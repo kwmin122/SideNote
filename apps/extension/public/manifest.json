@@ -2,7 +2,8 @@
   "manifest_version": 3,
   "name": "SideNote",
   "version": "0.3.0",
-  "description": "현재 Chrome 탭의 강의 오디오를 로컬 AI로 실시간 자막화하고 메모/캡처를 함께 저장합니다.",
+  "default_locale": "en",
+  "description": "__MSG_appDesc__",
   "minimum_chrome_version": "139",
   "permissions": [
     "sidePanel",

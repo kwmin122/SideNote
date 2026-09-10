@@ -1,4 +1,6 @@
 // 명세 §7 상태 / §8 데이터 모델 / §14 STT 프로토콜 / §15 에러 코드
+import { t } from './i18n';
+
 export type SessionStatus = 'READY' | 'CAPTURING' | 'PAUSED' | 'STOPPED' | 'ERROR';
 export type STTConnectionStatus = 'DISCONNECTED' | 'CONNECTING' | 'CONNECTED' | 'RECONNECTING' | 'FAILED';
 export type SaveStatus = 'IDLE' | 'SAVING' | 'SAVED' | 'FAILED';
@@ -46,23 +48,10 @@ export function appError(
   return { code, component, operation, message, retryable, cause };
 }
 
-/** 사용자에게 보여줄 한국어 메시지 (명세 §15). */
-export const ERROR_MESSAGES: Record<ErrorCode, string> = {
-  TAB_NOT_FOUND: '현재 탭을 찾을 수 없습니다.',
-  TAB_CAPTURE_PERMISSION_DENIED: '탭 오디오 캡처 권한이 없습니다. 강의 탭에서 툴바의 확장 아이콘을 한 번 누른 뒤 다시 시도하세요.',
-  TAB_CAPTURE_FAILED: '탭 오디오 캡처를 시작하지 못했습니다.',
-  VIDEO_ELEMENT_NOT_FOUND: '재생 중인 영상을 찾지 못해 화면 전체를 저장했습니다.',
-  SCREENSHOT_FAILED: '화면 캡처에 실패했습니다.',
-  IMAGE_CROP_FAILED: '영상 영역 자르기에 실패해 화면 전체를 저장했습니다.',
-  STORAGE_WRITE_FAILED: '저장에 실패했습니다. 잠시 후 다시 시도하세요.',
-  STORAGE_READ_FAILED: '저장된 데이터를 불러오지 못했습니다.',
-  STT_CONNECTION_FAILED: '자막 서버에 연결할 수 없습니다. STT 서버가 실행 중인지 확인하세요.',
-  STT_PROVIDER_FAILED: '음성 인식에 실패했습니다.',
-  STT_RATE_LIMITED: '음성 인식 요청이 많아 잠시 지연됩니다.',
-  STT_AUTH_FAILED: '음성 인식 서버 인증에 실패했습니다.',
-  NETWORK_OFFLINE: '네트워크가 오프라인입니다.',
-  UNKNOWN: '알 수 없는 오류가 발생했습니다.'
-};
+/** 사용자에게 보여줄 오류 문구 (명세 §15). 실제 문장은 _locales 의 err_<코드> 키에 있다. */
+export function errorMessage(code: ErrorCode): string {
+  return t(`err_${code}`);
+}
 
 export interface StudySession {
   id: string;

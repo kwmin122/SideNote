@@ -1,5 +1,6 @@
 import Dexie, { type Table } from 'dexie';
 import type { CaptureRecord, StoredImageBlob, StudySession, TranscriptSegment } from '../shared/contracts';
+import { t } from '../shared/i18n';
 import { originOf, pageKeyOf } from '../shared/url';
 
 export type StoredTranscript = TranscriptSegment;
@@ -95,7 +96,7 @@ export async function getOrCreateSession(tab: TabLike): Promise<StudySession> {
     pageKey,
     tabOrigin: originOf(url),
     pageUrl: url,
-    pageTitle: tab.title ?? '제목 없음',
+    pageTitle: tab.title ?? t('untitled'),
     createdAt: now,
     updatedAt: now,
     status: 'READY',
@@ -143,7 +144,7 @@ export async function createFreshSession(tab: TabLike): Promise<StudySession> {
     pageKey,
     tabOrigin: originOf(url),
     pageUrl: url,
-    pageTitle: tab.title ?? '제목 없음',
+    pageTitle: tab.title ?? t('untitled'),
     createdAt: now,
     updatedAt: now,
     status: 'READY',

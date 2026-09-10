@@ -18,7 +18,7 @@ describe('파일 이름', () => {
   });
 
   it('제목이 비면 대체 이름을 쓴다', () => {
-    expect(sanitizeFileName('   ', '강의')).toBe('강의');
+    expect(sanitizeFileName('   ', 'Lecture')).toBe('Lecture');
   });
 
   it('재생 위치를 알면 파일 이름에 넣는다', () => {
@@ -45,12 +45,12 @@ describe('클립보드 보조 텍스트', () => {
       memo: '스케줄러 비교표',
       createdAt: AT
     });
-    expect(text).toBe('운영체제 1강\n재생 위치 00:12:43\nhttps://lms.example.com/vod/1\n\n스케줄러 비교표');
+    expect(text).toBe('운영체제 1강\nAt 00:12:43\nhttps://lms.example.com/vod/1\n\n스케줄러 비교표');
   });
 
   it('메모가 없으면 없다고 남긴다', () => {
     const text = captureClipboardText({ title: '강의', memo: '  ', createdAt: AT });
-    expect(text).toBe('강의\n\n(메모 없음)');
+    expect(text).toBe('강의\n\n(no note)');
   });
 });
 
@@ -94,7 +94,7 @@ describe('전체 저장 HTML', () => {
 
   it('캡처마다 메모가 함께 들어간다', () => {
     expect(html).toContain('비교표');
-    expect(html).toContain('(메모 없음)');
+    expect(html).toContain('(no note)');
   });
 
   it('일반 메모와 자막을 모두 담는다', () => {
@@ -110,7 +110,7 @@ describe('전체 저장 HTML', () => {
   });
 
   it('재생 위치를 캡처 라벨에 붙인다', () => {
-    expect(html).toContain('캡처 1 · 00:12:43');
+    expect(html).toContain('Capture 1 · 00:12:43');
   });
 });
 
@@ -138,12 +138,12 @@ describe('전체 저장 HTML - 캡처 없는 메모', () => {
   });
 
   it('메모 항목에도 재생 위치가 붙는다', () => {
-    expect(html).toContain('메모 1 · 00:02:05');
+    expect(html).toContain('Note 1 · 00:02:05');
   });
 
   it('머리말에서 캡처 장수와 이미지 없는 메모 개수를 구분해서 센다', () => {
     // 항목 2개 = 이미지 1장 + 메모만 1개. 사이드패널 알림 문구와 같은 기준으로 센다.
-    expect(html).toContain('캡처 1장 · 메모 1개');
+    expect(html).toContain('1 captures · 1 notes');
   });
 });
 

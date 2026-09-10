@@ -1,0 +1,579 @@
+{
+  "appDesc": {
+    "message": "Turns the audio of the lecture tab into live captions on your device, and keeps your notes and screenshots beside them."
+  },
+  "err_TAB_NOT_FOUND": {
+    "message": "Can't find the current tab."
+  },
+  "err_TAB_CAPTURE_PERMISSION_DENIED": {
+    "message": "No permission to capture this tab's audio. Click the extension icon in the toolbar on the lecture tab once, then try again."
+  },
+  "err_TAB_CAPTURE_FAILED": {
+    "message": "Couldn't start capturing this tab's audio."
+  },
+  "err_VIDEO_ELEMENT_NOT_FOUND": {
+    "message": "No playing video was found, so the whole screen was saved."
+  },
+  "err_SCREENSHOT_FAILED": {
+    "message": "Screen capture failed."
+  },
+  "err_IMAGE_CROP_FAILED": {
+    "message": "Cropping to the video area failed, so the whole screen was saved."
+  },
+  "err_STORAGE_WRITE_FAILED": {
+    "message": "Saving failed. Please try again in a moment."
+  },
+  "err_STORAGE_READ_FAILED": {
+    "message": "Couldn't load the saved data."
+  },
+  "err_STT_CONNECTION_FAILED": {
+    "message": "Couldn't reach the speech recognizer."
+  },
+  "err_STT_PROVIDER_FAILED": {
+    "message": "Speech recognition failed."
+  },
+  "err_STT_RATE_LIMITED": {
+    "message": "Too many speech recognition requests; this will take a moment."
+  },
+  "err_STT_AUTH_FAILED": {
+    "message": "Speech recognition authentication failed."
+  },
+  "err_NETWORK_OFFLINE": {
+    "message": "The network is offline."
+  },
+  "err_UNKNOWN": {
+    "message": "Something went wrong."
+  },
+  "state_alreadyCapturing": {
+    "message": "Captions are already running."
+  },
+  "state_pausedResume": {
+    "message": "Captions are paused. Press Resume."
+  },
+  "state_notCapturing": {
+    "message": "Captions aren't running."
+  },
+  "state_notPaused": {
+    "message": "Captions aren't paused."
+  },
+  "state_alreadyStopped": {
+    "message": "Captions are already stopped."
+  },
+  "state_alreadyError": {
+    "message": "Already in an error state."
+  },
+  "state_alreadyReady": {
+    "message": "Already ready."
+  },
+  "untitled": {
+    "message": "Untitled"
+  },
+  "noMemo": {
+    "message": "(no note)"
+  },
+  "defaultLectureTitle": {
+    "message": "Lecture"
+  },
+  "playbackPos": {
+    "message": "At $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "imageReadFailed": {
+    "message": "Couldn't read the image."
+  },
+  "exportCaptureN": {
+    "message": "Capture $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "exportMemoN": {
+    "message": "Note $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "exportDocTitle": {
+    "message": "$p1$ · study log",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "exportExportedAt": {
+    "message": "Exported $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "exportSummary": {
+    "message": "$p1$ captures · $p2$ notes · $p3$ caption lines",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "exportMyNotes": {
+    "message": "My notes"
+  },
+  "exportNoNotes": {
+    "message": "No notes written."
+  },
+  "exportCaptures": {
+    "message": "Captures and notes"
+  },
+  "exportNoCaptures": {
+    "message": "No captures or notes."
+  },
+  "exportTranscript": {
+    "message": "Captions"
+  },
+  "exportNoTranscript": {
+    "message": "No captions saved."
+  },
+  "bgUnknownCommand": {
+    "message": "Unknown command"
+  },
+  "bgTabNotFound": {
+    "message": "Can't find that tab."
+  },
+  "bgTabCapturePermission": {
+    "message": "No permission to capture this tab's audio. Click the extension icon in the toolbar on the lecture tab once, then try again. (Navigating to another page resets this permission.)"
+  },
+  "bgTabCaptureFailed": {
+    "message": "Tab audio capture failed: $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "bgOffscreenJustification": {
+    "message": "Processes the lecture tab's audio to turn it into live captions."
+  },
+  "bgCurrentTabNotFound": {
+    "message": "Can't find the current tab."
+  },
+  "bgScreenshotFailed": {
+    "message": "Screen capture failed: $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "bgTabClosed": {
+    "message": "The lecture tab was closed, so captions stopped."
+  },
+  "bgTabNavigated": {
+    "message": "The tab moved to another page, so captions stopped."
+  },
+  "sttNoOffscreenSupport": {
+    "message": "Chrome's built-in speech recognition isn't available in this context (offscreen not supported)."
+  },
+  "sttNoOnDevice": {
+    "message": "This Chrome doesn't support on-device speech recognition (processLocally). Captions were not started, so that no audio leaves your computer. Please update Chrome to version 139 or later. Notes and captures still work."
+  },
+  "sttAvailabilityCheckFailed": {
+    "message": "Couldn't check whether speech recognition is available: $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttLangUnavailable": {
+    "message": "On-device speech recognition for $p1$ isn't available on this device. Add that language under Chrome Settings → Languages and try again. Notes and captures still work.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttPackReady": {
+    "message": "The $p1$ speech pack is ready. Starting captions.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttNoAudioTrack": {
+    "message": "There's no audio track to recognize."
+  },
+  "sttRecognizerCreateFailed": {
+    "message": "Couldn't create the speech recognizer: $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttStartFailed": {
+    "message": "Couldn't start speech recognition."
+  },
+  "sttPackDownloading": {
+    "message": "Downloading the $p1$ speech pack (first run only, a few hundred MB). Captions start automatically when it finishes.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttPackUnavailable": {
+    "message": "The $p1$ speech pack isn't available. Add that language under Chrome Settings → Languages and try again.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttPackNotStarted": {
+    "message": "The $p1$ speech pack download didn't start. Press [Start captions] once more.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttPackIncomplete": {
+    "message": "The $p1$ speech pack download hasn't finished. Start again once it's done.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttUnavailableKind": {
+    "message": "Speech recognition is unavailable ($p1$). Notes and captures still work.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttNetworkRequired": {
+    "message": "Speech recognition asked for the network. It may not be running on-device."
+  },
+  "sttError": {
+    "message": "Speech recognition error: $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttTooManyRestarts": {
+    "message": "Speech recognition kept dropping, so it stopped. Press [Start captions] again."
+  },
+  "sttRestartFailed": {
+    "message": "Couldn't restart speech recognition. Press [Start captions] again."
+  },
+  "uiTagline": {
+    "message": "Watch the lecture, read the captions, keep the notes — in one place."
+  },
+  "uiImageLoadFailed": {
+    "message": "Couldn't load the image."
+  },
+  "uiCaptureAlt": {
+    "message": "Lecture capture"
+  },
+  "uiSessionListReadFailed": {
+    "message": "Couldn't read the saved note list."
+  },
+  "uiCannotSwitchWhileCapturing": {
+    "message": "You can't switch notes while captions are running. Press Stop first."
+  },
+  "uiNewNoteStarted": {
+    "message": "Started a new note. The previous one is still in History."
+  },
+  "uiNoteDeleted": {
+    "message": "Note deleted."
+  },
+  "uiTranscriptCleared": {
+    "message": "Cleared $p1$ caption lines. Notes and captures are untouched.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiNothingToClear": {
+    "message": "There are no captions to clear."
+  },
+  "uiCommandFailed": {
+    "message": "Couldn't run that command."
+  },
+  "uiCaptureFailed": {
+    "message": "Capture failed."
+  },
+  "uiCroppedFallback": {
+    "message": "Couldn't find the playing video area, so the whole screen was saved."
+  },
+  "uiCaptureMemoSaveFailed": {
+    "message": "Couldn't save the capture note."
+  },
+  "uiCaptureDeleteFailed": {
+    "message": "Couldn't delete the capture."
+  },
+  "uiCaptureImageNotFound": {
+    "message": "Couldn't find the capture image."
+  },
+  "uiCopiedMemo": {
+    "message": "Copied the note."
+  },
+  "uiCopiedCaptureMemo": {
+    "message": "Copied the capture note."
+  },
+  "uiCopiedTranscript": {
+    "message": "Copied the captions."
+  },
+  "uiCopiedTranscriptLines": {
+    "message": "Copied $p1$ caption lines.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiCopiedCaptureAndMemo": {
+    "message": "Copied the capture together with its note."
+  },
+  "uiPngNeedsImage": {
+    "message": "A note without an image can't be saved as PNG. Use Copy, or include it in Save all."
+  },
+  "uiSavedPng": {
+    "message": "Saved the capture and its note as a PNG."
+  },
+  "uiSaveCaptureFailed": {
+    "message": "Couldn't save the capture: $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiSavedBundle": {
+    "message": "Saved $p1$ captures · $p2$ notes · $p3$ caption lines into a single HTML file.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "uiSaveBundleFailed": {
+    "message": "Save all failed: $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiNoTranscriptToCopy": {
+    "message": "There are no captions to copy yet."
+  },
+  "uiClipboardFailed": {
+    "message": "Copying to the clipboard failed."
+  },
+  "uiMemoSaving": {
+    "message": "Saving..."
+  },
+  "uiMemoSaved": {
+    "message": "Saved"
+  },
+  "uiMemoSaveFailed": {
+    "message": "Save failed"
+  },
+  "uiCheckingTab": {
+    "message": "Checking the current tab"
+  },
+  "uiReadingTab": {
+    "message": "Reading tab info"
+  },
+  "uiResume": {
+    "message": "Resume"
+  },
+  "uiStartCaption": {
+    "message": "Start captions"
+  },
+  "uiPause": {
+    "message": "Pause"
+  },
+  "uiStop": {
+    "message": "Stop"
+  },
+  "uiCapture": {
+    "message": "Capture"
+  },
+  "uiOverlay": {
+    "message": "Captions on video"
+  },
+  "uiHistory": {
+    "message": "History"
+  },
+  "uiSaveAll": {
+    "message": "Save all"
+  },
+  "uiNewCaptionSession": {
+    "message": "+ Start a new note"
+  },
+  "uiNewCaptionSessionTitle": {
+    "message": "Starts fresh captions, notes and captures for this video. Everything so far stays in History."
+  },
+  "uiHistoryHint": {
+    "message": "When the video changes, captions start over automatically; come back to a video and its captions continue. History is stored only in this browser (IndexedDB)."
+  },
+  "uiNoHistory": {
+    "message": "No saved history yet."
+  },
+  "uiNoUrl": {
+    "message": "No address"
+  },
+  "uiCaptionsShort": {
+    "message": "captions"
+  },
+  "uiCapturesMemos": {
+    "message": "captures/notes"
+  },
+  "uiViewing": {
+    "message": "Viewing"
+  },
+  "uiDelete": {
+    "message": "Delete"
+  },
+  "uiOffTabWarn": {
+    "message": "You have a note open from a different lecture than the tab you're on. Captions and capture are locked for now."
+  },
+  "uiPinnedNote": {
+    "message": "You're viewing a note opened from History. It stays put even if you switch tabs."
+  },
+  "uiBackToCurrentTab": {
+    "message": "Go to this tab's note ›"
+  },
+  "uiNeedsInvoke": {
+    "message": "To capture this tab's audio, click the extension icon in the toolbar once. (Chrome resets this permission whenever the page navigates.)"
+  },
+  "uiNavNotes": {
+    "message": "Notes"
+  },
+  "uiNavCurrentCaptions": {
+    "message": "Captions"
+  },
+  "uiLectureMemo": {
+    "message": "Lecture notes"
+  },
+  "uiRetry": {
+    "message": "Try again"
+  },
+  "uiMemoPlaceholder": {
+    "message": "Thoughts on the whole lecture, questions, things to study next..."
+  },
+  "uiTimeline": {
+    "message": "Timeline"
+  },
+  "uiTimelineCounts": {
+    "message": "$p1$ captures · $p2$ notes",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "uiAddMemoOnly": {
+    "message": "+ Note only"
+  },
+  "uiTimelineHint": {
+    "message": "Capture puts the current screen here; Note only puts the current playback position here. Both stack in time order."
+  },
+  "uiVideoAt": {
+    "message": "Video $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiTypeVideoRegion": {
+    "message": "Video area"
+  },
+  "uiTypeViewport": {
+    "message": "Whole screen"
+  },
+  "uiTypeMemo": {
+    "message": "Note"
+  },
+  "uiCopy": {
+    "message": "Copy"
+  },
+  "uiSave": {
+    "message": "Save"
+  },
+  "uiMemoForScene": {
+    "message": "A note about this scene"
+  },
+  "uiMemoForMoment": {
+    "message": "A note about this moment"
+  },
+  "uiAutoScroll": {
+    "message": "Auto-scroll"
+  },
+  "uiCopyAll": {
+    "message": "Copy all"
+  },
+  "uiClearCurrentCaptions": {
+    "message": "Clear captions"
+  },
+  "uiClearCurrentCaptionsTitle": {
+    "message": "Clears only this video's captions. Notes and captures stay."
+  },
+  "uiEmptyCaptions": {
+    "message": "Press Start captions and the audio of the video you're watching will stack up here."
+  },
+  "uiShowOlder": {
+    "message": "Show $p1$ older caption lines",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiOverlayHint": {
+    "message": "Captions are drawn over the video. This list holds the captions of the video you're watching now; move to another video and a new set starts. The old ones stay under History."
+  },
+  "uiCaptionLanguage": {
+    "message": "Caption language"
+  },
+  "uiCaptionLanguageTitle": {
+    "message": "The language spoken in the lecture. Chrome downloads a speech pack for it on first use."
+  },
+  "uiLanguageChangeWhileLive": {
+    "message": "Stop captions first to change the caption language."
+  }
+}

@@ -1,0 +1,579 @@
+{
+  "appDesc": {
+    "message": "현재 Chrome 탭의 강의 오디오를 기기 안에서 실시간 자막으로 만들고, 메모와 캡처를 함께 저장합니다."
+  },
+  "err_TAB_NOT_FOUND": {
+    "message": "현재 탭을 찾을 수 없습니다."
+  },
+  "err_TAB_CAPTURE_PERMISSION_DENIED": {
+    "message": "탭 오디오 캡처 권한이 없습니다. 강의 탭에서 툴바의 확장 아이콘을 한 번 누른 뒤 다시 시도하세요."
+  },
+  "err_TAB_CAPTURE_FAILED": {
+    "message": "탭 오디오 캡처를 시작하지 못했습니다."
+  },
+  "err_VIDEO_ELEMENT_NOT_FOUND": {
+    "message": "재생 중인 영상을 찾지 못해 화면 전체를 저장했습니다."
+  },
+  "err_SCREENSHOT_FAILED": {
+    "message": "화면 캡처에 실패했습니다."
+  },
+  "err_IMAGE_CROP_FAILED": {
+    "message": "영상 영역 자르기에 실패해 화면 전체를 저장했습니다."
+  },
+  "err_STORAGE_WRITE_FAILED": {
+    "message": "저장에 실패했습니다. 잠시 후 다시 시도하세요."
+  },
+  "err_STORAGE_READ_FAILED": {
+    "message": "저장된 데이터를 불러오지 못했습니다."
+  },
+  "err_STT_CONNECTION_FAILED": {
+    "message": "음성 인식기에 연결할 수 없습니다."
+  },
+  "err_STT_PROVIDER_FAILED": {
+    "message": "음성 인식에 실패했습니다."
+  },
+  "err_STT_RATE_LIMITED": {
+    "message": "음성 인식 요청이 많아 잠시 지연됩니다."
+  },
+  "err_STT_AUTH_FAILED": {
+    "message": "음성 인식 인증에 실패했습니다."
+  },
+  "err_NETWORK_OFFLINE": {
+    "message": "네트워크가 오프라인입니다."
+  },
+  "err_UNKNOWN": {
+    "message": "알 수 없는 오류가 발생했습니다."
+  },
+  "state_alreadyCapturing": {
+    "message": "이미 자막을 수신 중입니다."
+  },
+  "state_pausedResume": {
+    "message": "일시정지 상태입니다. 계속하기를 누르세요."
+  },
+  "state_notCapturing": {
+    "message": "자막 수신 중이 아닙니다."
+  },
+  "state_notPaused": {
+    "message": "일시정지 상태가 아닙니다."
+  },
+  "state_alreadyStopped": {
+    "message": "이미 종료된 상태입니다."
+  },
+  "state_alreadyError": {
+    "message": "이미 오류 상태입니다."
+  },
+  "state_alreadyReady": {
+    "message": "이미 준비 상태입니다."
+  },
+  "untitled": {
+    "message": "제목 없음"
+  },
+  "noMemo": {
+    "message": "(메모 없음)"
+  },
+  "defaultLectureTitle": {
+    "message": "강의"
+  },
+  "playbackPos": {
+    "message": "재생 위치 $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "imageReadFailed": {
+    "message": "이미지를 읽지 못했습니다."
+  },
+  "exportCaptureN": {
+    "message": "캡처 $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "exportMemoN": {
+    "message": "메모 $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "exportDocTitle": {
+    "message": "$p1$ · 학습 기록",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "exportExportedAt": {
+    "message": "내보낸 시각 $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "exportSummary": {
+    "message": "캡처 $p1$장 · 메모 $p2$개 · 자막 $p3$줄",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "exportMyNotes": {
+    "message": "내 노트"
+  },
+  "exportNoNotes": {
+    "message": "작성한 노트가 없습니다."
+  },
+  "exportCaptures": {
+    "message": "캡처와 메모"
+  },
+  "exportNoCaptures": {
+    "message": "캡처와 메모가 없습니다."
+  },
+  "exportTranscript": {
+    "message": "자막"
+  },
+  "exportNoTranscript": {
+    "message": "저장된 자막이 없습니다."
+  },
+  "bgUnknownCommand": {
+    "message": "알 수 없는 명령"
+  },
+  "bgTabNotFound": {
+    "message": "탭을 찾을 수 없습니다."
+  },
+  "bgTabCapturePermission": {
+    "message": "탭 오디오 캡처 권한이 없습니다. 강의 탭에서 툴바의 확장 아이콘을 한 번 누른 뒤 다시 시도하세요. (페이지를 이동하면 권한이 초기화됩니다)"
+  },
+  "bgTabCaptureFailed": {
+    "message": "탭 오디오 캡처 실패: $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "bgOffscreenJustification": {
+    "message": "강의 탭 오디오를 실시간 자막으로 변환하기 위해 오디오를 처리합니다."
+  },
+  "bgCurrentTabNotFound": {
+    "message": "현재 탭을 찾을 수 없습니다."
+  },
+  "bgScreenshotFailed": {
+    "message": "화면 캡처 실패: $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "bgTabClosed": {
+    "message": "강의 탭이 닫혀 자막을 종료했습니다."
+  },
+  "bgTabNavigated": {
+    "message": "탭이 다른 페이지로 이동해 자막을 종료했습니다."
+  },
+  "sttNoOffscreenSupport": {
+    "message": "이 컨텍스트에서 Chrome 내장 음성인식을 쓸 수 없습니다 (offscreen 미지원)."
+  },
+  "sttNoOnDevice": {
+    "message": "이 Chrome 은 기기 내 음성인식(processLocally)을 지원하지 않습니다. 오디오를 밖으로 내보내지 않기 위해 자막을 시작하지 않았습니다. Chrome 을 최신 버전(139 이상)으로 업데이트해 주세요. 메모와 캡처는 그대로 쓸 수 있습니다."
+  },
+  "sttAvailabilityCheckFailed": {
+    "message": "음성 인식 사용 가능 여부를 확인하지 못했습니다: $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttLangUnavailable": {
+    "message": "이 기기에서 $p1$ 기기 내 음성인식을 쓸 수 없습니다. Chrome 설정 → 언어에서 해당 언어를 추가한 뒤 다시 시도해 주세요. 메모와 캡처는 그대로 쓸 수 있습니다.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttPackReady": {
+    "message": "$p1$ 음성 인식 언어팩이 준비됐습니다. 자막을 시작합니다.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttNoAudioTrack": {
+    "message": "인식에 쓸 오디오 트랙이 없습니다."
+  },
+  "sttRecognizerCreateFailed": {
+    "message": "음성 인식기를 만들지 못했습니다: $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttStartFailed": {
+    "message": "음성 인식을 시작하지 못했습니다."
+  },
+  "sttPackDownloading": {
+    "message": "$p1$ 음성 인식 언어팩을 내려받는 중입니다 (첫 실행에만, 수백 MB). 다 받으면 자막이 자동으로 시작됩니다.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttPackUnavailable": {
+    "message": "$p1$ 언어팩을 쓸 수 없습니다. Chrome 설정 → 언어에서 해당 언어를 추가한 뒤 다시 시도해 주세요.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttPackNotStarted": {
+    "message": "$p1$ 언어팩 다운로드가 시작되지 않았습니다. [자막 시작] 을 한 번 더 눌러 주세요.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttPackIncomplete": {
+    "message": "$p1$ 언어팩 다운로드가 끝나지 않았습니다. 다 받은 뒤 다시 시작해 주세요.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttUnavailableKind": {
+    "message": "음성 인식을 사용할 수 없습니다 ($p1$). 메모와 캡처는 그대로 쓸 수 있습니다.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttNetworkRequired": {
+    "message": "음성 인식이 네트워크를 요구했습니다. on-device 인식이 아닐 수 있습니다."
+  },
+  "sttError": {
+    "message": "음성 인식 오류: $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttTooManyRestarts": {
+    "message": "음성 인식이 반복해서 끊겨 중단했습니다. [자막 시작] 을 다시 눌러 주세요."
+  },
+  "sttRestartFailed": {
+    "message": "음성 인식을 다시 시작하지 못했습니다. [자막 시작] 을 다시 눌러 주세요."
+  },
+  "uiTagline": {
+    "message": "강의를 보면서 자막을 보고, 노트를 한 번에."
+  },
+  "uiImageLoadFailed": {
+    "message": "이미지를 불러올 수 없습니다."
+  },
+  "uiCaptureAlt": {
+    "message": "강의 캡처"
+  },
+  "uiSessionListReadFailed": {
+    "message": "저장된 노트 목록을 읽지 못했습니다."
+  },
+  "uiCannotSwitchWhileCapturing": {
+    "message": "자막을 받는 중에는 노트를 바꿀 수 없습니다. 먼저 종료를 눌러주세요."
+  },
+  "uiNewNoteStarted": {
+    "message": "새 노트를 시작했습니다. 이전 노트는 기록에 남아 있습니다."
+  },
+  "uiNoteDeleted": {
+    "message": "노트를 삭제했습니다."
+  },
+  "uiTranscriptCleared": {
+    "message": "현재 자막 $p1$줄을 지웠습니다. 메모와 캡처는 그대로입니다.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiNothingToClear": {
+    "message": "지울 자막이 없습니다."
+  },
+  "uiCommandFailed": {
+    "message": "명령을 실행하지 못했습니다."
+  },
+  "uiCaptureFailed": {
+    "message": "캡처에 실패했습니다."
+  },
+  "uiCroppedFallback": {
+    "message": "재생 중인 영상 영역을 찾지 못해 화면 전체를 저장했습니다."
+  },
+  "uiCaptureMemoSaveFailed": {
+    "message": "캡처 메모 저장에 실패했습니다."
+  },
+  "uiCaptureDeleteFailed": {
+    "message": "캡처 삭제에 실패했습니다."
+  },
+  "uiCaptureImageNotFound": {
+    "message": "캡처 이미지를 찾을 수 없습니다."
+  },
+  "uiCopiedMemo": {
+    "message": "메모를 복사했습니다."
+  },
+  "uiCopiedCaptureMemo": {
+    "message": "캡처 메모를 복사했습니다."
+  },
+  "uiCopiedTranscript": {
+    "message": "자막을 복사했습니다."
+  },
+  "uiCopiedTranscriptLines": {
+    "message": "자막 $p1$줄을 복사했습니다.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiCopiedCaptureAndMemo": {
+    "message": "캡처와 메모를 함께 복사했습니다."
+  },
+  "uiPngNeedsImage": {
+    "message": "이미지가 없는 메모는 PNG 로 저장할 수 없습니다. 복사를 쓰거나 전체 저장에 담으세요."
+  },
+  "uiSavedPng": {
+    "message": "캡처와 메모를 PNG 로 저장했습니다."
+  },
+  "uiSaveCaptureFailed": {
+    "message": "캡처 저장에 실패했습니다: $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiSavedBundle": {
+    "message": "캡처 $p1$장 · 메모 $p2$개 · 자막 $p3$줄을 HTML 한 파일로 저장했습니다.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "uiSaveBundleFailed": {
+    "message": "전체 저장에 실패했습니다: $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiNoTranscriptToCopy": {
+    "message": "복사할 자막이 아직 없습니다."
+  },
+  "uiClipboardFailed": {
+    "message": "클립보드 복사에 실패했습니다."
+  },
+  "uiMemoSaving": {
+    "message": "저장 중..."
+  },
+  "uiMemoSaved": {
+    "message": "저장됨"
+  },
+  "uiMemoSaveFailed": {
+    "message": "저장 실패"
+  },
+  "uiCheckingTab": {
+    "message": "현재 탭 확인 중"
+  },
+  "uiReadingTab": {
+    "message": "탭 정보를 읽는 중"
+  },
+  "uiResume": {
+    "message": "계속하기"
+  },
+  "uiStartCaption": {
+    "message": "자막 시작"
+  },
+  "uiPause": {
+    "message": "일시정지"
+  },
+  "uiStop": {
+    "message": "종료"
+  },
+  "uiCapture": {
+    "message": "캡처"
+  },
+  "uiOverlay": {
+    "message": "영상 위 자막"
+  },
+  "uiHistory": {
+    "message": "기록"
+  },
+  "uiSaveAll": {
+    "message": "전체 저장"
+  },
+  "uiNewCaptionSession": {
+    "message": "+ 새 자막 시작"
+  },
+  "uiNewCaptionSessionTitle": {
+    "message": "이 영상의 자막·메모·캡처를 새로 시작합니다. 지금까지 쌓인 것은 기록에 남습니다."
+  },
+  "uiHistoryHint": {
+    "message": "영상이 바뀌면 자막은 자동으로 새로 시작하고, 보던 영상으로 돌아오면 그 자막을 이어서 씁니다. 기록은 이 브라우저 안(IndexedDB)에만 저장됩니다."
+  },
+  "uiNoHistory": {
+    "message": "저장된 기록이 없습니다."
+  },
+  "uiNoUrl": {
+    "message": "주소 없음"
+  },
+  "uiCaptionsShort": {
+    "message": "자막"
+  },
+  "uiCapturesMemos": {
+    "message": "캡처/메모"
+  },
+  "uiViewing": {
+    "message": "보는 중"
+  },
+  "uiDelete": {
+    "message": "삭제"
+  },
+  "uiOffTabWarn": {
+    "message": "지금 보고 있는 탭과 다른 강의의 노트를 열어둔 상태입니다. 자막·캡처는 잠시 잠겼습니다."
+  },
+  "uiPinnedNote": {
+    "message": "목록에서 연 노트를 보고 있습니다. 탭을 옮겨도 이 노트가 유지됩니다."
+  },
+  "uiBackToCurrentTab": {
+    "message": "현재 탭 노트로 ›"
+  },
+  "uiNeedsInvoke": {
+    "message": "이 탭의 오디오를 캡처하려면 툴바의 확장 아이콘을 한 번 눌러주세요. (Chrome 정책상 페이지를 이동하면 권한이 초기화됩니다)"
+  },
+  "uiNavNotes": {
+    "message": "노트"
+  },
+  "uiNavCurrentCaptions": {
+    "message": "현재 자막"
+  },
+  "uiLectureMemo": {
+    "message": "강의 메모"
+  },
+  "uiRetry": {
+    "message": "다시 시도"
+  },
+  "uiMemoPlaceholder": {
+    "message": "이 강의 전체에 대한 생각, 궁금한 점, 추가로 학습할 내용을 적어보세요..."
+  },
+  "uiTimeline": {
+    "message": "타임라인"
+  },
+  "uiTimelineCounts": {
+    "message": "캡처 $p1$ · 메모 $p2$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "uiAddMemoOnly": {
+    "message": "+ 메모만 추가"
+  },
+  "uiTimelineHint": {
+    "message": "캡처를 누르면 지금 화면이, 메모만 추가를 누르면 지금 재생 위치가 여기에 시간 순으로 쌓입니다."
+  },
+  "uiVideoAt": {
+    "message": "영상 $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiTypeVideoRegion": {
+    "message": "영상 영역"
+  },
+  "uiTypeViewport": {
+    "message": "화면 전체"
+  },
+  "uiTypeMemo": {
+    "message": "메모"
+  },
+  "uiCopy": {
+    "message": "복사"
+  },
+  "uiSave": {
+    "message": "저장"
+  },
+  "uiMemoForScene": {
+    "message": "이 장면에 대한 메모"
+  },
+  "uiMemoForMoment": {
+    "message": "이 시점에 대한 메모"
+  },
+  "uiAutoScroll": {
+    "message": "자동 스크롤"
+  },
+  "uiCopyAll": {
+    "message": "전체 복사"
+  },
+  "uiClearCurrentCaptions": {
+    "message": "현재 자막 지우기"
+  },
+  "uiClearCurrentCaptionsTitle": {
+    "message": "이 영상의 자막만 지웁니다. 메모와 캡처는 그대로 남습니다."
+  },
+  "uiEmptyCaptions": {
+    "message": "자막 시작을 누르면 지금 보고 있는 영상의 음성이 여기에 쌓입니다."
+  },
+  "uiShowOlder": {
+    "message": "이전 자막 $p1$줄 더 보기",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiOverlayHint": {
+    "message": "자막은 영상 위에 겹쳐 보여집니다. 여기 목록은 지금 보고 있는 영상의 자막이고, 다른 영상으로 넘어가면 자동으로 새 자막이 시작됩니다. 이전 영상 자막은 기록에 남습니다."
+  },
+  "uiCaptionLanguage": {
+    "message": "자막 언어"
+  },
+  "uiCaptionLanguageTitle": {
+    "message": "강의에서 말하는 언어입니다. 처음 쓸 때 Chrome 이 해당 언어팩을 내려받습니다."
+  },
+  "uiLanguageChangeWhileLive": {
+    "message": "자막 언어는 자막을 종료한 뒤에 바꿀 수 있습니다."
+  }
+}

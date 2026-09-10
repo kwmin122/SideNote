@@ -1,4 +1,5 @@
 import type { SessionStatus } from './contracts';
+import { t } from './i18n';
 
 export type CaptureCommand = 'START' | 'PAUSE' | 'RESUME' | 'STOP' | 'FAIL' | 'RESET';
 
@@ -30,23 +31,23 @@ const ignore = (status: SessionStatus, reason: string): TransitionResult => ({
 export function transition(current: SessionStatus, command: CaptureCommand): TransitionResult {
   switch (command) {
     case 'START':
-      if (current === 'CAPTURING') return ignore(current, '이미 자막을 수신 중입니다.');
-      if (current === 'PAUSED') return ignore(current, '일시정지 상태입니다. 계속하기를 누르세요.');
+      if (current === 'CAPTURING') return ignore(current, t('state_alreadyCapturing'));
+      if (current === 'PAUSED') return ignore(current, t('state_pausedResume'));
       return { status: 'CAPTURING', changed: true, effect: 'START_CAPTURE' };
     case 'PAUSE':
-      if (current !== 'CAPTURING') return ignore(current, '자막 수신 중이 아닙니다.');
+      if (current !== 'CAPTURING') return ignore(current, t('state_notCapturing'));
       return { status: 'PAUSED', changed: true, effect: 'PAUSE_CAPTURE' };
     case 'RESUME':
-      if (current !== 'PAUSED') return ignore(current, '일시정지 상태가 아닙니다.');
+      if (current !== 'PAUSED') return ignore(current, t('state_notPaused'));
       return { status: 'CAPTURING', changed: true, effect: 'RESUME_CAPTURE' };
     case 'STOP':
-      if (current === 'STOPPED' || current === 'READY') return ignore(current, '이미 종료된 상태입니다.');
+      if (current === 'STOPPED' || current === 'READY') return ignore(current, t('state_alreadyStopped'));
       return { status: 'STOPPED', changed: true, effect: 'STOP_CAPTURE' };
     case 'FAIL':
-      if (current === 'ERROR') return ignore(current, '이미 오류 상태입니다.');
+      if (current === 'ERROR') return ignore(current, t('state_alreadyError'));
       return { status: 'ERROR', changed: true, effect: 'STOP_CAPTURE' };
     case 'RESET':
-      if (current === 'READY') return ignore(current, '이미 준비 상태입니다.');
+      if (current === 'READY') return ignore(current, t('state_alreadyReady'));
       return { status: 'READY', changed: true, effect: 'NONE' };
   }
 }

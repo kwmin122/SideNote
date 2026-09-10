@@ -161,7 +161,7 @@ describe('ChromeSpeechProvider - 시작 조건', () => {
     expect(ok).toBe(false);
     expect(Ctor.install).not.toHaveBeenCalled();
     // 무한 대기 대신, 사용자가 무엇을 하면 되는지 알려준다.
-    expect(rec.errors[0]?.message).toContain('한 번 더 눌러');
+    expect(rec.errors[0]?.message).toContain('once more');
     expect(FakeRecognition.instances.length).toBe(0);
   });
 
@@ -182,8 +182,8 @@ describe('ChromeSpeechProvider - 시작 조건', () => {
     // 사용자가 다시 누를 필요가 없어야 한다 = 오류 배너가 뜨면 안 된다.
     expect(rec.errors).toEqual([]);
     expect(rec.notices.length).toBe(2);
-    expect(rec.notices[0]).toContain('내려받는 중');
-    expect(rec.notices.at(-1)).toContain('준비');
+    expect(rec.notices[0]).toContain('Downloading');
+    expect(rec.notices.at(-1)).toContain('is ready');
   });
 
   it('이미 내려받는 중(downloading)이면 install 을 다시 부르지 않고 기다린다', async () => {
@@ -276,7 +276,10 @@ describe('ChromeSpeechProvider - 시작 조건', () => {
     const Ctor = installCtor();
     const rec = recorder();
     const track = fakeTrack();
-    const ok = await new ChromeSpeechProvider().connect({ sessionId: 's1', audioTrack: track }, rec.handlers);
+    const ok = await new ChromeSpeechProvider().connect(
+      { sessionId: 's1', language: 'ko-KR', audioTrack: track },
+      rec.handlers
+    );
     expect(ok).toBe(true);
     expect(Ctor.available).toHaveBeenCalledWith({ langs: ['ko-KR'], processLocally: true });
     const instance = FakeRecognition.instances[0];

@@ -18,7 +18,7 @@
 npm run release:chrome
 ```
 
-→ `release/sidenote-0.3.0.zip` 이 만들어지고, 업로드 전 검사 13가지가 자동으로 돌아갑니다.
+→ `release/sidenote-0.3.0.zip` 이 만들어지고, 업로드 전 검사 15가지가 자동으로 돌아갑니다.
 하나라도 FAIL 이면 스크립트가 실패로 끝나며, 그 상태로는 올리지 말라고 알려 줍니다.
 
 검사에 포함된 것 중 중요한 세 가지:
@@ -30,6 +30,9 @@ npm run release:chrome
 - **`minimum_chrome_version` 이 139 이상인지** — 자막을 만드는 유일한 경로인 Chrome 기기 내 음성인식
   (`SpeechRecognition.available()` / `install()` / `processLocally`)이 Chrome 139부터입니다. 이 줄이 없으면
   구버전 사용자는 설치는 되는데 자막이 한 줄도 안 나오고, 심사자가 구버전으로 열면 죽은 확장으로 보입니다.
+
+- **`_locales/en/messages.json` 이 들어 있고 매니페스트의 `__MSG_...__` 가 전부 그 안에 있는지** —
+  `default_locale` 을 선언해 놓고 그 언어 파일이 빠지면 Chrome 이 설치 자체를 거절합니다.
 
 나머지는 실행 파일(.pkg) 미포함, macOS 부산물(`.DS_Store`, `._*`) 미포함, 소스맵 미포함,
 아이콘 4종 존재, 아이콘이 자리표시자가 아닌지, 이름이 `SideNote` 인지, 진입점 3종 존재 여부입니다.
@@ -48,14 +51,16 @@ npm run release:chrome
 
 ## A-3. 등록정보 채우기
 
-`store/STORE-LISTING.md` 의 1번 항목을 순서대로 복사해 붙여 넣습니다.
+기본 언어는 **영어**입니다. `store/STORE-LISTING.en.md` 의 1번 항목을 순서대로 복사해 붙여 넣고,
+대시보드에서 언어를 하나 더 추가해 `store/STORE-LISTING.md`(한국어) 를 같은 방식으로 채웁니다.
 스크린샷만 직접 찍어야 합니다(같은 문서에 찍는 법을 표로 정리해 뒀습니다).
 
 ## A-4. 개인정보 보호 탭 채우기
 
-1. `store/PRIVACY.md` 내용을 공개 주소에 올립니다 (가장 빠른 방법: https://gist.github.com → 공개 Gist)
+1. `store/PRIVACY.en.md` 내용을 공개 주소에 올립니다 (가장 빠른 방법: https://gist.github.com → 공개 Gist)
+   한국어 방침은 `store/PRIVACY.md` 에 그대로 있습니다.
 2. 그 주소를 **개인정보처리방침 URL** 칸에 넣습니다
-3. `store/STORE-LISTING.md` 의 2번 항목(단일 목적, 권한별 사유, 체크박스)을 그대로 채웁니다
+3. `store/STORE-LISTING.en.md` 의 2번 항목(단일 목적, 권한별 사유, 체크박스)을 그대로 채웁니다
 
 ## A-5. 배포 설정 후 제출
 

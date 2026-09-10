@@ -1,7 +1,8 @@
 /**
  * 캡처/메모/자막을 밖으로 내보내기 위한 순수 함수 모음.
- * DOM 과 chrome API 를 쓰지 않으므로 그대로 단위 테스트할 수 있다.
+ * 화면 문구만 _locales 에서 가져오고, 나머지는 그대로 단위 테스트할 수 있다.
  */
+import { t, uiLanguage } from './i18n';
 
 /** 00:12:43. 재생 위치 표기. */
 export function formatClock(seconds?: number): string {
@@ -40,15 +41,15 @@ export interface ExportCaptureMeta {
 /** 캡처 1건의 파일 이름. 재생 위치를 알면 그걸 쓰고, 모르면 캡처 시각을 쓴다. */
 export function captureFileName(meta: ExportCaptureMeta, ext = 'png'): string {
   const at = meta.videoTimeSec != null ? formatClock(meta.videoTimeSec).replace(/:/g, '-') : stamp(meta.createdAt);
-  return `${sanitizeFileName(meta.title, '강의')}_${at}.${ext}`;
+  return `${sanitizeFileName(meta.title, t('defaultLectureTitle'))}_${at}.${ext}`;
 }
 
 /** 이미지를 못 붙이는 곳(메모장 등)에 대비한 보조 텍스트. */
 export function captureClipboardText(meta: ExportCaptureMeta): string {
   const lines = [meta.title];
-  if (meta.videoTimeSec != null) lines.push(`재생 위치 ${formatClock(meta.videoTimeSec)}`);
+  if (meta.videoTimeSec != null) lines.push(t('playbackPos', formatClock(meta.videoTimeSec)));
   if (meta.pageUrl) lines.push(meta.pageUrl);
-  lines.push('', meta.memo.trim() || '(메모 없음)');
+  lines.push('', meta.memo.trim() || t('noMemo'));
   return lines.join('\n');
 }
 
@@ -123,13 +124,13 @@ export function buildSessionHtml(bundle: ExportBundle): string {
     .map((capture, index) => {
       const time = capture.videoTimeSec != null ? formatClock(capture.videoTimeSec) : '';
       // 이미지 없는 메모 항목도 반드시 남긴다. img 만 빼고 나머지는 캡처와 똑같이 그린다.
-      const label = capture.dataUrl ? `캡처 ${index + 1}` : `메모 ${index + 1}`;
+      const label = capture.dataUrl ? t('exportCaptureN', index + 1) : t('exportMemoN', index + 1);
       return [
         '<figure class="shot">',
-        capture.dataUrl ? `<img src="${escapeHtml(capture.dataUrl)}" alt="캡처 ${index + 1}">` : '',
+        capture.dataUrl ? `<img src="${escapeHtml(capture.dataUrl)}" alt="${escapeHtml(t('exportCaptureN', index + 1))}">` : '',
         '<figcaption>',
         `<span class="chip">${escapeHtml(label)}${time ? ` · ${escapeHtml(time)}` : ''}</span>`,
-        `<p>${escapeHtml(capture.memo.trim() || '(메모 없음)')}</p>`,
+        `<p>${escapeHtml(capture.memo.trim() || t('noMemo'))}</p>`,
         '</figcaption>',
         '</figure>'
       ]
@@ -143,9 +144,9 @@ export function buildSessionHtml(bundle: ExportBundle): string {
     .join('\n');
 
   return `<!doctype html>
-<html lang="ko">
+<html lang="${escapeHtml(uiLanguage())}">
 <meta charset="utf-8">
-<title>${escapeHtml(bundle.title)} · 학습 기록</title>
+<title>${escapeHtml(t('exportDocTitle', bundle.title))}</title>
 <style>
   :root { color-scheme: light; }
   body { margin: 0; padding: 32px; background: #f5f7fb; color: #1b2333;
@@ -174,23 +175,34 @@ export function buildSessionHtml(bundle: ExportBundle): string {
   <h1>${escapeHtml(bundle.title)}</h1>
   <p class="meta">
     ${bundle.pageUrl ? `<a href="${escapeHtml(bundle.pageUrl)}">${escapeHtml(bundle.pageUrl)}</a><br>` : ''}
-    내보낸 시각 ${escapeHtml(new Date(bundle.exportedAt).toLocaleString('ko-KR'))} ·
-    캡처 ${bundle.captures.filter((c) => c.dataUrl).length}장 · 메모 ${bundle.captures.filter((c) => !c.dataUrl).length}개 · 자막 ${bundle.transcripts.length}줄
+    ${escapeHtml(t('exportExportedAt', new Date(bundle.exportedAt).toLocaleString(uiLanguage())))} ·
+    ${escapeHtml(
+      t(
+        'exportSummary',
+        bundle.captures.filter((c) => c.dataUrl).length,
+        bundle.captures.filter((c) => !c.dataUrl).length,
+        bundle.transcripts.length
+      )
+    )}
   </p>
 
   <section>
-    <h2 style="margin-top:0">내 노트</h2>
-    <div class="memo">${bundle.generalMemo.trim() ? escapeHtml(bundle.generalMemo) : '<span class="empty">작성한 노트가 없습니다.</span>'}</div>
+    <h2 style="margin-top:0">${escapeHtml(t('exportMyNotes'))}</h2>
+    <div class="memo">${
+      bundle.generalMemo.trim()
+        ? escapeHtml(bundle.generalMemo)
+        : `<span class="empty">${escapeHtml(t('exportNoNotes'))}</span>`
+    }</div>
   </section>
 
   <section>
-    <h2 style="margin-top:0">캡처와 메모</h2>
-    ${shots || '<p class="empty">캡처와 메모가 없습니다.</p>'}
+    <h2 style="margin-top:0">${escapeHtml(t('exportCaptures'))}</h2>
+    ${shots || `<p class="empty">${escapeHtml(t('exportNoCaptures'))}</p>`}
   </section>
 
   <section>
-    <h2 style="margin-top:0">자막</h2>
-    ${lines ? `<ul>\n${lines}\n</ul>` : '<p class="empty">저장된 자막이 없습니다.</p>'}
+    <h2 style="margin-top:0">${escapeHtml(t('exportTranscript'))}</h2>
+    ${lines ? `<ul>\n${lines}\n</ul>` : `<p class="empty">${escapeHtml(t('exportNoTranscript'))}</p>`}
   </section>
 </main>
 </html>`;
@@ -198,5 +210,5 @@ export function buildSessionHtml(bundle: ExportBundle): string {
 
 /** 전체 저장 파일 이름. */
 export function bundleFileName(title: string, exportedAt: number): string {
-  return `${sanitizeFileName(title, '강의')}_${stamp(exportedAt)}.html`;
+  return `${sanitizeFileName(title, t('defaultLectureTitle'))}_${stamp(exportedAt)}.html`;
 }

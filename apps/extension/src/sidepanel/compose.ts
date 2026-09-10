@@ -1,4 +1,5 @@
 import { formatClock, wrapTextByWidth } from '../shared/export';
+import { t } from '../shared/i18n';
 
 export interface ComposeInput {
   blob: Blob;
@@ -34,7 +35,7 @@ export async function composeCaptureImage(input: ComposeInput): Promise<Blob> {
   measure.font = `600 ${titleSize}px ${FONT}`;
   const titleLines = wrapTextByWidth(input.title, inner, (s) => measure.measureText(s).width).slice(0, 2);
   measure.font = `${memoSize}px ${FONT}`;
-  const memoText = input.memo.trim() || '(메모 없음)';
+  const memoText = input.memo.trim() || t('noMemo');
   const memoLines = wrapTextByWidth(memoText, inner, (s) => measure.measureText(s).width);
 
   const panelHeight = pad + titleLines.length * titleLead + Math.round(memoLead * 0.4) + memoLines.length * memoLead + pad;
@@ -65,7 +66,7 @@ export async function composeCaptureImage(input: ComposeInput): Promise<Blob> {
   }
 
   if (input.videoTimeSec != null) {
-    const label = `재생 위치 ${formatClock(input.videoTimeSec)}`;
+    const label = t('playbackPos', formatClock(input.videoTimeSec));
     ctx.font = `600 ${memoSize}px ${FONT}`;
     ctx.fillStyle = '#2563eb';
     ctx.textAlign = 'right';
@@ -102,7 +103,7 @@ export function blobToDataUrl(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result ?? ''));
-    reader.onerror = () => reject(reader.error ?? new Error('이미지를 읽지 못했습니다.'));
+    reader.onerror = () => reject(reader.error ?? new Error(t('imageReadFailed')));
     reader.readAsDataURL(blob);
   });
 }

@@ -3,6 +3,7 @@ import type { CaptureResponse, ErrorCode, SessionStatus, STTConnectionStatus, St
 import { pickVideoFromFrames } from '../shared/capture';
 import { COMMAND_BY_MESSAGE, transition, type CaptureCommand } from '../shared/state';
 import { hideOverlay, showOverlay } from './overlay';
+import { t } from '../shared/i18n';
 
 const STATE_KEY = 'captureState';
 
@@ -154,7 +155,7 @@ async function handleMessage(message: any): Promise<unknown> {
   if (message.type === 'VIDEO_TIME_GET') return probeVideoTime(message.tabId);
 
   const command = COMMAND_BY_MESSAGE[message.type];
-  if (!command) return { ok: false, error: '알 수 없는 명령' };
+  if (!command) return { ok: false, error: t('bgUnknownCommand') };
 
   if (command === 'START') {
     if (startInFlight) {
@@ -185,6 +186,7 @@ async function runCommand(command: CaptureCommand, message: any) {
         streamId,
         sessionId: message.sessionId,
         contextPrompt: message.contextPrompt ?? '',
+        language: message.language,
         engine
       });
       const next = await writeState({
@@ -211,7 +213,7 @@ async function runCommand(command: CaptureCommand, message: any) {
 }
 
 async function getStreamId(tabId: number): Promise<string> {
-  if (typeof tabId !== 'number') throw Object.assign(new Error('탭을 찾을 수 없습니다.'), { code: 'TAB_NOT_FOUND' as ErrorCode });
+  if (typeof tabId !== 'number') throw Object.assign(new Error(t('bgTabNotFound')), { code: 'TAB_NOT_FOUND' as ErrorCode });
   try {
     return await chrome.tabCapture.getMediaStreamId({ targetTabId: tabId });
   } catch (err) {
@@ -223,8 +225,8 @@ async function getStreamId(tabId: number): Promise<string> {
     await writeState({ errorCode: code, error: message });
     throw new Error(
       code === 'TAB_CAPTURE_PERMISSION_DENIED'
-        ? '탭 오디오 캡처 권한이 없습니다. 강의 탭에서 툴바의 확장 아이콘을 한 번 누른 뒤 다시 시도하세요. (페이지를 이동하면 권한이 초기화됩니다)'
-        : `탭 오디오 캡처 실패: ${message}`
+        ? t('bgTabCapturePermission')
+        : t('bgTabCaptureFailed', message)
     );
   }
 }
@@ -251,7 +253,7 @@ async function ensureOffscreen() {
     await chrome.offscreen.createDocument({
       url: 'offscreen.html',
       reasons: [chrome.offscreen.Reason.USER_MEDIA],
-      justification: '강의 탭 오디오를 실시간 자막으로 변환하기 위해 오디오를 처리합니다.'
+      justification: t('bgOffscreenJustification')
     });
   } catch (err) {
     // 동시 호출로 이미 만들어진 경우는 정상으로 취급한다.
@@ -282,7 +284,7 @@ async function probeVideoTime(tabId: number): Promise<VideoTimeResponse> {
 }
 
 async function captureScreen(tabId: number): Promise<CaptureResponse> {
-  if (typeof tabId !== 'number') return { ok: false, error: '현재 탭을 찾을 수 없습니다.', errorCode: 'TAB_NOT_FOUND' };
+  if (typeof tabId !== 'number') return { ok: false, error: t('bgCurrentTabNotFound'), errorCode: 'TAB_NOT_FOUND' };
   const { topRect, anyVideo } = await probeVideos(tabId);
   let pageUrl = '';
   try {
@@ -295,7 +297,7 @@ async function captureScreen(tabId: number): Promise<CaptureResponse> {
     const dataUrl = await chrome.tabs.captureVisibleTab({ format: 'png' });
     return { ok: true, dataUrl, videoRect: topRect, videoTimeSec: anyVideo?.videoTimeSec, pageUrl };
   } catch (err) {
-    return { ok: false, error: `화면 캡처 실패: ${String((err as Error)?.message ?? err)}`, errorCode: 'SCREENSHOT_FAILED' };
+    return { ok: false, error: t('bgScreenshotFailed', String((err as Error)?.message ?? err)), errorCode: 'SCREENSHOT_FAILED' };
   }
 }
 
@@ -343,7 +345,7 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
   if (state.invokedTabId === tabId) await writeState({ invokedTabId: undefined });
   if (state.tabId !== tabId || state.status === 'STOPPED') return;
   await teardown();
-  await writeState({ status: 'STOPPED', stt: 'DISCONNECTED', error: '강의 탭이 닫혀 자막을 종료했습니다.' });
+  await writeState({ status: 'STOPPED', stt: 'DISCONNECTED', error: t('bgTabClosed') });
 });
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo) => {
@@ -353,5 +355,5 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo) => {
   if (state.invokedTabId === tabId) await writeState({ invokedTabId: undefined });
   if (state.tabId !== tabId || (state.status !== 'CAPTURING' && state.status !== 'PAUSED')) return;
   await teardown();
-  await writeState({ status: 'STOPPED', stt: 'DISCONNECTED', error: '탭이 다른 페이지로 이동해 자막을 종료했습니다.' });
+  await writeState({ status: 'STOPPED', stt: 'DISCONNECTED', error: t('bgTabNavigated') });
 });

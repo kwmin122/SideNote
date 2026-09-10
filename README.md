@@ -1,5 +1,7 @@
 # SideNote
 
+> **English below the Korean intro — see [English](#english).**
+
 Chrome에서 재생 중인 강의 탭의 소리를 **Chrome 내장 기기 내(on-device) 음성인식**으로 실시간 자막화하고,
 오른쪽 Side Panel에 **자막 · 메모 · 화면 캡처**를 함께 쌓아두는 Chrome 확장입니다.
 
@@ -9,6 +11,49 @@ Chrome에서 재생 중인 강의 탭의 소리를 **Chrome 내장 기기 내(on
   자막·메모·캡처는 [기록] 에 남습니다.
 - STT가 실패해도 메모와 캡처는 계속 동작하고, 캡처가 실패해도 자막과 메모는 계속 동작합니다.
 - Chrome 139 이상이 필요합니다(`SpeechRecognition.available()` / `install()` / `processLocally`가 그 버전부터입니다).
+- 화면 글자는 브라우저 언어를 따라가고(영어·한국어 포함, `_locales/` 에 폴더를 더하면 언어 추가), 자막 언어는
+  패널에서 22개 중 골라 씁니다.
+
+---
+
+## English
+
+SideNote is a Chrome extension that turns the audio of the lecture tab you are watching into live captions using
+**Chrome's built-in on-device speech recognition**, and stacks **captions, notes, and screen captures** together
+in the right-hand Side Panel.
+
+- Recognition runs entirely on your computer. No external API, no API key, no billing, no server to keep running.
+- One extension is the whole install. No companion program (`.pkg`), no `nativeMessaging` permission.
+- **Each video gets its own notebook.** Move to another video and captions restart automatically; the previous
+  video's captions, notes, and captures stay in [History].
+- If speech recognition fails, notes and captures keep working; if capture fails, captions and notes keep working.
+- Requires Chrome 139+ (`SpeechRecognition.available()` / `install()` / `processLocally` landed in that version).
+
+### Languages
+
+The **interface language** follows your Chrome UI language. English and Korean ship in the package
+(`apps/extension/public/_locales/`); adding another language means dropping in one more
+`_locales/<lang>/messages.json` — no code change is needed, because every visible string goes through
+`t()` in `apps/extension/src/shared/i18n.ts`.
+
+The **caption language** is separate and chosen in the panel, so a Korean-language browser can caption an
+English lecture. The list lives in `apps/extension/src/shared/languages.ts` (22 locales: English, Korean,
+Japanese, Chinese, Spanish, French, German, Italian, Portuguese, Russian, Hindi, Arabic, Indonesian,
+Vietnamese, Thai, Turkish, Dutch, Polish, Swedish). Chrome downloads the on-device speech pack for the
+chosen language on first use; Chrome does not expose an API to enumerate which packs a given machine
+supports, so the extension checks availability at runtime and reports what it finds.
+
+### Build it yourself
+
+```bash
+npm install
+npm run typecheck && npm test && npm run build
+```
+
+Then open `chrome://extensions` → enable **Developer mode** → **Load unpacked** → pick `apps/extension/dist`.
+`npm run release:chrome` produces the Web Store ZIP in `release/` and runs 15 pre-upload checks.
+
+Store copy: `store/STORE-LISTING.en.md`, privacy policy: `store/PRIVACY.en.md`.
 
 ---
 

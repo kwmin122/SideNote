@@ -1,4 +1,4 @@
-import type { STTConnectionStatus, SttEngine } from '../shared/contracts';
+import type { SttEngine } from '../shared/contracts';
 
 /** 명세 §22 AppConfig. 값은 전부 이 파일에서만 바꾼다. */
 export interface AppConfig {
@@ -15,7 +15,10 @@ export interface AppConfig {
   autoScrollThresholdPx: number;
   /** 사용자가 고른 값이 없을 때 쓰는 자막 엔진. */
   defaultSttEngine: SttEngine;
-  /** Chrome 내장 인식기에 넘길 언어. on-device 언어팩 목록에 있는 값이어야 한다. */
+  /**
+   * 사이드패널에서 고른 자막 언어가 전달되지 않았을 때 쓰는 최후의 기본값.
+   * 평소에는 shared/languages.ts 의 목록에서 고른 값이 여기까지 오지 않는다.
+   */
   chromeSpeechLang: string;
   featureFlags: {
     cropVideoRegion: boolean;
@@ -33,7 +36,7 @@ export const config: AppConfig = {
   transcriptRenderWindow: 300,
   autoScrollThresholdPx: 48,
   defaultSttEngine: 'chrome',
-  chromeSpeechLang: 'ko-KR',
+  chromeSpeechLang: 'en-US',
   featureFlags: {
     cropVideoRegion: true,
     savePartialTranscript: false,
@@ -45,15 +48,3 @@ export const config: AppConfig = {
 export const AUDIO_SAMPLE_RATE = 16000;
 export const AUDIO_FRAME_SAMPLES = 2048;
 
-/** 인식기 이름표. 지금은 Chrome 내장 인식기 하나뿐이라 화면에 토글을 두지 않는다. */
-export const STT_ENGINE_TEXT: Record<SttEngine, string> = {
-  chrome: 'Chrome 기기 내 음성인식'
-};
-
-export const STT_STATUS_TEXT: Record<STTConnectionStatus, string> = {
-  DISCONNECTED: '연결 안 됨',
-  CONNECTING: '연결 중',
-  CONNECTED: '연결됨',
-  RECONNECTING: '재연결 중',
-  FAILED: '연결 실패'
-};

@@ -2,6 +2,7 @@ import { config } from '../config';
 import type { ErrorCode, STTConnectionStatus } from '../shared/contracts';
 import type { SttClientHandlers } from './client';
 import type { SttProvider, SttSession } from './provider';
+import { t } from '../shared/i18n';
 
 /**
  * Chrome 내장 on-device 음성 인식(Web Speech API) 제공자.
@@ -59,9 +60,9 @@ export function getSpeechRecognitionCtor(): SpeechRecognitionCtor | undefined {
 
 /** offscreen 문서에서 Web Speech API 가 없을 때 사용자에게 그대로 보여줄 문구. */
 export const CHROME_STT_UNSUPPORTED =
-  '이 컨텍스트에서 Chrome 내장 음성인식을 쓸 수 없습니다 (offscreen 미지원).';
+  t('sttNoOffscreenSupport');
 export const CHROME_STT_NOT_LOCAL =
-  '이 Chrome 은 기기 내 음성인식(processLocally)을 지원하지 않습니다. 오디오를 밖으로 내보내지 않기 위해 자막을 시작하지 않았습니다. Chrome 을 최신 버전(139 이상)으로 업데이트해 주세요. 메모와 캡처는 그대로 쓸 수 있습니다.';
+  t('sttNoOnDevice');
 
 /**
  * 언어팩 설치를 "사용자 클릭 안에서" 시작한다.
@@ -167,10 +168,10 @@ export class ChromeSpeechProvider implements SttProvider {
     try {
       availability = await Ctor.available(query);
     } catch (err) {
-      return this.fail('STT_PROVIDER_FAILED', `음성 인식 사용 가능 여부를 확인하지 못했습니다: ${String(err)}`);
+      return this.fail('STT_PROVIDER_FAILED', t('sttAvailabilityCheckFailed', String(err)));
     }
     if (availability === 'unavailable') {
-      return this.fail('STT_PROVIDER_FAILED', `이 기기에서 ${lang} 기기 내 음성인식을 쓸 수 없습니다. Chrome 설정 → 언어에서 해당 언어를 추가한 뒤 다시 시도해 주세요. 메모와 캡처는 그대로 쓸 수 있습니다.`);
+      return this.fail('STT_PROVIDER_FAILED', t('sttLangUnavailable', lang));
     }
     if (availability !== 'available') {
       // 첫 실행에는 언어팩(수백 MB)을 내려받아야 한다. 이건 실패가 아니라 진행 상황이므로
@@ -178,11 +179,11 @@ export class ChromeSpeechProvider implements SttProvider {
       if (!(await this.ensureLanguagePack(Ctor, query, lang))) return false;
     }
     if (this.closedByUser) return false;
-    if (this.waitedForPack) this.notice(`${lang} 음성 인식 언어팩이 준비됐습니다. 자막을 시작합니다.`);
+    if (this.waitedForPack) this.notice(t('sttPackReady', lang));
 
     const track = session.audioTrack;
     if (!track || track.kind !== 'audio' || track.readyState !== 'live') {
-      return this.fail('TAB_CAPTURE_FAILED', '인식에 쓸 오디오 트랙이 없습니다.');
+      return this.fail('TAB_CAPTURE_FAILED', t('sttNoAudioTrack'));
     }
     this.track = track;
 
@@ -190,7 +191,7 @@ export class ChromeSpeechProvider implements SttProvider {
     try {
       recognition = new Ctor();
     } catch (err) {
-      return this.fail('STT_PROVIDER_FAILED', `음성 인식기를 만들지 못했습니다: ${String(err)}`);
+      return this.fail('STT_PROVIDER_FAILED', t('sttRecognizerCreateFailed', String(err)));
     }
     recognition.lang = lang;
     recognition.continuous = true;
@@ -211,7 +212,7 @@ export class ChromeSpeechProvider implements SttProvider {
     }
 
     if (!this.startRecognition()) {
-      return this.fail('STT_PROVIDER_FAILED', '음성 인식을 시작하지 못했습니다.');
+      return this.fail('STT_PROVIDER_FAILED', t('sttStartFailed'));
     }
     // onstart 를 못 받는 구현도 있으므로 시작 성공 시점에 연결됨으로 본다.
     this.setStatus('CONNECTED');
@@ -227,7 +228,7 @@ export class ChromeSpeechProvider implements SttProvider {
    */
   private async ensureLanguagePack(Ctor: SpeechRecognitionCtor, query: AvailabilityQuery, lang: string): Promise<boolean> {
     this.waitedForPack = true;
-    this.notice(`${lang} 음성 인식 언어팩을 내려받는 중입니다 (첫 실행에만, 수백 MB). 다 받으면 자막이 자동으로 시작됩니다.`);
+    this.notice(t('sttPackDownloading', lang));
     return this.waitForPack(Ctor, query, lang);
   }
 
@@ -247,16 +248,16 @@ export class ChromeSpeechProvider implements SttProvider {
       }
       if (state === 'available') return true;
       if (state === 'unavailable') {
-        return this.fail('STT_PROVIDER_FAILED', `${lang} 언어팩을 쓸 수 없습니다. Chrome 설정 → 언어에서 해당 언어를 추가한 뒤 다시 시도해 주세요.`);
+        return this.fail('STT_PROVIDER_FAILED', t('sttPackUnavailable', lang));
       }
       if (state === 'downloadable' && Date.now() >= startDeadline) {
         return this.fail(
           'STT_PROVIDER_FAILED',
-          `${lang} 언어팩 다운로드가 시작되지 않았습니다. [자막 시작] 을 한 번 더 눌러 주세요.`
+          t('sttPackNotStarted', lang)
         );
       }
       if (Date.now() >= deadline) {
-        return this.fail('STT_PROVIDER_FAILED', `${lang} 언어팩 다운로드가 끝나지 않았습니다. 다 받은 뒤 다시 시작해 주세요.`);
+        return this.fail('STT_PROVIDER_FAILED', t('sttPackIncomplete', lang));
       }
       await new Promise((resolve) => setTimeout(resolve, this.packPollMs));
     }
@@ -327,14 +328,14 @@ export class ChromeSpeechProvider implements SttProvider {
     if (kind === 'no-speech' || kind === 'aborted') return;
     if (kind === 'language-not-supported' || kind === 'service-not-allowed' || kind === 'not-allowed') {
       this.closedByUser = true;
-      this.fail('STT_PROVIDER_FAILED', `음성 인식을 사용할 수 없습니다 (${kind}). 메모와 캡처는 그대로 쓸 수 있습니다.`);
+      this.fail('STT_PROVIDER_FAILED', t('sttUnavailableKind', kind));
       return;
     }
     if (kind === 'network') {
-      this.handlers?.onError?.('STT_CONNECTION_FAILED', '음성 인식이 네트워크를 요구했습니다. on-device 인식이 아닐 수 있습니다.');
+      this.handlers?.onError?.('STT_CONNECTION_FAILED', t('sttNetworkRequired'));
       return;
     }
-    this.handlers?.onError?.('STT_PROVIDER_FAILED', `음성 인식 오류: ${kind}${event?.message ? ` (${event.message})` : ''}`);
+    this.handlers?.onError?.('STT_PROVIDER_FAILED', t('sttError', `${kind}${event?.message ? ` (${event.message})` : ''}`));
   }
 
   /** continuous 여도 Chrome 은 무음 구간에서 세션을 끝낸다. 사용자가 멈춘 게 아니면 다시 켠다. */
@@ -344,14 +345,14 @@ export class ChromeSpeechProvider implements SttProvider {
     if (!this.track || this.track.readyState !== 'live') return;
     if (this.restarts >= MAX_RESTARTS) {
       this.setStatus('FAILED', 'STT_PROVIDER_FAILED');
-      this.handlers?.onError?.('STT_PROVIDER_FAILED', '음성 인식이 반복해서 끊겨 중단했습니다. [자막 시작] 을 다시 눌러 주세요.');
+      this.handlers?.onError?.('STT_PROVIDER_FAILED', t('sttTooManyRestarts'));
       return;
     }
     this.restarts += 1;
     if (!this.startRecognition()) {
       // start() 가 던지면 다음 onend 도 오지 않는다. 여기서 끝내지 않으면 영원히 "재연결 중"이 된다.
       this.setStatus('FAILED', 'STT_PROVIDER_FAILED');
-      this.handlers?.onError?.('STT_PROVIDER_FAILED', '음성 인식을 다시 시작하지 못했습니다. [자막 시작] 을 다시 눌러 주세요.');
+      this.handlers?.onError?.('STT_PROVIDER_FAILED', t('sttRestartFailed'));
     }
   }
 

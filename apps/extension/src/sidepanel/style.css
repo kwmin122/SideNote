@@ -26,15 +26,6 @@ body { margin: 0; }
 }
 h1 { font-size: 15px; margin: 0; letter-spacing: -0.2px; }
 .brand p { margin: 2px 0 0; font-size: 11px; color: var(--ink-3); }
-.conn {
-  flex: none; display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600;
-  color: var(--ink-2); background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 4px 9px;
-}
-.conn i { width: 6px; height: 6px; border-radius: 50%; background: var(--ink-3); }
-.conn.capturing i { background: #16a34a; }
-.conn.paused i { background: #d97706; }
-.conn.error i { background: #dc2626; }
-
 /* lecture card */
 .lecture {
   display: grid; grid-template-columns: 84px 1fr; gap: 10px; align-items: center;
@@ -107,6 +98,10 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .listbar .ghost:last-child { margin-left: auto; }
 /* 컨트롤 바로 아래 붙는 보조 줄(영상 위 자막 토글 / 전체 저장) */
 .toolbar { margin-top: -4px; }
+/* 자막 언어 선택. 사이드패널이 좁아 오른쪽 끝에 붙이고 폭을 제한한다. */
+.toolbar .lang { margin-left: auto; max-width: 44%; font-size: 11px; font-weight: 600; color: var(--ink-2);
+  background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 5px 6px; cursor: pointer; }
+.toolbar .lang:disabled { opacity: 0.5; cursor: not-allowed; }
 /* 자막 엔진 선택. 자막이 도는 중에는 바꿀 수 없어 잠긴다. */
 .enginebar { flex-wrap: wrap; row-gap: 6px; margin-top: -4px; }
 .engine-label { font-size: 11px; font-weight: 600; color: var(--ink-3); }

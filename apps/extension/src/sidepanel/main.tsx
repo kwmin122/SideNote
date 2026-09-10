@@ -1,18 +1,17 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { config, STT_STATUS_TEXT } from '../config';
+import { config } from '../config';
 import type {
   CaptureRecord,
   CaptureResponse,
   ErrorCode,
   SaveStatus,
   SessionStatus,
-  STTConnectionStatus,
   StatusPayload,
   StudySession,
   TranscriptSegment
 } from '../shared/contracts';
-import { ERROR_MESSAGES } from '../shared/contracts';
+import { errorMessage } from '../shared/contracts';
 import { captureTypeFor, computeCropRect } from '../shared/capture';
 import { pageKeyOf } from '../shared/url';
 import { shouldResyncTab } from '../shared/state';
@@ -25,6 +24,8 @@ import {
   type ExportCaptureMeta
 } from '../shared/export';
 import { requestLanguagePack } from '../transcription/chrome-speech';
+import { t, uiLanguage } from '../shared/i18n';
+import { CAPTION_LANGUAGES, defaultCaptionLanguage, normalizeCaptionLanguage } from '../shared/languages';
 import { blobToDataUrl, composeCaptureImage, downloadBlob } from './compose';
 import {
   cleanupOrphanBlobs,
@@ -123,8 +124,8 @@ function CaptureImage({ capture }: { capture: CaptureRecord }) {
       if (url) URL.revokeObjectURL(url);
     };
   }, [capture.imageBlobId]);
-  if (!src) return <div className="capture-missing">이미지를 불러올 수 없습니다.</div>;
-  return <img src={src} alt="강의 캡처" />;
+  if (!src) return <div className="capture-missing">{t('uiImageLoadFailed')}</div>;
+  return <img src={src} alt={t('uiCaptureAlt')} />;
 }
 
 function App() {
@@ -132,7 +133,6 @@ function App() {
   const [items, setItems] = useState<TranscriptSegment[]>([]);
   const [captures, setCaptures] = useState<CaptureRecord[]>([]);
   const [status, setStatus] = useState<SessionStatus>('READY');
-  const [stt, setStt] = useState<STTConnectionStatus>('DISCONNECTED');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [memo, setMemo] = useState('');
@@ -152,6 +152,9 @@ function App() {
   const [autoScroll, setAutoScroll] = useState(true);
   const [overlay, setOverlay] = useState(true);
   const [videoTime, setVideoTime] = useState<{ cur?: number; dur?: number } | null>(null);
+  /** 인식할 말소리의 언어. 화면 글자 언어(브라우저 설정)와 별개다. */
+  const [lang, setLang] = useState(() => defaultCaptionLanguage(uiLanguage()));
+  const langRef = useRef(lang);
 
   const listRef = useRef<HTMLDivElement>(null);
   const stickRef = useRef(true);
@@ -166,7 +169,7 @@ function App() {
   pinnedRef.current = pinned;
 
   const showError = useCallback((message: string, code?: ErrorCode) => {
-    setError(code ? `${ERROR_MESSAGES[code]} (${message})` : message);
+    setError(code ? `${errorMessage(code)} (${message})` : message);
   }, []);
 
   useEffect(() => {
@@ -186,12 +189,10 @@ function App() {
       if (message?.type === 'STATUS') {
         const payload = message.payload as StatusPayload;
         setStatus(payload.status);
-        setStt(payload.stt);
         setInvokedTabId(payload.invokedTabId);
         if (payload.overlay != null) setOverlay(payload.overlay);
         if (payload.error) showError(payload.error, payload.errorCode);
       }
-      if (message?.type === 'STT_STATUS') setStt(message.stt);
       if (message?.type === 'OFFSCREEN_ERROR') showError(message.message, message.errorCode);
       // 언어팩 다운로드 같은 진행 상황은 오류가 아니다. 알림 줄로만 보여준다.
       if (message?.type === 'OFFSCREEN_NOTICE') setNotice(String(message.message ?? ''));
@@ -330,7 +331,7 @@ function App() {
     try {
       setSessions(await listSessions());
     } catch {
-      showError('저장된 노트 목록을 읽지 못했습니다.', 'STORAGE_READ_FAILED');
+      showError(t('uiSessionListReadFailed'), 'STORAGE_READ_FAILED');
     }
   }
 
@@ -343,7 +344,7 @@ function App() {
   /** 자막을 받는 중에는 노트를 갈아탈 수 없다. 자막이 엉뚱한 노트에 쌓이는 것을 막는다. */
   function blockedByCapture(): boolean {
     if (statusRef.current !== 'CAPTURING' && statusRef.current !== 'PAUSED') return false;
-    showError('자막을 받는 중에는 노트를 바꿀 수 없습니다. 먼저 종료를 눌러주세요.');
+    showError(t('uiCannotSwitchWhileCapturing'));
     return true;
   }
 
@@ -359,7 +360,7 @@ function App() {
       setPinned(false);
       await applySession(fresh);
       await refreshSessions();
-      setNotice('새 노트를 시작했습니다. 이전 노트는 목록에 남아 있습니다.');
+      setNotice(t('uiNewNoteStarted'));
     } catch (err) {
       showError(String(err), 'STORAGE_WRITE_FAILED');
     } finally {
@@ -403,7 +404,7 @@ function App() {
         await syncActiveTab();
       }
       await refreshSessions();
-      setNotice('노트를 삭제했습니다.');
+      setNotice(t('uiNoteDeleted'));
     } catch (err) {
       showError(String(err), 'STORAGE_WRITE_FAILED');
     } finally {
@@ -425,7 +426,7 @@ function App() {
       setShowAll(false);
       stickRef.current = true;
       await refreshSessions();
-      setNotice(removed ? `현재 자막 ${removed}줄을 지웠습니다. 메모와 캡처는 그대로입니다.` : '지울 자막이 없습니다.');
+      setNotice(removed ? t('uiTranscriptCleared', removed) : t('uiNothingToClear'));
     } catch (err) {
       showError(String(err), 'STORAGE_WRITE_FAILED');
     } finally {
@@ -444,6 +445,14 @@ function App() {
     // 예전 버전에서 고른 엔진 값이 남아 있을 수 있다. 이제 인식기는 Chrome 내장 하나뿐이라 읽지 않고 지운다.
     void chrome.storage.local.remove('sttEngine').catch(() => {});
     try {
+      const saved = await chrome.storage.local.get('captionLang');
+      const next = normalizeCaptionLanguage(saved?.captionLang, uiLanguage());
+      langRef.current = next;
+      setLang(next);
+    } catch {
+      /* 저장소를 못 읽으면 브라우저 언어에서 고른 기본값을 그대로 쓴다. */
+    }
+    try {
       await syncActiveTab();
       void cleanupOrphanBlobs().catch(() => {});
     } catch (err) {
@@ -453,7 +462,6 @@ function App() {
       const res = await chrome.runtime.sendMessage({ type: 'STATUS_GET' });
       if (res?.ok) {
         setStatus(res.status as SessionStatus);
-        setStt(res.stt as STTConnectionStatus);
         setInvokedTabId(res.invokedTabId as number | undefined);
         if (res.overlay != null) setOverlay(Boolean(res.overlay));
       }
@@ -471,7 +479,7 @@ function App() {
     // offscreen 문서에는 활성화가 없어 NotAllowedError 가 났었다. 그래서 여기서, 첫 await 보다 먼저,
     // 동기적으로 시작만 시켜 둔다. 이미 깔려 있으면 아무 일도 일어나지 않는다.
     if (type === 'CAPTION_START') {
-      void requestLanguagePack(config.chromeSpeechLang);
+      void requestLanguagePack(langRef.current);
     }
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -480,10 +488,11 @@ function App() {
         tabId: tab?.id,
         sessionId: current.id,
         contextPrompt: current.pageTitle,
+        language: langRef.current,
         engine: config.defaultSttEngine
       });
       if (!res?.ok) {
-        showError(res?.error ?? '명령을 실행하지 못했습니다.');
+        showError(res?.error ?? t('uiCommandFailed'));
         return;
       }
       if (res.ignored && res.reason) setNotice(res.reason);
@@ -505,7 +514,7 @@ function App() {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       const res: CaptureResponse = await chrome.runtime.sendMessage({ type: 'CAPTURE_REQUEST', tabId: tab?.id });
       if (!res?.ok || !res.dataUrl) {
-        showError(res?.error ?? '캡처에 실패했습니다.', res?.errorCode ?? 'SCREENSHOT_FAILED');
+        showError(res?.error ?? t('uiCaptureFailed'), res?.errorCode ?? 'SCREENSHOT_FAILED');
         return;
       }
       const { blob, cropped } = await toCaptureBlob(res.dataUrl, res.videoRect);
@@ -522,7 +531,7 @@ function App() {
       };
       await db.captures.add(record);
       setCaptures((prev) => [record, ...prev]);
-      if (!cropped) setNotice('재생 중인 영상 영역을 찾지 못해 화면 전체를 저장했습니다.');
+      if (!cropped) setNotice(t('uiCroppedFallback'));
     } catch (err) {
       showError(String(err), 'STORAGE_WRITE_FAILED');
     } finally {
@@ -598,7 +607,7 @@ function App() {
     try {
       await db.captures.update(id, { memo: value });
     } catch {
-      showError('캡처 메모 저장에 실패했습니다.', 'STORAGE_WRITE_FAILED');
+      showError(t('uiCaptureMemoSaveFailed'), 'STORAGE_WRITE_FAILED');
     }
   }
 
@@ -607,8 +616,19 @@ function App() {
       await deleteCapture(record);
       setCaptures((prev) => prev.filter((c) => c.id !== record.id));
     } catch {
-      showError('캡처 삭제에 실패했습니다.', 'STORAGE_WRITE_FAILED');
+      showError(t('uiCaptureDeleteFailed'), 'STORAGE_WRITE_FAILED');
     }
+  }
+
+  /**
+   * 자막 언어 변경. 이 change 이벤트는 사용자 제스처라, 여기서 언어팩 내려받기를 시작할 수 있다.
+   * (offscreen 문서에는 제스처가 없어 거기서 install() 을 부르면 NotAllowedError 가 난다.)
+   */
+  function changeLanguage(next: string) {
+    langRef.current = next;
+    setLang(next);
+    void chrome.storage.local.set({ captionLang: next }).catch(() => {});
+    void requestLanguagePack(next);
   }
 
   /** 영상 위 자막 오버레이 on/off. 끄면 배경이 즉시 걷어낸다. */
@@ -620,7 +640,7 @@ function App() {
 
   function captureMeta(record: CaptureRecord): ExportCaptureMeta {
     return {
-      title: sessionRef.current?.pageTitle ?? '강의',
+      title: sessionRef.current?.pageTitle ?? t('defaultLectureTitle'),
       pageUrl: record.pageUrl ?? sessionRef.current?.pageUrl,
       videoTimeSec: record.videoTimeSec,
       memo: record.memo ?? '',
@@ -634,7 +654,7 @@ function App() {
       if (blob) return blob;
     }
     if (record.dataUrl) return await (await fetch(record.dataUrl)).blob();
-    throw new Error('캡처 이미지를 찾을 수 없습니다.');
+    throw new Error(t('uiCaptureImageNotFound'));
   }
 
   /** 캡처 + 메모를 한 장의 PNG 로 합친다. 클립보드와 파일 저장이 같은 결과물을 쓴다. */
@@ -659,7 +679,7 @@ function App() {
     const text = captureClipboardText(meta);
     // 메모만 있는 항목은 합칠 이미지가 없다. 그대로 텍스트만 복사한다.
     if (!hasImage(record)) {
-      void copy(text, '메모를');
+      void copy(text, t('uiCopiedMemo'));
       return;
     }
     try {
@@ -669,23 +689,23 @@ function App() {
       });
       void navigator.clipboard
         .write([item])
-        .then(() => setNotice('캡처와 메모를 함께 복사했습니다.'))
-        .catch(() => void copy(text, '캡처 메모를'));
+        .then(() => setNotice(t('uiCopiedCaptureAndMemo')))
+        .catch(() => void copy(text, t('uiCopiedCaptureMemo')));
     } catch {
-      void copy(text, '캡처 메모를');
+      void copy(text, t('uiCopiedCaptureMemo'));
     }
   }
 
   async function saveCapture(record: CaptureRecord) {
     if (!hasImage(record)) {
-      showError('이미지가 없는 메모는 PNG 로 저장할 수 없습니다. 복사를 쓰거나 전체 저장에 담으세요.');
+      showError(t('uiPngNeedsImage'));
       return;
     }
     try {
       downloadBlob(await composedCapture(record), captureFileName(captureMeta(record)));
-      setNotice('캡처와 메모를 PNG 로 저장했습니다.');
+      setNotice(t('uiSavedPng'));
     } catch (err) {
-      showError(`캡처 저장에 실패했습니다: ${String((err as Error)?.message ?? err)}`);
+      showError(t('uiSaveCaptureFailed', String((err as Error)?.message ?? err)));
     }
   }
 
@@ -718,18 +738,18 @@ function App() {
         });
       }
       const html = buildSessionHtml({
-        title: current.pageTitle || '강의',
+        title: current.pageTitle || t('defaultLectureTitle'),
         pageUrl: current.pageUrl ?? '',
         generalMemo: pendingMemo.current ?? memo,
         transcripts: bundle.transcripts.map((item) => ({ startedAtMs: item.startedAtMs, text: item.text })),
         captures: shots,
         exportedAt: Date.now()
       });
-      downloadBlob(new Blob([html], { type: 'text/html;charset=utf-8' }), bundleFileName(current.pageTitle || '강의', Date.now()));
+      downloadBlob(new Blob([html], { type: 'text/html;charset=utf-8' }), bundleFileName(current.pageTitle || t('defaultLectureTitle'), Date.now()));
       const withImage = shots.filter((shot) => shot.dataUrl).length;
-      setNotice(`캡처 ${withImage}장 · 메모 ${shots.length - withImage}개 · 자막 ${bundle.transcripts.length}줄을 HTML 한 파일로 저장했습니다.`);
+      setNotice(t('uiSavedBundle', withImage, shots.length - withImage, bundle.transcripts.length));
     } catch (err) {
-      showError(`전체 저장에 실패했습니다: ${String((err as Error)?.message ?? err)}`);
+      showError(t('uiSaveBundleFailed', String((err as Error)?.message ?? err)));
     } finally {
       setBusy(false);
     }
@@ -743,33 +763,30 @@ function App() {
       const bundle = await loadSessionBundle(current.id);
       const text = transcriptToText(bundle.transcripts);
       if (!text) {
-        setNotice('복사할 자막이 아직 없습니다.');
+        setNotice(t('uiNoTranscriptToCopy'));
         return;
       }
-      await copy(text, `자막 ${bundle.transcripts.length}줄을`);
+      await copy(text, t('uiCopiedTranscriptLines', bundle.transcripts.length));
     } catch {
-      await copy(transcriptToText(items), '자막을');
+      await copy(transcriptToText(items), t('uiCopiedTranscript'));
     }
   }
 
-  async function copy(text: string, label: string) {
+  /** notice 는 이미 완성된 한 문장이다. 언어마다 어순과 조사가 달라 조각을 이어 붙이지 않는다. */
+  async function copy(text: string, notice: string) {
     if (!text) return;
     try {
       await navigator.clipboard.writeText(text);
-      setNotice(`${label} 복사했습니다.`);
+      setNotice(notice);
     } catch {
-      showError('클립보드 복사에 실패했습니다.');
+      showError(t('uiClipboardFailed'));
     }
   }
 
   const live = status === 'CAPTURING';
   const visible = showAll ? items : items.slice(-config.transcriptRenderWindow);
   const hidden = items.length - visible.length;
-  const statusText = useMemo(
-    () => ({ READY: '대기 중', CAPTURING: '실시간 연결됨', PAUSED: '일시정지', STOPPED: '종료됨', ERROR: '오류' })[status],
-    [status]
-  );
-  const memoText = { IDLE: '', SAVING: '저장 중...', SAVED: '저장됨', FAILED: '저장 실패' }[memoSave];
+  const memoText = { IDLE: '', SAVING: t('uiMemoSaving'), SAVED: t('uiMemoSaved'), FAILED: t('uiMemoSaveFailed') }[memoSave];
   const latestShot = captures.find(hasImage);
   const shotCount = captures.filter(hasImage).length;
   // 이전 노트를 열어둔 채 다른 페이지를 보고 있으면 자막/캡처가 엉뚱한 노트에 쌓인다. 그래서 막는다.
@@ -787,13 +804,9 @@ function App() {
           </span>
           <div>
             <h1>SideNote</h1>
-            <p>강의를 보면서 자막을 보고, 노트를 한 번에.</p>
+            <p>{t('uiTagline')}</p>
           </div>
         </div>
-        <span className={`conn ${status.toLowerCase()}`} title={`STT ${STT_STATUS_TEXT[stt]}`}>
-          <i />
-          {statusText}
-        </span>
       </header>
 
       <section className="lecture">
@@ -801,8 +814,8 @@ function App() {
           {latestShot ? <CaptureImage capture={latestShot} /> : <span aria-hidden>▶</span>}
         </div>
         <div className="lecture-meta">
-          <strong title={session?.pageUrl}>{session?.pageTitle ?? '현재 탭 확인 중'}</strong>
-          <small>{hostOf(session?.pageUrl) || '탭 정보를 읽는 중'}</small>
+          <strong title={session?.pageUrl}>{session?.pageTitle ?? t('uiCheckingTab')}</strong>
+          <small>{hostOf(session?.pageUrl) || t('uiReadingTab')}</small>
           {clock && <span className="lecture-time">{clock}</span>}
         </div>
       </section>
@@ -814,53 +827,69 @@ function App() {
           onClick={() => void command(status === 'PAUSED' ? 'CAPTION_RESUME' : 'CAPTION_START')}
         >
           <span aria-hidden>CC</span>
-          {status === 'PAUSED' ? '계속하기' : '자막 시작'}
+          {status === 'PAUSED' ? t('uiResume') : t('uiStartCaption')}
         </button>
         <button disabled={busy || !live} onClick={() => void command('CAPTION_PAUSE')}>
-          <span aria-hidden>❚❚</span>일시정지
+          <span aria-hidden>❚❚</span>
+          {t('uiPause')}
         </button>
         <button disabled={busy || (!live && status !== 'PAUSED')} onClick={() => void command('CAPTION_STOP')}>
-          <span aria-hidden>■</span>종료
+          <span aria-hidden>■</span>
+          {t('uiStop')}
         </button>
         <button disabled={busy || offTab} onClick={() => void capture()}>
-          <span aria-hidden>◎</span>캡처
+          <span aria-hidden>◎</span>
+          {t('uiCapture')}
         </button>
       </div>
 
       <div className="listbar toolbar">
         <button className={`switch ${overlay ? 'on' : ''}`} onClick={toggleOverlay} aria-pressed={overlay}>
           <i />
-          영상 위 자막
+          {t('uiOverlay')}
         </button>
         <button className={`ghost ${showSessions ? 'accent' : ''}`} onClick={toggleSessions} aria-expanded={showSessions}>
-          기록 {showSessions ? '▴' : '▾'}
+          {t('uiHistory')} {showSessions ? '▴' : '▾'}
         </button>
         <button className="ghost" disabled={busy} onClick={() => void saveAll()}>
-          전체 저장
+          {t('uiSaveAll')}
         </button>
+        <select
+          className="lang"
+          value={lang}
+          disabled={live || status === 'PAUSED'}
+          title={live || status === 'PAUSED' ? t('uiLanguageChangeWhileLive') : t('uiCaptionLanguageTitle')}
+          aria-label={t('uiCaptionLanguage')}
+          onChange={(e) => changeLanguage(e.target.value)}
+        >
+          {CAPTION_LANGUAGES.map((item) => (
+            <option key={item.code} value={item.code}>
+              {item.label}
+            </option>
+          ))}
+        </select>
       </div>
 
       {showSessions && (
         <section className="block sessions">
           <div className="block-head">
             <h2>
-              기록 <span>{sessions.length}</span>
+              {t('uiHistory')} <span>{sessions.length}</span>
             </h2>
             <button
               className="ghost accent"
               disabled={busy}
-              title="이 영상의 자막·메모·캡처를 새로 시작합니다. 지금까지 쌓인 것은 기록에 남습니다."
+              title={t('uiNewCaptionSessionTitle')}
               onClick={() => void newNote()}
             >
-              + 새 자막 시작
+              {t('uiNewCaptionSession')}
             </button>
           </div>
           <p className="hint-line">
-            영상이 바뀌면 자막은 자동으로 새로 시작하고, 보던 영상으로 돌아오면 그 자막을 이어서 씁니다. 기록은 이
-            브라우저 안(IndexedDB)에만 저장됩니다.
+            {t('uiHistoryHint')}
           </p>
           {!sessions.length ? (
-            <p className="empty">저장된 기록이 없습니다.</p>
+            <p className="empty">{t('uiNoHistory')}</p>
           ) : (
             <ul className="session-list">
               {sessions.map((item) => (
@@ -871,15 +900,15 @@ function App() {
                     onClick={() => void openSession(item)}
                     title={item.session.pageUrl}
                   >
-                    <strong>{item.session.pageTitle || '제목 없음'}</strong>
+                    <strong>{item.session.pageTitle || t('untitled')}</strong>
                     <small>
-                      {hostOf(item.session.pageUrl) || '주소 없음'} · {fmtDate(item.session.updatedAt)} · 자막{' '}
-                      {item.transcriptCount} · 캡처/메모 {item.captureCount}
+                      {hostOf(item.session.pageUrl) || t('uiNoUrl')} · {fmtDate(item.session.updatedAt)} ·{' '}
+                      {t('uiCaptionsShort')} {item.transcriptCount} · {t('uiCapturesMemos')} {item.captureCount}
                     </small>
                   </button>
-                  {item.session.id === session?.id && <span className="chip">보는 중</span>}
+                  {item.session.id === session?.id && <span className="chip">{t('uiViewing')}</span>}
                   <button className="danger" disabled={busy} onClick={() => void removeSession(item)}>
-                    삭제
+                    {t('uiDelete')}
                   </button>
                 </li>
               ))}
@@ -892,15 +921,15 @@ function App() {
         <div className="hint">
           <span>
             {offTab
-              ? '지금 보고 있는 탭과 다른 강의의 노트를 열어둔 상태입니다. 자막·캡처는 잠시 잠겼습니다.'
-              : '목록에서 연 노트를 보고 있습니다. 탭을 옮겨도 이 노트가 유지됩니다.'}
+              ? t('uiOffTabWarn')
+              : t('uiPinnedNote')}
           </span>
-          <button onClick={() => void backToCurrentTab()}>현재 탭 노트로 ›</button>
+          <button onClick={() => void backToCurrentTab()}>{t('uiBackToCurrentTab')}</button>
         </div>
       )}
       {needsInvoke && !offTab && (
         <div className="hint">
-          이 탭의 오디오를 캡처하려면 툴바의 확장 아이콘을 한 번 눌러주세요. (Chrome 정책상 페이지를 이동하면 권한이 초기화됩니다)
+          {t('uiNeedsInvoke')}
         </div>
       )}
       {error && (
@@ -918,10 +947,12 @@ function App() {
 
       <nav className="tabs">
         <button className={tab === 'note' ? 'on' : ''} onClick={() => setTab('note')}>
-          노트{captures.length > 0 && <em>{captures.length}</em>}
+          {t('uiNavNotes')}
+          {captures.length > 0 && <em>{captures.length}</em>}
         </button>
         <button className={tab === 'caption' ? 'on' : ''} onClick={() => setTab('caption')}>
-          현재 자막{items.length > 0 && <em>{items.length}</em>}
+          {t('uiNavCurrentCaptions')}
+          {items.length > 0 && <em>{items.length}</em>}
         </button>
       </nav>
 
@@ -929,11 +960,11 @@ function App() {
         <>
           <section className="block">
             <div className="block-head">
-              <h2>강의 메모</h2>
+              <h2>{t('uiLectureMemo')}</h2>
               <em className={`save ${memoSave.toLowerCase()}`}>{memoText}</em>
               {memoSave === 'FAILED' && (
                 <button className="ghost" onClick={() => void flushMemo()}>
-                  다시 시도
+                  {t('uiRetry')}
                 </button>
               )}
             </div>
@@ -941,43 +972,41 @@ function App() {
               className="note-full"
               value={memo}
               onChange={(e) => onMemoChange(e.target.value)}
-              placeholder="이 강의 전체에 대한 생각, 궁금한 점, 추가로 학습할 내용을 적어보세요..."
+              placeholder={t('uiMemoPlaceholder')}
             />
           </section>
 
           <section className="block">
             <div className="block-head">
               <h2>
-                타임라인 <span>캡처 {shotCount} · 메모 {captures.length - shotCount}</span>
+                {t('uiTimeline')} <span>{t('uiTimelineCounts', shotCount, captures.length - shotCount)}</span>
               </h2>
               <button className="ghost accent" disabled={busy || offTab} onClick={() => void addMemoNote()}>
-                + 메모만 추가
+                {t('uiAddMemoOnly')}
               </button>
             </div>
             {!captures.length && (
-              <p className="empty">
-                캡처를 누르면 지금 화면이, 메모만 추가를 누르면 지금 재생 위치가 여기에 시간 순으로 쌓입니다.
-              </p>
+              <p className="empty">{t('uiTimelineHint')}</p>
             )}
             {captures.map((item) => (
               <article className={`capture ${hasImage(item) ? '' : 'memo-only'}`} key={item.id}>
                 <div className="capture-meta">
                   <span className="chip">
-                    {item.videoTimeSec != null ? `영상 ${fmtClock(item.videoTimeSec)}` : fmtDate(item.createdAt)}
+                    {item.videoTimeSec != null ? t('uiVideoAt', fmtClock(item.videoTimeSec)) : fmtDate(item.createdAt)}
                   </span>
                   <span className="tag">
-                    {item.captureType === 'VIDEO_REGION' ? '영상 영역' : item.captureType === 'VIEWPORT' ? '화면 전체' : '메모'}
+                    {item.captureType === 'VIDEO_REGION' ? t('uiTypeVideoRegion') : item.captureType === 'VIEWPORT' ? t('uiTypeViewport') : t('uiTypeMemo')}
                   </span>
                   <button className="ghost" onClick={() => copyCapture(item)}>
-                    복사
+                    {t('uiCopy')}
                   </button>
                   {hasImage(item) && (
                     <button className="ghost" onClick={() => void saveCapture(item)}>
-                      저장
+                      {t('uiSave')}
                     </button>
                   )}
                   <button className="danger" onClick={() => void removeCapture(item)}>
-                    삭제
+                    {t('uiDelete')}
                   </button>
                 </div>
                 {hasImage(item) && <CaptureImage capture={item} />}
@@ -985,7 +1014,7 @@ function App() {
                   id={`memo-${item.id}`}
                   value={item.memo}
                   onChange={(e) => void updateCaptureMemo(item.id, e.target.value)}
-                  placeholder={hasImage(item) ? '이 장면에 대한 메모' : '이 시점에 대한 메모'}
+                  placeholder={hasImage(item) ? t('uiMemoForScene') : t('uiMemoForMoment')}
                 />
               </article>
             ))}
@@ -996,40 +1025,39 @@ function App() {
           <div className="listbar">
             <button className={`switch ${autoScroll ? 'on' : ''}`} onClick={toggleAutoScroll} aria-pressed={autoScroll}>
               <i />
-              자동 스크롤
+              {t('uiAutoScroll')}
             </button>
             <button className="ghost" onClick={() => void copyAllTranscript()}>
-              전체 복사
+              {t('uiCopyAll')}
             </button>
             <button
               className="ghost"
               disabled={busy || !items.length}
-              title="이 영상의 자막만 지웁니다. 메모와 캡처는 그대로 남습니다."
+              title={t('uiClearCurrentCaptionsTitle')}
               onClick={() => void clearCurrentTranscripts()}
             >
-              현재 자막 지우기
+              {t('uiClearCurrentCaptions')}
             </button>
           </div>
           <div className="transcript compact" ref={listRef} onScroll={onListScroll}>
             {!items.length && (
-              <p className="empty">자막 시작을 누르면 지금 보고 있는 영상의 음성이 여기에 쌓입니다.</p>
+              <p className="empty">{t('uiEmptyCaptions')}</p>
             )}
             {visible.map((item) => (
               <div key={item.id} className={item.status === 'FINAL' ? 'line final' : 'line partial'}>
                 <time>{fmtMs(item.startedAtMs)}</time>
                 <p>{item.text}</p>
-                <button onClick={() => void copy(item.text, '자막을')}>복사</button>
+                <button onClick={() => void copy(item.text, t('uiCopiedTranscript'))}>{t('uiCopy')}</button>
               </div>
             ))}
           </div>
           {hidden > 0 && (
             <button className="ghost wide" onClick={() => setShowAll(true)}>
-              이전 자막 {hidden}줄 더 보기
+              {t('uiShowOlder', hidden)}
             </button>
           )}
           <p className="hint-line">
-            자막은 영상 위에 겹쳐 보여집니다. 여기 목록은 <b>지금 보고 있는 영상</b>의 자막이고, 다른 영상으로
-            넘어가면 자동으로 새 자막이 시작됩니다. 이전 영상 자막은 위의 [기록]에 남습니다.
+            {t('uiOverlayHint')}
           </p>
         </>
       )}

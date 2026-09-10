@@ -132,6 +132,21 @@ function main() {
     '소스맵이 들어 있지 않다',
     !listing.some((name) => name.endsWith('.map'))
   );
+  // default_locale 을 선언해 놓고 그 언어 파일이 빠지면 Chrome 이 설치 자체를 거절한다.
+  // 매니페스트의 __MSG_키__ 도 기본 언어 파일에 실제로 있어야 한다.
+  const defaultLocale = manifest.default_locale;
+  const localePath = defaultLocale ? path.join(stage, '_locales', defaultLocale, 'messages.json') : '';
+  const localeExists = Boolean(defaultLocale) && fs.existsSync(localePath);
+  check(
+    `기본 언어 파일이 들어 있다 (_locales/${defaultLocale ?? '?'}/messages.json)`,
+    localeExists,
+    defaultLocale ? '' : 'default_locale 이 매니페스트에 없다'
+  );
+  const messages = localeExists ? JSON.parse(fs.readFileSync(localePath, 'utf-8')) : {};
+  const missingKeys = [...JSON.stringify(manifest).matchAll(/__MSG_([A-Za-z0-9_@]+)__/g)]
+    .map((m) => m[1])
+    .filter((key) => !(key in messages));
+  check('매니페스트의 __MSG_키__ 가 기본 언어 파일에 모두 있다', missingKeys.length === 0, missingKeys.join(', '));
 
   const sizeKb = Math.round(fs.statSync(zipPath).size / 1024);
   console.log(`\n${pass} pass / ${fail} fail`);

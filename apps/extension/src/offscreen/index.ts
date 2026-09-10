@@ -34,7 +34,8 @@ chrome.runtime.onMessage.addListener((message) => {
         message.streamId,
         message.sessionId,
         message.contextPrompt ?? '',
-        message.engine === 'chrome' ? 'chrome' : config.defaultSttEngine
+        message.engine === 'chrome' ? 'chrome' : config.defaultSttEngine,
+        typeof message.language === 'string' ? message.language : 'auto'
       ).catch((err) => {
         report('TAB_CAPTURE_FAILED', String(err?.message ?? err));
       });
@@ -73,7 +74,7 @@ function broadcastCaptionLive(state: RunState, partialText: string) {
   void chrome.runtime.sendMessage({ type: 'CAPTION_LIVE', sessionId: state.sessionId, text }).catch(() => {});
 }
 
-async function start(streamId: string, sessionId: string, contextPrompt: string, engine: SttEngine) {
+async function start(streamId: string, sessionId: string, contextPrompt: string, engine: SttEngine, language: string) {
   stop();
   paused = false;
 
@@ -139,7 +140,7 @@ async function start(streamId: string, sessionId: string, contextPrompt: string,
 
   // STT 연결 실패는 치명적이지 않다. 오디오 패스스루/메모/캡처는 계속 동작한다.
   await provider.connect(
-    { sessionId, language: 'auto', contextPrompt, audioTrack: recognizerTrack },
+    { sessionId, language, contextPrompt, audioTrack: recognizerTrack },
     {
       onTranscript: (result) => void persist(state, result),
       onPartial: (text) => {

@@ -1,10 +1,26 @@
 import 'fake-indexeddb/auto';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { vi } from 'vitest';
+
+// 화면 문구는 _locales 에 있다. 테스트는 기본 언어(en) 파일을 그대로 읽어 chrome.i18n 을 흉내 낸다.
+// 실제로 쓰는 파일을 읽으므로, 키를 지우거나 오타를 내면 테스트가 먼저 깨진다.
+const MESSAGES: Record<string, { message: string }> = JSON.parse(
+  readFileSync(resolve(process.cwd(), 'public/_locales/en/messages.json'), 'utf-8')
+);
+
+function getMessage(key: string, subs?: string | string[]): string {
+  const entry = MESSAGES[key];
+  if (!entry) return '';
+  const list = subs == null ? [] : Array.isArray(subs) ? subs : [subs];
+  return entry.message.replace(/\$p(\d+)\$/g, (_m, n) => list[Number(n) - 1] ?? '');
+}
 
 /** 테스트에서 쓰는 최소 chrome API 스텁. 실제 확장 런타임이 없어도 모듈을 로드할 수 있게 한다. */
 const listeners = new Set<(message: unknown) => void>();
 
 (globalThis as any).chrome = {
+  i18n: { getMessage, getUILanguage: () => 'en-US' },
   runtime: {
     sendMessage: vi.fn(async () => ({ ok: true })),
     onMessage: {
