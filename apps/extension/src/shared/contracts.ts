@@ -160,7 +160,7 @@ export type ExtensionMessage =
   | { type: 'OFFSCREEN_NOTICE'; message: string }
   | { type: 'TRANSCRIPT'; payload: TranscriptSegment }
   /** 확정 전 진행 중인 자막. 저장하지 않고 영상 위 오버레이에만 쓴다. */
-  | { type: 'CAPTION_LIVE'; sessionId: string; text: string }
+  | { type: 'CAPTION_LIVE'; sessionId: string; text: string; partial: string }
   | { type: 'OVERLAY_SET'; enabled: boolean }
   | { type: 'STT_STATUS'; stt: STTConnectionStatus; errorCode?: ErrorCode }
   | { type: 'STATUS'; payload: StatusPayload };

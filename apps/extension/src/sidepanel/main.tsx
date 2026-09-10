@@ -158,6 +158,8 @@ function App() {
   /** 목록에서 이전 노트를 직접 열어둔 상태. 탭을 옮겨도 세션을 바꾸지 않는다. */
   const [pinned, setPinned] = useState(false);
   const [autoScroll, setAutoScroll] = useState(true);
+  /** 아직 확정되지 않은 줄. 확정될 때까지 몇십 초 걸리기도 해서 오는 대로 보여준다. */
+  const [liveLine, setLiveLine] = useState('');
   const [overlay, setOverlay] = useState(true);
   const [videoTime, setVideoTime] = useState<{ cur?: number; dur?: number } | null>(null);
   /** 인식할 말소리의 언어. 화면 글자 언어(브라우저 설정)와 별개다. */
@@ -206,6 +208,10 @@ function App() {
         if (payload.overlay != null) setOverlay(payload.overlay);
         if (payload.error) showError(payload.error, payload.errorCode);
       }
+      if (message?.type === 'CAPTION_LIVE') {
+        if (sessionRef.current && message.sessionId !== sessionRef.current.id) return;
+        setLiveLine(String(message.partial ?? ''));
+      }
       if (message?.type === 'OFFSCREEN_ERROR') showError(message.message, message.errorCode);
       // 언어팩 다운로드 같은 진행 상황은 오류가 아니다. 알림 줄로만 보여준다.
       if (message?.type === 'OFFSCREEN_NOTICE') setNotice(String(message.message ?? ''));
@@ -251,7 +257,12 @@ function App() {
     const el = listRef.current;
     if (!el || !stickRef.current) return;
     el.scrollTop = el.scrollHeight;
-  }, [items, showAll, tab]);
+  }, [items, liveLine, showAll, tab]);
+
+  // 자막이 멈추면 진행 중이던 줄도 지운다. 안 그러면 멈춘 화면에 끝나지 않은 줄이 남는다.
+  useEffect(() => {
+    if (status !== 'CAPTURING' && status !== 'PAUSED') setLiveLine('');
+  }, [status]);
 
   function onListScroll() {
     const el = listRef.current;
@@ -1094,7 +1105,7 @@ function App() {
             </button>
           </div>
           <div className="transcript compact" ref={listRef} onScroll={onListScroll}>
-            {!items.length && (
+            {!items.length && !liveLine && (
               <p className="empty">{t('uiEmptyCaptions')}</p>
             )}
             {visible.map((item) => (
@@ -1107,6 +1118,12 @@ function App() {
                 <button onClick={() => void copy(lineToText(item), t('uiCopiedTranscript'))}>{t('uiCopy')}</button>
               </div>
             ))}
+            {liveLine && (
+              <div className="line live">
+                <time>···</time>
+                <p>{liveLine}</p>
+              </div>
+            )}
           </div>
           {hidden > 0 && (
             <button className="ghost wide" onClick={() => setShowAll(true)}>

@@ -4,6 +4,7 @@ import { buildOverlayText, isMeaningfulTranscript } from '../shared/transcripts'
 import { db, lastTranscriptSequence } from '../storage/db';
 import { createSttProvider, type SttProvider } from '../transcription/provider';
 import { CaptionTranslator } from '../transcription/translator';
+import { LiveTranslation } from '../transcription/live-translation';
 import { translationSourceOf } from '../shared/languages';
 
 interface RunState {
@@ -25,6 +26,8 @@ interface RunState {
   translator?: CaptionTranslator;
   /** 번역된 직전 확정 줄. 오버레이는 원문 대신 이걸 그린다. */
   lastFinalTranslation: string;
+  /** 확정 전의 줄을 번역해 흘려보내는 쪽. 번역이 켜져 있을 때만 있다. */
+  live?: LiveTranslation;
 }
 
 let run: RunState | undefined;
@@ -77,14 +80,21 @@ function broadcastSttStatus(stt: STTConnectionStatus, errorCode?: ErrorCode) {
 
 /**
  * 영상 위 오버레이에 그릴 문구를 보낸다. 저장하지 않는 휘발성 메시지다.
- * 번역이 켜져 있으면 번역된 확정 줄만 그린다. 진행 중인 줄은 아직 원문이라,
- * 같이 띄우면 한 화면에서 두 언어가 번갈아 깜빡인다.
+ *
+ * 번역이 켜져 있으면 확정 줄도 진행 중인 줄도 번역문으로 그린다. 한 화면에 한 언어만 둬야
+ * 두 언어가 번갈아 깜빡이지 않는다. 다만 번역이 아직 한 줄도 도착하지 않았다면
+ * (모델을 내려받는 중이거나 지원하지 않는 조합) 화면을 비워 두지 않고 원문을 그대로 그린다.
  */
 function broadcastCaptionLive(state: RunState, partialText: string) {
-  const translating = Boolean(state.translator);
-  const finalLine = translating ? state.lastFinalTranslation : state.lastFinalText;
-  const text = buildOverlayText(finalLine, translating ? '' : partialText);
-  void chrome.runtime.sendMessage({ type: 'CAPTION_LIVE', sessionId: state.sessionId, text }).catch(() => {});
+  const liveTranslation = state.live?.translation ?? '';
+  const translated = Boolean(state.translator) && Boolean(state.lastFinalTranslation || liveTranslation);
+  const finalLine = translated ? state.lastFinalTranslation : state.lastFinalText;
+  const tail = translated ? liveTranslation : partialText;
+  const text = buildOverlayText(finalLine, tail);
+  // text 는 오버레이용으로 두 줄까지 잘라 놓은 것이다. 사이드패널은 진행 중인 줄을 통째로 쓴다.
+  void chrome.runtime
+    .sendMessage({ type: 'CAPTION_LIVE', sessionId: state.sessionId, text, partial: tail })
+    .catch(() => {});
 }
 
 async function start(
@@ -149,6 +159,17 @@ async function start(
       : undefined
   };
   run = state;
+  // 확정을 기다리지 않고 진행 중인 줄을 번역해 오버레이에 흘려보낸다.
+  if (state.translator) {
+    const translator = state.translator;
+    state.live = new LiveTranslation(
+      (text) => translator.translate(text),
+      () => {
+        if (run !== state && finishing !== state) return;
+        broadcastCaptionLive(state, '');
+      }
+    );
+  }
 
   if (processor) {
     processor.onaudioprocess = (event) => {
@@ -170,8 +191,8 @@ async function start(
       onTranscript: (result) => void persist(state, result),
       onPartial: (text) => {
         if (run !== state && finishing !== state) return;
-        // 번역 중에는 진행 중인 줄로 오버레이를 건드리지 않는다(위 broadcastCaptionLive 주석 참고).
-        if (state.translator) return;
+        // 번역이 켜져 있으면 이 줄도 번역해서 내보낸다. 번역이 도착하기 전까지는 원문이 그려진다.
+        state.live?.push(text);
         broadcastCaptionLive(state, text);
       },
       onStatus: (status, errorCode) => broadcastSttStatus(status, errorCode),
@@ -220,6 +241,11 @@ async function persist(state: RunState, result: { text: string; isFinal: boolean
     broadcastCaptionLive(state, '');
     return;
   }
+  // 진행 중이던 줄의 번역을 그대로 확정 줄로 올린다. 거의 같은 문장이라,
+  // 확정 줄의 번역이 도착할 때까지 화면이 비거나 이전 줄로 되돌아가지 않는다.
+  const carried = state.live?.flush();
+  if (carried) state.lastFinalTranslation = carried;
+  broadcastCaptionLive(state, '');
   // 번역은 기다리지 않는다. 원문 자막은 이미 나갔고, 번역이 도착하면 같은 줄을 덮어쓴다.
   // 번역이 안 되거나 늦어도 자막은 그대로 남는다.
   void state.translator.translate(text).then(async (translation) => {
@@ -251,6 +277,7 @@ function stop(options: { flushTail?: boolean } = {}) {
       /* 이미 해제됨 */
     }
   }
+  state.live?.clear();
   state.stream.getTracks().forEach((track) => track.stop());
   void state.playbackContext.close().catch(() => {});
   void state.sttContext?.close().catch(() => {});

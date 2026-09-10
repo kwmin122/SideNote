@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   CaptionTranslator,
   prepareTranslator,
+  splitForTranslation,
   translationNeeded,
   translatorAvailability,
   translatorSupported
@@ -177,5 +178,91 @@ describe('번역문이 붙은 자막 글자', () => {
   it('전체 복사에도 번역이 함께 담긴다', () => {
     const list = [line({ sequence: 1, translation: '안녕하세요' }), line({ id: 'y', sequence: 2, text: 'bye' })];
     expect(transcriptToText(list)).toBe('hello there\n안녕하세요\nbye');
+  });
+});
+
+/** 실제로 문제가 됐던 모양: 쉬지 않고 말해서 구두점 없이 한 덩어리로 확정된 줄. */
+const RUN_ON =
+  'So Jeffrey Hinton British Canadian computer scientist as you know Nobel Prize winner known for ' +
+  'his work on AI which earned him the title The Godfather of AI and I know they all say that but ' +
+  'he actually is the Godfather I asked him whether he thinks there is a greater than 10 chance ' +
+  'that AI could kill all humans potentially within a decade';
+
+describe('번역 조각 나누기', () => {
+  it('짧은 줄은 자르지 않는다', () => {
+    expect(splitForTranslation('hello there')).toEqual(['hello there']);
+  });
+
+  it('문장 부호가 있으면 문장 단위로 끊는다', () => {
+    expect(splitForTranslation('First one. Second one! Third one?', 20)).toEqual([
+      'First one.',
+      'Second one!',
+      'Third one?'
+    ]);
+  });
+
+  it('구두점 없이 길게 이어진 받아쓰기도 단어 경계로 끊는다', () => {
+    const chunks = splitForTranslation(RUN_ON);
+    expect(chunks.length).toBeGreaterThan(1);
+    for (const chunk of chunks) expect(chunk.length).toBeLessThanOrEqual(140);
+    // 단어가 쪼개지거나 사라지면 안 된다.
+    expect(chunks.join(' ').split(/\s+/)).toEqual(RUN_ON.split(/\s+/));
+  });
+
+  it('공백이 없는 언어는 길이로 끊는다', () => {
+    const chunks = splitForTranslation('가'.repeat(50), 20);
+    expect(chunks).toEqual(['가'.repeat(20), '가'.repeat(20), '가'.repeat(10)]);
+  });
+
+  it('빈 줄은 조각이 없다', () => {
+    expect(splitForTranslation('   ')).toEqual([]);
+  });
+});
+
+describe('진행 중인 줄 번역 (자막이 확정되기 전에 흘려보내기)', () => {
+  it('긴 줄은 조각으로 나눠 넘긴다. 통째로 넘기면 번역기가 뒤를 흘린다', async () => {
+    const translate = vi.fn(async (text: string) => `[${text}]`);
+    installTranslator({ translate });
+    const translator = new CaptionTranslator('en', 'ko');
+    const out = await translator.translate(RUN_ON);
+    expect(translate.mock.calls.length).toBe(splitForTranslation(RUN_ON).length);
+    expect(out).toContain('Jeffrey Hinton');
+    expect(out).toContain('within a decade');
+  });
+
+  it('말이 길어져도 이미 번역한 앞 조각은 다시 번역하지 않는다', async () => {
+    const translate = vi.fn(async (text: string) => `[${text}]`);
+    installTranslator({ translate });
+    const translator = new CaptionTranslator('en', 'ko');
+
+    await translator.translate(RUN_ON);
+    const first = translate.mock.calls.length;
+    // 인식이 계속되면서 뒤에 말이 더 붙은 상태
+    await translator.translate(`${RUN_ON} and that is why he left Google`);
+    const added = translate.mock.calls.length - first;
+
+    expect(first).toBeGreaterThan(1);
+    expect(added).toBe(1);
+  });
+
+  it('같은 줄을 다시 번역해 달라고 하면 번역기를 부르지 않는다', async () => {
+    const translate = vi.fn(async (text: string) => `[${text}]`);
+    installTranslator({ translate });
+    const translator = new CaptionTranslator('en', 'ko');
+    await translator.translate('hello there');
+    await translator.translate('hello there');
+    expect(translate).toHaveBeenCalledTimes(1);
+  });
+
+  it('조각 하나가 실패하면 반쪽짜리 번역을 남기지 않는다', async () => {
+    let calls = 0;
+    const translate = vi.fn(async (text: string) => {
+      calls += 1;
+      if (calls > 1) throw new Error('model gone');
+      return `[${text}]`;
+    });
+    installTranslator({ translate });
+    const translator = new CaptionTranslator('en', 'ko');
+    expect(await translator.translate(RUN_ON)).toBe('');
   });
 });
