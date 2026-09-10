@@ -15,7 +15,7 @@ import { errorMessage } from '../shared/contracts';
 import { captureTypeFor, computeCropRect } from '../shared/capture';
 import { pageKeyOf } from '../shared/url';
 import { shouldResyncTab } from '../shared/state';
-import { capSegments, mergeSegment, transcriptToText } from '../shared/transcripts';
+import { capSegments, lineToText, mergeSegment, transcriptToText } from '../shared/transcripts';
 import {
   buildSessionHtml,
   bundleFileName,
@@ -25,7 +25,15 @@ import {
 } from '../shared/export';
 import { requestLanguagePack } from '../transcription/chrome-speech';
 import { t, uiLanguage } from '../shared/i18n';
-import { CAPTION_LANGUAGES, defaultCaptionLanguage, normalizeCaptionLanguage } from '../shared/languages';
+import {
+  CAPTION_LANGUAGES,
+  TRANSLATION_TARGETS,
+  defaultCaptionLanguage,
+  normalizeCaptionLanguage,
+  normalizeTranslationTarget,
+  translationSourceOf
+} from '../shared/languages';
+import { prepareTranslator, translatorSupported } from '../transcription/translator';
 import { blobToDataUrl, composeCaptureImage, downloadBlob } from './compose';
 import {
   cleanupOrphanBlobs,
@@ -155,6 +163,11 @@ function App() {
   /** 인식할 말소리의 언어. 화면 글자 언어(브라우저 설정)와 별개다. */
   const [lang, setLang] = useState(() => defaultCaptionLanguage(uiLanguage()));
   const langRef = useRef(lang);
+  /** 자막을 옮겨 볼 언어. '' 이면 번역하지 않는다. */
+  const [translateTo, setTranslateTo] = useState('');
+  const translateRef = useRef('');
+  /** 이 Chrome 에 내장 번역기가 있는가. 없으면 번역 선택 자체를 감춘다. */
+  const [canTranslate] = useState(() => translatorSupported());
 
   const listRef = useRef<HTMLDivElement>(null);
   const stickRef = useRef(true);
@@ -445,10 +458,15 @@ function App() {
     // 예전 버전에서 고른 엔진 값이 남아 있을 수 있다. 이제 인식기는 Chrome 내장 하나뿐이라 읽지 않고 지운다.
     void chrome.storage.local.remove('sttEngine').catch(() => {});
     try {
-      const saved = await chrome.storage.local.get('captionLang');
+      const saved = await chrome.storage.local.get(['captionLang', 'translateTo']);
       const next = normalizeCaptionLanguage(saved?.captionLang, uiLanguage());
       langRef.current = next;
       setLang(next);
+      // 자막 언어와 같은 언어로 옮길 일은 없다. 예전에 고른 값이 겹치면 번역을 끈다.
+      const target = normalizeTranslationTarget(saved?.translateTo);
+      const usable = target === translationSourceOf(next) ? '' : target;
+      translateRef.current = usable;
+      setTranslateTo(usable);
     } catch {
       /* 저장소를 못 읽으면 브라우저 언어에서 고른 기본값을 그대로 쓴다. */
     }
@@ -480,6 +498,9 @@ function App() {
     // 동기적으로 시작만 시켜 둔다. 이미 깔려 있으면 아무 일도 일어나지 않는다.
     if (type === 'CAPTION_START') {
       void requestLanguagePack(langRef.current);
+      if (translateRef.current) {
+        void prepareTranslator(translationSourceOf(langRef.current), translateRef.current);
+      }
     }
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -489,6 +510,7 @@ function App() {
         sessionId: current.id,
         contextPrompt: current.pageTitle,
         language: langRef.current,
+        translateTo: translateRef.current,
         engine: config.defaultSttEngine
       });
       if (!res?.ok) {
@@ -629,6 +651,17 @@ function App() {
     setLang(next);
     void chrome.storage.local.set({ captionLang: next }).catch(() => {});
     void requestLanguagePack(next);
+    // 새 자막 언어와 번역 대상이 같아지면 번역할 것이 없다. 선택도 목록에서 사라지므로 함께 끈다.
+    if (translateRef.current && translateRef.current === translationSourceOf(next)) changeTranslateTo('');
+  }
+
+  /** 자막을 옮겨 볼 언어 변경. 다음 [자막 시작] 부터 적용된다. */
+  function changeTranslateTo(next: string) {
+    translateRef.current = next;
+    setTranslateTo(next);
+    void chrome.storage.local.set({ translateTo: next }).catch(() => {});
+    // 이 change 도 사용자 제스처다. 여기서 번역 모델 내려받기를 미리 시작해 둔다.
+    if (next) void prepareTranslator(translationSourceOf(langRef.current), next);
   }
 
   /** 영상 위 자막 오버레이 on/off. 끄면 배경이 즉시 걷어낸다. */
@@ -741,7 +774,11 @@ function App() {
         title: current.pageTitle || t('defaultLectureTitle'),
         pageUrl: current.pageUrl ?? '',
         generalMemo: pendingMemo.current ?? memo,
-        transcripts: bundle.transcripts.map((item) => ({ startedAtMs: item.startedAtMs, text: item.text })),
+        transcripts: bundle.transcripts.map((item) => ({
+          startedAtMs: item.startedAtMs,
+          text: item.text,
+          translation: item.translation
+        })),
         captures: shots,
         exportedAt: Date.now()
       });
@@ -868,6 +905,23 @@ function App() {
             </option>
           ))}
         </select>
+        {canTranslate && (
+          <select
+            className="lang translate"
+            value={translateTo}
+            disabled={live || status === 'PAUSED'}
+            title={live || status === 'PAUSED' ? t('uiLanguageChangeWhileLive') : t('uiTranslateToTitle')}
+            aria-label={t('uiTranslateTo')}
+            onChange={(e) => changeTranslateTo(e.target.value)}
+          >
+            <option value="">{t('uiTranslateOff')}</option>
+            {TRANSLATION_TARGETS.filter((item) => item.code !== translationSourceOf(lang)).map((item) => (
+              <option key={item.code} value={item.code}>
+                {t('uiTranslateInto', item.label)}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
       {showSessions && (
@@ -1046,8 +1100,11 @@ function App() {
             {visible.map((item) => (
               <div key={item.id} className={item.status === 'FINAL' ? 'line final' : 'line partial'}>
                 <time>{fmtMs(item.startedAtMs)}</time>
-                <p>{item.text}</p>
-                <button onClick={() => void copy(item.text, t('uiCopiedTranscript'))}>{t('uiCopy')}</button>
+                <p>
+                  {item.text}
+                  {item.translation && <span className="translated">{item.translation}</span>}
+                </p>
+                <button onClick={() => void copy(lineToText(item), t('uiCopiedTranscript'))}>{t('uiCopy')}</button>
               </div>
             ))}
           </div>

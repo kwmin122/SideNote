@@ -19,7 +19,8 @@ stored only on your own computer. There is no account, no sign-in, no payment, a
 | Notes | Typed by you | Browser local storage (IndexedDB) | No |
 | Screen captures | The current tab's screen when you press [Capture] | Browser local storage (IndexedDB) | No |
 | Page title, URL, playback position | The current tab | Stored locally as metadata on captures and captions | No |
-| Settings (caption language, etc.) | Your choice | `chrome.storage.local` | No |
+| Caption translations | Chrome's built-in translator applied to the captions above | Browser local storage (IndexedDB) | No |
+| Settings (caption language, translation language, etc.) | Your choice | `chrome.storage.local` | No |
 
 ## Where speech recognition happens
 
@@ -27,6 +28,13 @@ The extension uses **only Chrome's built-in on-device speech recognition**, whic
 It requests recognition with `processLocally: true` only, so it never uses a recognition path that sends audio
 over the network. Chrome downloads the speech language pack from Google; that is Chrome's own behavior, and the
 extension sends no audio or captions as part of it.
+
+## Where translation happens
+
+When translation is turned on, the extension uses **only Chrome's built-in translator (the Translator API)**,
+which also runs on your own computer. The extension does not send the text anywhere. Chrome downloads the
+model for your language pair, which — like the speech language pack — is Chrome's own behavior. With
+translation off (the default), no translator is created at all.
 
 The extension does not talk to any external program or server. It makes no outbound network requests of its own.
 
@@ -46,7 +54,7 @@ The extension does not talk to any external program or server. It makes no outbo
 - `tabCapture` — to receive the sound of the current tab and turn it into captions. Applies only to the tab where you pressed [Start captions].
 - `offscreen` — to open a document that can process audio under Manifest V3. Audio is processed only inside that document and is not stored.
 - `sidePanel` — to display captions, notes, and captures in the right-hand panel.
-- `storage` — to keep your settings and session list on this computer.
+- `storage` — to keep your settings (caption language, translation language) and session list on this computer.
 - `activeTab`, `tabs` — to identify the tab being captioned and captured, and to clean up recording when that tab closes or navigates away.
 - `scripting` — to read the on-screen position and playback time of the playing `<video>`, so captures can be cropped to the video area and captions can be overlaid on the video when you turn that on.
 - `host_permissions` (`http://*/*`, `https://*/*`) — because lectures can be on any site, and both of the above must work wherever you are watching. Page content is never read, stored, or transmitted.

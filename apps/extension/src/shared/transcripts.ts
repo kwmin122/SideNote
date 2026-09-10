@@ -24,9 +24,16 @@ export function isMeaningfulTranscript(text: string | undefined | null): boolean
   return /[\p{L}\p{N}]/u.test(trimmed);
 }
 
+/** 자막 한 줄을 글자로. 번역이 붙어 있으면 원문 아래 줄에 같이 담는다. */
+export function lineToText(item: TranscriptSegment): string {
+  const text = item.text.trim();
+  const translation = item.translation?.trim();
+  return translation ? `${text}\n${translation}` : text;
+}
+
 export function transcriptToText(list: TranscriptSegment[]): string {
   return list
-    .map((item) => item.text.trim())
+    .map(lineToText)
     .filter(Boolean)
     .join('\n');
 }

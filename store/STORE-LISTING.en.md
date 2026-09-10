@@ -47,6 +47,12 @@ picks up that notebook again.
 Speech recognition runs through Chrome's built-in on-device recognizer, on your machine. Audio, captions, notes, and screenshots
 are never uploaded. No account, no sign-in, no payment, no ads.
 
+■ Translate the lecture as you watch
+Watching an English lecture but want Korean captions? Pick a language to translate into and every finished caption line
+gets a translation right underneath it — and on the video overlay too. Translation uses Chrome's built-in translator,
+which runs on this computer. No API key, no per-use cost, no server. Chrome downloads the translation model for your
+language pair the first time you use it, and support varies by device and language pair.
+
 ■ Choose your caption language
 Captions are not limited to one language. Pick from English, Korean, Japanese, Chinese, Spanish, French, German, Italian, Portuguese,
 Russian, Hindi, Arabic, Indonesian, Vietnamese, Thai, Turkish, Dutch, Polish, and Swedish. The interface itself follows your Chrome
@@ -66,6 +72,8 @@ language. Chrome downloads the on-device speech pack for your chosen language th
 · On the first run you may wait a moment while Chrome downloads the speech pack for your language.
 · Captions come from automatic recognition, so they are not 100% accurate. Use them as a study aid.
 · Captions cannot be made for silent tabs or chrome:// pages.
+· Translation needs Chrome's built-in translator. If your Chrome or language pair does not support it, captions still
+  work and only the translation is skipped.
 · Chrome 139 or newer is required (on-device speech recognition arrived in that version).
 ```
 
@@ -94,7 +102,7 @@ text in the screenshots matches this listing.
 
 ### Single purpose
 ```
-SideNote's only purpose is to turn the audio of a lecture video playing in the current Chrome tab into captions on the user's own device, and to collect those captions together with the user's notes and screen captures in one side panel as a study notebook.
+SideNote's only purpose is to turn the audio of a lecture video playing in the current Chrome tab into captions on the user's own device, optionally translate those captions on-device, and collect them together with the user's notes and screen captures in one side panel as a study notebook.
 ```
 
 ### Permission justifications (paste into each field)
@@ -116,7 +124,7 @@ Used to show captions, notes, and screen captures next to the lecture video with
 
 **storage**
 ```
-Used to keep settings such as the chosen caption language and the current session identifier on this computer. Nothing is synced or transmitted.
+Used to keep settings such as the chosen caption language, the chosen translation language, and the current session identifier on this computer. Nothing is synced or transmitted.
 ```
 
 **activeTab**

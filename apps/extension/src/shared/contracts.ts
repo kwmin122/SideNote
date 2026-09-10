@@ -78,6 +78,10 @@ export interface TranscriptSegment {
   videoTimeSec?: number;
   createdAt: number;
   status: 'PARTIAL' | 'FINAL';
+  /** Chrome 내장 번역기가 옮긴 문장. 번역을 끄면 비어 있다. */
+  translation?: string;
+  /** 위 번역문의 언어 코드. 나중에 대상 언어를 바꿔도 옛 줄이 무슨 언어인지 알 수 있게 남긴다. */
+  translatedTo?: string;
 }
 
 export interface CaptureRecord {

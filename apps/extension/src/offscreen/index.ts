@@ -3,6 +3,8 @@ import type { ErrorCode, STTConnectionStatus, SttEngine, TranscriptSegment } fro
 import { buildOverlayText, isMeaningfulTranscript } from '../shared/transcripts';
 import { db, lastTranscriptSequence } from '../storage/db';
 import { createSttProvider, type SttProvider } from '../transcription/provider';
+import { CaptionTranslator } from '../transcription/translator';
+import { translationSourceOf } from '../shared/languages';
 
 interface RunState {
   sessionId: string;
@@ -19,6 +21,10 @@ interface RunState {
   startedAtMs: number;
   /** 오버레이 윗줄로 쓸 직전 확정 자막. 서비스워커는 잠들 수 있어 여기서 들고 있는다. */
   lastFinalText: string;
+  /** 번역이 켜져 있을 때만 있다. 자막 한 줄이 확정될 때마다 옮긴다. */
+  translator?: CaptionTranslator;
+  /** 번역된 직전 확정 줄. 오버레이는 원문 대신 이걸 그린다. */
+  lastFinalTranslation: string;
 }
 
 let run: RunState | undefined;
@@ -35,7 +41,8 @@ chrome.runtime.onMessage.addListener((message) => {
         message.sessionId,
         message.contextPrompt ?? '',
         message.engine === 'chrome' ? 'chrome' : config.defaultSttEngine,
-        typeof message.language === 'string' ? message.language : 'auto'
+        typeof message.language === 'string' ? message.language : 'auto',
+        typeof message.translateTo === 'string' ? message.translateTo : ''
       ).catch((err) => {
         report('TAB_CAPTURE_FAILED', String(err?.message ?? err));
       });
@@ -68,13 +75,26 @@ function broadcastSttStatus(stt: STTConnectionStatus, errorCode?: ErrorCode) {
   void chrome.runtime.sendMessage({ type: 'STT_STATUS', stt, errorCode }).catch(() => {});
 }
 
-/** 영상 위 오버레이에 그릴 문구를 보낸다. 저장하지 않는 휘발성 메시지다. */
+/**
+ * 영상 위 오버레이에 그릴 문구를 보낸다. 저장하지 않는 휘발성 메시지다.
+ * 번역이 켜져 있으면 번역된 확정 줄만 그린다. 진행 중인 줄은 아직 원문이라,
+ * 같이 띄우면 한 화면에서 두 언어가 번갈아 깜빡인다.
+ */
 function broadcastCaptionLive(state: RunState, partialText: string) {
-  const text = buildOverlayText(state.lastFinalText, partialText);
+  const translating = Boolean(state.translator);
+  const finalLine = translating ? state.lastFinalTranslation : state.lastFinalText;
+  const text = buildOverlayText(finalLine, translating ? '' : partialText);
   void chrome.runtime.sendMessage({ type: 'CAPTION_LIVE', sessionId: state.sessionId, text }).catch(() => {});
 }
 
-async function start(streamId: string, sessionId: string, contextPrompt: string, engine: SttEngine, language: string) {
+async function start(
+  streamId: string,
+  sessionId: string,
+  contextPrompt: string,
+  engine: SttEngine,
+  language: string,
+  translateTo: string
+) {
   stop();
   paused = false;
 
@@ -121,7 +141,12 @@ async function start(streamId: string, sessionId: string, contextPrompt: string,
     provider,
     sequence: await safeLastSequence(sessionId),
     startedAtMs: Date.now(),
-    lastFinalText: ''
+    lastFinalText: '',
+    lastFinalTranslation: '',
+    // 같은 언어로 옮길 일은 없다. 번역기가 없는 Chrome 에서도 생성 자체는 안전하다(번역만 비어 나온다).
+    translator: translateTo && translateTo !== translationSourceOf(language)
+      ? new CaptionTranslator(translationSourceOf(language), translateTo)
+      : undefined
   };
   run = state;
 
@@ -145,6 +170,8 @@ async function start(streamId: string, sessionId: string, contextPrompt: string,
       onTranscript: (result) => void persist(state, result),
       onPartial: (text) => {
         if (run !== state && finishing !== state) return;
+        // 번역 중에는 진행 중인 줄로 오버레이를 건드리지 않는다(위 broadcastCaptionLive 주석 참고).
+        if (state.translator) return;
         broadcastCaptionLive(state, text);
       },
       onStatus: (status, errorCode) => broadcastSttStatus(status, errorCode),
@@ -187,10 +214,28 @@ async function persist(state: RunState, result: { text: string; isFinal: boolean
     report('STORAGE_WRITE_FAILED', String(err));
   }
   void chrome.runtime.sendMessage({ type: 'TRANSCRIPT', payload: segment }).catch(() => {});
-  if (result.isFinal) {
-    state.lastFinalText = text;
+  if (!result.isFinal) return;
+  state.lastFinalText = text;
+  if (!state.translator) {
     broadcastCaptionLive(state, '');
+    return;
   }
+  // 번역은 기다리지 않는다. 원문 자막은 이미 나갔고, 번역이 도착하면 같은 줄을 덮어쓴다.
+  // 번역이 안 되거나 늦어도 자막은 그대로 남는다.
+  void state.translator.translate(text).then(async (translation) => {
+    if (!translation) return;
+    const translated: TranscriptSegment = { ...segment, translation, translatedTo: state.translator!.target };
+    try {
+      await db.transcripts.put(translated);
+    } catch {
+      /* 저장에 실패해도 화면에는 보여 준다. */
+    }
+    void chrome.runtime.sendMessage({ type: 'TRANSCRIPT', payload: translated }).catch(() => {});
+    // 오버레이는 아직 진행 중인 세션일 때만 건드린다.
+    if (run !== state && finishing !== state) return;
+    state.lastFinalTranslation = translation;
+    broadcastCaptionLive(state, '');
+  });
 }
 
 function stop(options: { flushTail?: boolean } = {}) {
@@ -219,11 +264,13 @@ function stop(options: { flushTail?: boolean } = {}) {
         if (finishing === state) finishing = undefined;
         state.provider.close();
         state.recognizerTrack?.stop();
+        state.translator?.destroy();
         broadcastSttStatus('DISCONNECTED');
       });
     return;
   }
   state.provider.close();
   state.recognizerTrack?.stop();
+  state.translator?.destroy();
   broadcastSttStatus('DISCONNECTED');
 }

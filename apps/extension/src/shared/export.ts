@@ -108,7 +108,7 @@ export interface ExportBundle {
   title: string;
   pageUrl: string;
   generalMemo: string;
-  transcripts: { startedAtMs: number; text: string }[];
+  transcripts: { startedAtMs: number; text: string; translation?: string }[];
   captures: ExportCapture[];
   exportedAt: number;
 }
@@ -140,7 +140,12 @@ export function buildSessionHtml(bundle: ExportBundle): string {
     .join('\n');
 
   const lines = bundle.transcripts
-    .map((item) => `<li><time>${escapeHtml(elapsed(item.startedAtMs))}</time><span>${escapeHtml(item.text)}</span></li>`)
+    .map((item) => {
+      const translated = item.translation?.trim()
+        ? `<span class="translated">${escapeHtml(item.translation.trim())}</span>`
+        : '';
+      return `<li><time>${escapeHtml(elapsed(item.startedAtMs))}</time><span>${escapeHtml(item.text)}${translated}</span></li>`;
+    })
     .join('\n');
 
   return `<!doctype html>
@@ -169,6 +174,7 @@ export function buildSessionHtml(bundle: ExportBundle): string {
   ul { list-style: none; margin: 0; padding: 0; }
   li { display: flex; gap: 12px; padding: 6px 0; border-bottom: 1px solid #eef1f6; }
   li time { color: #2563eb; font-variant-numeric: tabular-nums; font-size: 13px; flex: 0 0 52px; }
+  li .translated { display: block; margin-top: 2px; color: #2563eb; }
   .empty { color: #8a93a6; }
 </style>
 <main>

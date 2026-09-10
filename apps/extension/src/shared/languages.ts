@@ -10,31 +10,68 @@ export interface CaptionLanguage {
   /** BCP-47 태그. SpeechRecognition.lang 에 그대로 넣는다. */
   code: string;
   label: string;
+  /**
+   * Chrome 번역기(Translator API)에 넘길 언어 코드.
+   * 음성 태그와 규칙이 달라서(cmn-Hans-CN → zh) 앞부분을 잘라 쓰지 않고 하나씩 적어 둔다.
+   */
+  translate: string;
 }
 
 export const CAPTION_LANGUAGES: readonly CaptionLanguage[] = [
-  { code: 'en-US', label: 'English (US)' },
-  { code: 'en-GB', label: 'English (UK)' },
-  { code: 'ko-KR', label: '한국어' },
-  { code: 'ja-JP', label: '日本語' },
-  { code: 'cmn-Hans-CN', label: '中文 (简体)' },
-  { code: 'cmn-Hant-TW', label: '中文 (繁體)' },
-  { code: 'es-ES', label: 'Español (España)' },
-  { code: 'es-US', label: 'Español (América)' },
-  { code: 'fr-FR', label: 'Français' },
-  { code: 'de-DE', label: 'Deutsch' },
-  { code: 'it-IT', label: 'Italiano' },
-  { code: 'pt-BR', label: 'Português (Brasil)' },
-  { code: 'ru-RU', label: 'Русский' },
-  { code: 'hi-IN', label: 'हिन्दी' },
-  { code: 'ar-EG', label: 'العربية' },
-  { code: 'id-ID', label: 'Bahasa Indonesia' },
-  { code: 'vi-VN', label: 'Tiếng Việt' },
-  { code: 'th-TH', label: 'ไทย' },
-  { code: 'tr-TR', label: 'Türkçe' },
-  { code: 'nl-NL', label: 'Nederlands' },
-  { code: 'pl-PL', label: 'Polski' },
-  { code: 'sv-SE', label: 'Svenska' }
+  { code: 'en-US', label: 'English (US)', translate: 'en' },
+  { code: 'en-GB', label: 'English (UK)', translate: 'en' },
+  { code: 'ko-KR', label: '한국어', translate: 'ko' },
+  { code: 'ja-JP', label: '日本語', translate: 'ja' },
+  { code: 'cmn-Hans-CN', label: '中文 (简体)', translate: 'zh' },
+  { code: 'cmn-Hant-TW', label: '中文 (繁體)', translate: 'zh-Hant' },
+  { code: 'es-ES', label: 'Español (España)', translate: 'es' },
+  { code: 'es-US', label: 'Español (América)', translate: 'es' },
+  { code: 'fr-FR', label: 'Français', translate: 'fr' },
+  { code: 'de-DE', label: 'Deutsch', translate: 'de' },
+  { code: 'it-IT', label: 'Italiano', translate: 'it' },
+  { code: 'pt-BR', label: 'Português (Brasil)', translate: 'pt' },
+  { code: 'ru-RU', label: 'Русский', translate: 'ru' },
+  { code: 'hi-IN', label: 'हिन्दी', translate: 'hi' },
+  { code: 'ar-EG', label: 'العربية', translate: 'ar' },
+  { code: 'id-ID', label: 'Bahasa Indonesia', translate: 'id' },
+  { code: 'vi-VN', label: 'Tiếng Việt', translate: 'vi' },
+  { code: 'th-TH', label: 'ไทย', translate: 'th' },
+  { code: 'tr-TR', label: 'Türkçe', translate: 'tr' },
+  { code: 'nl-NL', label: 'Nederlands', translate: 'nl' },
+  { code: 'pl-PL', label: 'Polski', translate: 'pl' },
+  { code: 'sv-SE', label: 'Svenska', translate: 'sv' }
+];
+
+/**
+ * 번역해서 볼 수 있는 언어. 자막 언어와 달리 지역 구분이 없다(번역기는 언어 단위로 동작한다).
+ * '' 은 번역하지 않음이다.
+ */
+export interface TranslationTarget {
+  code: string;
+  label: string;
+}
+
+export const TRANSLATION_TARGETS: readonly TranslationTarget[] = [
+  { code: 'en', label: 'English' },
+  { code: 'ko', label: '한국어' },
+  { code: 'ja', label: '日本語' },
+  { code: 'zh', label: '中文 (简体)' },
+  { code: 'zh-Hant', label: '中文 (繁體)' },
+  { code: 'es', label: 'Español' },
+  { code: 'fr', label: 'Français' },
+  { code: 'de', label: 'Deutsch' },
+  { code: 'it', label: 'Italiano' },
+  { code: 'pt', label: 'Português' },
+  { code: 'ru', label: 'Русский' },
+  { code: 'hi', label: 'हिन्दी' },
+  { code: 'ar', label: 'العربية' },
+  { code: 'id', label: 'Bahasa Indonesia' },
+  { code: 'vi', label: 'Tiếng Việt' },
+  { code: 'th', label: 'ไทย' },
+  { code: 'tr', label: 'Türkçe' },
+  { code: 'nl', label: 'Nederlands' },
+  { code: 'pl', label: 'Polski' },
+  { code: 'sv', label: 'Svenska' }
 ];
 
 const FALLBACK = 'en-US';
@@ -57,4 +94,16 @@ export function defaultCaptionLanguage(uiLang: string): string {
 export function normalizeCaptionLanguage(value: unknown, uiLang: string): string {
   if (typeof value === 'string' && CAPTION_LANGUAGES.some((l) => l.code === value)) return value;
   return defaultCaptionLanguage(uiLang);
+}
+
+/** 자막 언어 태그 → 번역기 언어 코드. 목록에 없으면 앞부분만 잘라 쓴다. */
+export function translationSourceOf(captionCode: string): string {
+  const found = CAPTION_LANGUAGES.find((l) => l.code === captionCode);
+  return found?.translate ?? (captionCode || '').split('-')[0];
+}
+
+/** 저장된 번역 대상이 목록에 없으면 '번역 안 함'으로 되돌린다. */
+export function normalizeTranslationTarget(value: unknown): string {
+  if (typeof value === 'string' && TRANSLATION_TARGETS.some((l) => l.code === value)) return value;
+  return '';
 }

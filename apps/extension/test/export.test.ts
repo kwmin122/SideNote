@@ -97,6 +97,19 @@ describe('전체 저장 HTML', () => {
     expect(html).toContain('(no note)');
   });
 
+  it('번역이 붙은 자막은 원문과 번역을 함께 담는다', () => {
+    const withTranslation = buildSessionHtml({
+      title: '강의',
+      pageUrl: '',
+      generalMemo: '',
+      transcripts: [{ startedAtMs: 0, text: 'Hello there', translation: '안녕하세요' }],
+      captures: [],
+      exportedAt: AT
+    });
+    expect(withTranslation).toContain('Hello there');
+    expect(withTranslation).toContain('안녕하세요');
+  });
+
   it('일반 메모와 자막을 모두 담는다', () => {
     expect(html).toContain('문맥 교환 비용 정리');
     expect(html).toContain('안녕하세요');
