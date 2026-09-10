@@ -71,9 +71,22 @@ function wrapWords(text: string, maxChars: number): string[] {
  * 영상 위 오버레이에 띄울 문구.
  * 확정된 직전 줄과 진행 중인 줄을 이어 붙인 뒤 마지막 두 줄만 남긴다.
  * 진행 중인 줄은 문장이 끝날 때까지 계속 길어지므로 반드시 뒤에서 잘라야 한다.
+ *
+ * separateLines 는 번역이 켜져 있을 때 쓴다. 그때 위는 확정된 줄의 번역문,
+ * 아래는 아직 확정되지 않은 원문이라 언어가 서로 다르다. 한 문장처럼 이어 붙이면
+ * 두 언어가 한 줄에서 섞이므로 줄을 나누고 각각의 마지막 줄만 남긴다.
  */
-export function buildOverlayText(finalLine: string, partialLine: string): string {
-  const combined = [finalLine.trim(), partialLine.trim()].filter(Boolean).join(' ');
+export function buildOverlayText(finalLine: string, partialLine: string, separateLines = false): string {
+  const final = finalLine.trim();
+  const partial = partialLine.trim();
+  if (separateLines) {
+    const finalLines = wrapWords(final, OVERLAY_LINE_CHARS);
+    const partialLines = wrapWords(partial, OVERLAY_LINE_CHARS);
+    if (!partialLines.length) return finalLines.slice(-OVERLAY_MAX_LINES).join('\n');
+    if (!finalLines.length) return partialLines.slice(-OVERLAY_MAX_LINES).join('\n');
+    return [finalLines[finalLines.length - 1], partialLines[partialLines.length - 1]].join('\n');
+  }
+  const combined = [final, partial].filter(Boolean).join(' ');
   if (!combined) return '';
   return wrapWords(combined, OVERLAY_LINE_CHARS).slice(-OVERLAY_MAX_LINES).join('\n');
 }
