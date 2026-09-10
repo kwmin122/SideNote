@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.cache/
+models/
+vendor/
+.whisper-env
+*.log
+.DS_Store
+apps/native-host/bin/
+apps/native-host/dist/
+apps/extension/public/engine/
+release/
+apps/extension/dist-store/

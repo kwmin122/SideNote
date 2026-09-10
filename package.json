@@ -1,0 +1,24 @@
+{
+  "name": "chrome-study-sidepanel",
+  "private": true,
+  "version": "0.3.0",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w @study/extension && npm run build -w @study/stt-server",
+    "build:extension": "npm run build -w @study/extension",
+    "dev:extension": "npm run dev -w @study/extension",
+    "dev:server": "npm run dev -w @study/stt-server",
+    "start:server": "npm run start -w @study/stt-server",
+    "test": "npm run test -w @study/extension && npm run test -w @study/stt-server",
+    "typecheck": "npm run typecheck -w @study/extension && npm run typecheck -w @study/stt-server",
+    "setup:whisper": "bash scripts/setup-whisper.sh small",
+    "e2e:stt": "npm run e2e -w @study/stt-server",
+    "e2e:host": "node apps/native-host/scripts/e2e.mjs",
+    "e2e:host:real": "node apps/native-host/scripts/kill-real.mjs",
+    "engine:pkg": "node apps/native-host/scripts/build-pkg.mjs",
+    "engine:verify": "node apps/native-host/scripts/pkg-verify.mjs",
+    "release:chrome": "node scripts/release-chrome.mjs"
+  }
+}

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <title>SideNote — 고정확도 엔진 설치</title>
+    <style>
+      :root {
+        --bg: #f6f8fb; --card: #ffffff; --line: #e4e8ef;
+        --ink: #111827; --ink-2: #4b5563; --ink-3: #8a94a6;
+        --accent: #2563eb; --accent-soft: #eff4ff; --danger: #b91c1c; --ok: #15803d;
+        color-scheme: light;
+        font-family: 'Pretendard', Inter, ui-sans-serif, system-ui, -apple-system, 'Apple SD Gothic Neo', sans-serif;
+        color: var(--ink); background: var(--bg);
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; }
+      main { max-width: 640px; margin: 0 auto; padding: 36px 20px 60px; display: grid; gap: 18px; }
+      h1 { font-size: 22px; margin: 0; letter-spacing: -0.4px; }
+      h2 { font-size: 15px; margin: 0 0 6px; }
+      h3 { font-size: 13px; margin: 14px 0 4px; color: var(--ink-2); }
+      p { margin: 6px 0; font-size: 13px; line-height: 1.65; color: var(--ink-2); }
+      .lead { font-size: 13.5px; }
+      code { background: var(--accent-soft); border-radius: 5px; padding: 1px 5px; font-size: 12px; color: var(--ink); }
+      ol.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; counter-reset: step; }
+      ol.steps > li { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+      a.primary {
+        display: inline-block; margin-top: 4px; background: var(--accent); color: #fff; text-decoration: none;
+        font-size: 13px; font-weight: 600; padding: 10px 16px; border-radius: 9px;
+      }
+      a.primary:hover { filter: brightness(1.05); }
+      button.ghost {
+        margin-top: 6px; font: inherit; font-size: 12.5px; font-weight: 600; color: var(--ink-2);
+        background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 7px 13px; cursor: pointer;
+      }
+      button.ghost:hover { border-color: var(--accent); color: var(--accent); }
+      .hint { font-size: 12px; color: var(--ink-3); }
+      .warn { font-size: 12.5px; color: var(--danger); }
+      .status { font-size: 12.5px; color: var(--ink-3); margin-top: 8px; }
+      .status.ok { color: var(--ok); font-weight: 600; }
+      .status.bad { color: var(--danger); }
+      .note { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/setup/main.ts"></script>
+  </body>
+</html>
