@@ -1,11 +1,15 @@
 import { AUDIO_FRAME_SAMPLES, AUDIO_SAMPLE_RATE, config } from '../config';
-import type { CaptionMode, ErrorCode, STTConnectionStatus, SttEngine, TranscriptSegment } from '../shared/contracts';
+import type { ErrorCode, STTConnectionStatus, SttEngine, TranscriptSegment } from '../shared/contracts';
 import { buildCaptionView, isMeaningfulTranscript } from '../shared/transcripts';
 import { db, lastTranscriptSequence } from '../storage/db';
 import { createSttProvider, type SttProvider } from '../transcription/provider';
 import { CaptionTranslator } from '../transcription/translator';
 import { CaptionDwell } from './dwell';
-import { normalizeCaptionMode, translationSourceOf } from '../shared/languages';
+import { translationSourceOf } from '../shared/languages';
+import { applyStoredUiLanguage } from '../shared/i18n';
+
+// 인식 실패 문구도 사용자가 고른 화면 언어로 나가야 한다.
+void applyStoredUiLanguage();
 
 interface RunState {
   sessionId: string;
@@ -28,8 +32,6 @@ interface RunState {
   lastFinalTranslation: string;
   /** 말이 끊겼을 때 영상 위 자막을 걷어내는 타이머. */
   dwell?: CaptionDwell;
-  /** 자막을 어떻게 보여 줄지. 번역기가 없으면 무엇을 골랐든 원문으로 본다. */
-  mode: CaptionMode;
   /** 마지막으로 내보낸 화면 내용. 같은 내용을 다시 보내지 않기 위한 것이다. */
   lastSent?: string;
 }
@@ -52,8 +54,7 @@ chrome.runtime.onMessage.addListener((message) => {
         message.contextPrompt ?? '',
         message.engine === 'chrome' ? 'chrome' : config.defaultSttEngine,
         typeof message.language === 'string' ? message.language : 'auto',
-        typeof message.translateTo === 'string' ? message.translateTo : '',
-        normalizeCaptionMode(message.mode)
+        typeof message.translateTo === 'string' ? message.translateTo : ''
       ).catch((err) => {
         report('TAB_CAPTURE_FAILED', String(err?.message ?? err));
       });
@@ -91,10 +92,10 @@ function broadcastSttStatus(stt: STTConnectionStatus, errorCode?: ErrorCode) {
  *
  * 번역은 줄이 확정된 다음에만 돌린다. 인식 결과는 말이 이어지는 동안 계속 고쳐 쓰이므로
  * (Today → Today we → Today we're) 그때마다 번역기를 돌리면 화면이 출렁이고 연산만 버린다.
- * 무엇을 그릴지는 자막 모드가 정한다(shared/transcripts.ts buildCaptionView).
+ * 옮겨 볼 때는 확정된 번역만, 옮기지 않을 때는 진행 중인 줄까지 그린다(shared/transcripts.ts buildCaptionView).
  */
 function broadcastCaptionLive(state: RunState, partialText: string) {
-  const view = buildCaptionView(state.mode, {
+  const view = buildCaptionView({
     finalText: state.lastFinalText,
     translation: state.lastFinalTranslation,
     partial: partialText,
@@ -118,8 +119,7 @@ async function start(
   contextPrompt: string,
   engine: SttEngine,
   language: string,
-  translateTo: string,
-  mode: CaptionMode
+  translateTo: string
 ) {
   stop();
   paused = false;
@@ -172,8 +172,7 @@ async function start(
     // 같은 언어로 옮길 일은 없다. 번역기가 없는 Chrome 에서도 생성 자체는 안전하다(번역만 비어 나온다).
     translator: translateTo && translateTo !== translationSourceOf(language)
       ? new CaptionTranslator(translationSourceOf(language), translateTo)
-      : undefined,
-    mode
+      : undefined
   };
   run = state;
   state.dwell = new CaptionDwell(() => {

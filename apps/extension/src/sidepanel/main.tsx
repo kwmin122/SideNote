@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { config } from '../config';
 import type {
-  CaptionMode,
   CaptureRecord,
   CaptureResponse,
   ErrorCode,
@@ -25,15 +24,20 @@ import {
   type ExportCaptureMeta
 } from '../shared/export';
 import { requestLanguagePack } from '../transcription/chrome-speech';
-import { t, uiLanguage } from '../shared/i18n';
+import {
+  UI_LANGUAGES,
+  applyStoredUiLanguage,
+  loadUiLanguage,
+  selectedUiLanguage,
+  t,
+  uiLanguage
+} from '../shared/i18n';
 import {
   CAPTION_LANGUAGES,
-  CAPTION_MODES,
   TRANSLATION_TARGETS,
   defaultCaptionLanguage,
   defaultTranslationTarget,
   normalizeCaptionLanguage,
-  normalizeCaptionMode,
   normalizeTranslationTarget,
   translationSourceOf
 } from '../shared/languages';
@@ -169,14 +173,13 @@ function App() {
   /** 인식할 말소리의 언어. 화면 글자 언어(브라우저 설정)와 별개다. */
   const [lang, setLang] = useState(() => defaultCaptionLanguage(uiLanguage()));
   const langRef = useRef(lang);
-  /** 자막을 옮겨 볼 언어. 번역 모드일 때만 쓴다. */
+  /** 자막을 볼 언어. 말하는 언어와 같으면 옮기지 않고 말한 그대로 보여 준다. */
   const [translateTo, setTranslateTo] = useState('');
   const translateRef = useRef('');
-  /** 자막을 보여 주는 방식. 원문 / 번역 / 원문+번역. */
-  const [mode, setMode] = useState<CaptionMode>('original');
-  const modeRef = useRef<CaptionMode>('original');
-  /** 자막 설정(모드·언어)을 펼쳐 놓았는가. 패널이 좁아서 평소에는 접어 둔다. */
+  /** 자막 설정을 펼쳐 놓았는가. 패널이 좁아서 평소에는 접어 둔다. */
   const [showSettings, setShowSettings] = useState(false);
+  /** 화면 글자의 언어. ''(빈 값)이면 브라우저 언어를 그대로 따른다. */
+  const [uiLang, setUiLang] = useState(() => selectedUiLanguage());
   /** 이 Chrome 에 내장 번역기가 있는가. 없으면 번역 선택 자체를 감춘다. */
   const [canTranslate] = useState(() => translatorSupported());
 
@@ -478,21 +481,13 @@ function App() {
     // 예전 버전에서 고른 엔진 값이 남아 있을 수 있다. 이제 인식기는 Chrome 내장 하나뿐이라 읽지 않고 지운다.
     void chrome.storage.local.remove('sttEngine').catch(() => {});
     try {
-      const saved = await chrome.storage.local.get(['captionLang', 'translateTo', 'captionMode']);
+      const saved = await chrome.storage.local.get(['captionLang', 'translateTo']);
       const next = normalizeCaptionLanguage(saved?.captionLang, uiLanguage());
       langRef.current = next;
       setLang(next);
-      // 자막 언어와 같은 언어로 옮길 일은 없다. 예전에 고른 값이 겹치면 다른 언어로 바꿔 준다.
-      const target = normalizeTranslationTarget(saved?.translateTo);
-      const usable = target && target !== translationSourceOf(next)
-        ? target
-        : defaultTranslationTarget(uiLanguage(), translationSourceOf(next));
-      translateRef.current = usable;
-      setTranslateTo(usable);
-      // 번역기가 없는 Chrome 에서는 무엇이 저장돼 있든 원문으로 본다.
-      const savedMode = translatorSupported() ? normalizeCaptionMode(saved?.captionMode) : 'original';
-      modeRef.current = savedMode;
-      setMode(savedMode);
+      const target = normalizeTranslationTarget(saved?.translateTo) || defaultTranslationTarget(uiLanguage());
+      translateRef.current = target;
+      setTranslateTo(target);
     } catch {
       /* 저장소를 못 읽으면 브라우저 언어에서 고른 기본값을 그대로 쓴다. */
     }
@@ -524,7 +519,7 @@ function App() {
     // 동기적으로 시작만 시켜 둔다. 이미 깔려 있으면 아무 일도 일어나지 않는다.
     if (type === 'CAPTION_START') {
       void requestLanguagePack(langRef.current);
-      if (modeRef.current !== 'original' && translateRef.current) {
+      if (translateRef.current !== translationSourceOf(langRef.current)) {
         void prepareTranslator(translationSourceOf(langRef.current), translateRef.current);
       }
     }
@@ -536,9 +531,8 @@ function App() {
         sessionId: current.id,
         contextPrompt: current.pageTitle,
         language: langRef.current,
-        // 원문만 볼 때는 번역기를 아예 만들지 않는다.
-        translateTo: modeRef.current === 'original' ? '' : translateRef.current,
-        mode: modeRef.current,
+        // 내장 번역기가 없는 Chrome 에서는 옮길 수 없다. 빈 값을 보내 말한 그대로 흐르게 둔다.
+        translateTo: canTranslate ? translateRef.current : '',
         engine: config.defaultSttEngine
       });
       if (!res?.ok) {
@@ -679,38 +673,32 @@ function App() {
     setLang(next);
     void chrome.storage.local.set({ captionLang: next }).catch(() => {});
     void requestLanguagePack(next);
-    // 새 자막 언어와 번역 대상이 같아지면 옮길 것이 없다. 목록에서도 사라지므로 다른 언어로 바꿔 둔다.
-    if (translateRef.current === translationSourceOf(next)) {
-      changeTranslateTo(defaultTranslationTarget(uiLanguage(), translationSourceOf(next)));
+    // 말하는 언어가 바뀌면 옮길 방향도 바뀐다. 새 조합의 번역 모델을 미리 데워 둔다.
+    if (translateRef.current && translateRef.current !== translationSourceOf(next)) {
+      void prepareTranslator(translationSourceOf(next), translateRef.current);
     }
   }
 
-  /** 자막을 옮겨 볼 언어 변경. 다음 [자막 시작] 부터 적용된다. */
+  /**
+   * 화면 글자의 언어 변경. chrome.i18n 은 런타임에 언어를 못 바꾸므로 해당 messages.json 을 직접 읽어 얹는다.
+   * 문구 표가 바뀌어도 React 는 모르니, 상태를 같이 바꿔서 화면 전체를 다시 그린다.
+   */
+  async function changeUiLanguage(next: string) {
+    void chrome.storage.local.set({ uiLang: next }).catch(() => {});
+    const applied = await loadUiLanguage(next);
+    setUiLang(applied);
+  }
+
+  /** 자막을 볼 언어 변경. 다음 [자막 시작] 부터 적용된다. */
   function changeTranslateTo(next: string) {
     translateRef.current = next;
     setTranslateTo(next);
     void chrome.storage.local.set({ translateTo: next }).catch(() => {});
     // 이 change 도 사용자 제스처다. 여기서 번역 모델 내려받기를 미리 시작해 둔다.
-    if (next && modeRef.current !== 'original') {
+    // 말하는 언어와 같으면 옮길 것이 없으므로 아무것도 받지 않는다.
+    if (next && next !== translationSourceOf(langRef.current)) {
       void prepareTranslator(translationSourceOf(langRef.current), next);
     }
-  }
-
-  /**
-   * 자막 모드 변경. 라디오 클릭도 사용자 제스처라, 여기서 번역 모델을 미리 데울 수 있다.
-   * 이미 자막이 돌고 있으면 다음 [자막 시작] 부터 적용된다(그래서 진행 중에는 잠가 둔다).
-   */
-  function changeMode(next: CaptionMode) {
-    modeRef.current = next;
-    setMode(next);
-    void chrome.storage.local.set({ captionMode: next }).catch(() => {});
-    if (next === 'original') return;
-    const source = translationSourceOf(langRef.current);
-    if (!translateRef.current || translateRef.current === source) {
-      changeTranslateTo(defaultTranslationTarget(uiLanguage(), source));
-      return;
-    }
-    void prepareTranslator(source, translateRef.current);
   }
 
   /** 영상 위 자막 오버레이 on/off. 끄면 배경이 즉시 걷어낸다. */
@@ -882,23 +870,9 @@ function App() {
   const needsInvoke = !live && status !== 'PAUSED' && activeTabId != null && invokedTabId !== activeTabId;
   // 자막이 도는 중에 언어를 바꾸면 인식기를 다시 띄워야 한다. 멈춘 뒤에 바꾸게 한다.
   const settingsLocked = live || status === 'PAUSED';
-  const langLabel = CAPTION_LANGUAGES.find((item) => item.code === lang)?.label ?? lang;
-  const targetLabel = TRANSLATION_TARGETS.find((item) => item.code === translateTo)?.label ?? translateTo;
-  // 설정을 접어 둔 동안에도 지금 무엇으로 보고 있는지는 버튼에 적어 둔다.
-  const settingsSummary = mode === 'original' ? langLabel : `${langLabel} → ${targetLabel}`;
-  const modeHint: Record<CaptionMode, string> = {
-    original: t('uiModeOriginalHint'),
-    translated: t('uiModeTranslatedHint', targetLabel),
-    both: t('uiModeBothHint')
-  };
-  const modeLabel: Record<CaptionMode, string> = {
-    original: t('uiModeOriginal'),
-    translated: t('uiModeTranslated'),
-    both: t('uiModeBoth')
-  };
-  // 원문을 보여 주지 않는 모드에서는 확정 전의 줄도 보여 주지 않는다(번역은 확정된 뒤에 나온다).
-  const showOriginal = mode !== 'translated';
-  const showTranslation = mode !== 'original';
+  // 말하는 언어와 자막 언어가 같으면 옮길 것이 없다. 그때는 말한 그대로, 확정 전의 줄까지 흐른다.
+  const sameLanguage = translateTo === translationSourceOf(lang);
+  const translating = canTranslate && !sameLanguage;
 
   return (
     <div className="app">
@@ -912,6 +886,21 @@ function App() {
             <p>{t('uiTagline')}</p>
           </div>
         </div>
+        <label className="ui-lang">
+          <span className="sr-only">{t('uiInterfaceLanguage')}</span>
+          <select
+            value={uiLang}
+            aria-label={t('uiInterfaceLanguage')}
+            title={t('uiInterfaceLanguage')}
+            onChange={(e) => void changeUiLanguage(e.target.value)}
+          >
+            {UI_LANGUAGES.map((item) => (
+              <option key={item.code || 'auto'} value={item.code}>
+                {item.code ? item.label : t('uiFollowBrowser')}
+              </option>
+            ))}
+          </select>
+        </label>
       </header>
 
       <section className="lecture">
@@ -965,7 +954,7 @@ function App() {
           aria-expanded={showSettings}
           title={t('uiCaptionSettingsTitle')}
         >
-          {settingsSummary} {showSettings ? '▴' : '▾'}
+          {t('uiCaptionSettings')} {showSettings ? '▴' : '▾'}
         </button>
       </div>
 
@@ -974,27 +963,7 @@ function App() {
           <div className="block-head">
             <h2>{t('uiCaptionSettings')}</h2>
           </div>
-          {canTranslate && (
-            <fieldset className="modes">
-              <legend>{t('uiCaptionMode')}</legend>
-              {CAPTION_MODES.map((item) => (
-                <label key={item} className={`mode ${mode === item ? 'on' : ''}`}>
-                  <input
-                    type="radio"
-                    name="caption-mode"
-                    value={item}
-                    checked={mode === item}
-                    disabled={settingsLocked}
-                    onChange={() => changeMode(item)}
-                  />
-                  <span>
-                    <strong>{modeLabel[item]}</strong>
-                    <small>{modeHint[item]}</small>
-                  </span>
-                </label>
-              ))}
-            </fieldset>
-          )}
+          <p className="hint-line lead">{t('uiCaptionSettingsLead')}</p>
           <label className="field">
             <span>{t('uiSpeechLanguage')}</span>
             <select
@@ -1011,17 +980,17 @@ function App() {
               ))}
             </select>
           </label>
-          {canTranslate && mode !== 'original' && (
+          {canTranslate && (
             <label className="field">
-              <span>{t('uiTranslationLanguage')}</span>
+              <span>{t('uiCaptionLanguage')}</span>
               <select
                 className="lang translate"
                 value={translateTo}
                 disabled={settingsLocked}
-                aria-label={t('uiTranslationLanguage')}
+                aria-label={t('uiCaptionLanguage')}
                 onChange={(e) => changeTranslateTo(e.target.value)}
               >
-                {TRANSLATION_TARGETS.filter((item) => item.code !== translationSourceOf(lang)).map((item) => (
+                {TRANSLATION_TARGETS.map((item) => (
                   <option key={item.code} value={item.code}>
                     {item.label}
                   </option>
@@ -1034,7 +1003,9 @@ function App() {
               ? t('uiTranslateUnsupported')
               : settingsLocked
                 ? t('uiLanguageChangeWhileLive')
-                : t('uiCaptionSettingsHint')}
+                : sameLanguage
+                  ? t('uiCaptionLanguageSame')
+                  : t('uiCaptionSettingsHint')}
           </p>
         </section>
       )}
@@ -1209,22 +1180,17 @@ function App() {
             </button>
           </div>
           <div className="transcript compact" ref={listRef} onScroll={onListScroll}>
-            {!items.length && !(liveLine && showOriginal) && (
+            {!items.length && !(liveLine && !translating) && (
               <p className="empty">{t('uiEmptyCaptions')}</p>
             )}
             {visible.map((item) => (
               <div key={item.id} className={item.status === 'FINAL' ? 'line final' : 'line partial'}>
                 <time>{fmtMs(item.startedAtMs)}</time>
-                <p>
-                  {showOriginal ? item.text : item.translation || item.text}
-                  {showOriginal && showTranslation && item.translation && (
-                    <span className="translated">{item.translation}</span>
-                  )}
-                </p>
+                <p>{translating ? item.translation || item.text : item.text}</p>
                 <button onClick={() => void copy(lineToText(item), t('uiCopiedTranscript'))}>{t('uiCopy')}</button>
               </div>
             ))}
-            {liveLine && showOriginal && (
+            {liveLine && !translating && (
               <div className="line live">
                 <time>···</time>
                 <p>{liveLine}</p>
@@ -1245,4 +1211,7 @@ function App() {
   );
 }
 
-createRoot(document.getElementById('root')!).render(<App />);
+// 고른 화면 언어를 먼저 얹고 그린다. 그려 놓고 바꾸면 첫 화면이 브라우저 언어로 한 번 깜빡인다.
+void applyStoredUiLanguage().then(() => {
+  createRoot(document.getElementById('root')!).render(<App />);
+});

@@ -1,0 +1,603 @@
+{
+  "appDesc": {
+    "message": "現在の Chrome タブの講義音声を端末内でリアルタイム字幕にし、メモとキャプチャを一緒に保存します。"
+  },
+  "bgCurrentTabNotFound": {
+    "message": "現在のタブが見つかりません。"
+  },
+  "bgOffscreenJustification": {
+    "message": "講義タブの音声をリアルタイム字幕に変換するために処理します。"
+  },
+  "bgScreenshotFailed": {
+    "message": "画面キャプチャに失敗しました: $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "bgTabCaptureFailed": {
+    "message": "タブ音声のキャプチャに失敗しました: $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "bgTabCapturePermission": {
+    "message": "このタブの音声を取り込む権限がありません。講義タブでツールバーの拡張機能アイコンを一度クリックしてから、もう一度お試しください。(ページを移動すると権限はリセットされます)"
+  },
+  "bgTabClosed": {
+    "message": "講義タブが閉じられたため、字幕を終了しました。"
+  },
+  "bgTabNavigated": {
+    "message": "タブが別のページに移動したため、字幕を終了しました。"
+  },
+  "bgTabNotFound": {
+    "message": "そのタブが見つかりません。"
+  },
+  "bgUnknownCommand": {
+    "message": "不明なコマンド"
+  },
+  "defaultLectureTitle": {
+    "message": "講義"
+  },
+  "err_IMAGE_CROP_FAILED": {
+    "message": "映像領域の切り抜きに失敗したため、画面全体を保存しました。"
+  },
+  "err_NETWORK_OFFLINE": {
+    "message": "ネットワークがオフラインです。"
+  },
+  "err_SCREENSHOT_FAILED": {
+    "message": "画面キャプチャに失敗しました。"
+  },
+  "err_STORAGE_READ_FAILED": {
+    "message": "保存されたデータを読み込めませんでした。"
+  },
+  "err_STORAGE_WRITE_FAILED": {
+    "message": "保存に失敗しました。しばらくしてからもう一度お試しください。"
+  },
+  "err_STT_AUTH_FAILED": {
+    "message": "音声認識の認証に失敗しました。"
+  },
+  "err_STT_CONNECTION_FAILED": {
+    "message": "音声認識に接続できません。"
+  },
+  "err_STT_PROVIDER_FAILED": {
+    "message": "音声認識に失敗しました。"
+  },
+  "err_STT_RATE_LIMITED": {
+    "message": "音声認識のリクエストが多く、少し遅れています。"
+  },
+  "err_TAB_CAPTURE_FAILED": {
+    "message": "このタブの音声の取り込みを開始できませんでした。"
+  },
+  "err_TAB_CAPTURE_PERMISSION_DENIED": {
+    "message": "このタブの音声を取り込む権限がありません。講義タブでツールバーの拡張機能アイコンを一度クリックしてから、もう一度お試しください。"
+  },
+  "err_TAB_NOT_FOUND": {
+    "message": "現在のタブが見つかりません。"
+  },
+  "err_UNKNOWN": {
+    "message": "問題が発生しました。"
+  },
+  "err_VIDEO_ELEMENT_NOT_FOUND": {
+    "message": "再生中の動画が見つからなかったため、画面全体を保存しました。"
+  },
+  "exportCaptureN": {
+    "message": "キャプチャ $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "exportCaptures": {
+    "message": "キャプチャとメモ"
+  },
+  "exportDocTitle": {
+    "message": "$p1$ · 学習記録",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "exportExportedAt": {
+    "message": "書き出し日時 $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "exportMemoN": {
+    "message": "メモ $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "exportMyNotes": {
+    "message": "マイノート"
+  },
+  "exportNoCaptures": {
+    "message": "キャプチャとメモがありません。"
+  },
+  "exportNoNotes": {
+    "message": "書いたノートがありません。"
+  },
+  "exportNoTranscript": {
+    "message": "保存された字幕がありません。"
+  },
+  "exportSummary": {
+    "message": "キャプチャ $p1$件 · メモ $p2$件 · 字幕 $p3$行",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "exportTranscript": {
+    "message": "字幕"
+  },
+  "imageReadFailed": {
+    "message": "画像を読み込めませんでした。"
+  },
+  "noMemo": {
+    "message": "(メモなし)"
+  },
+  "playbackPos": {
+    "message": "再生位置 $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "state_alreadyCapturing": {
+    "message": "すでに字幕を受信中です。"
+  },
+  "state_alreadyError": {
+    "message": "すでにエラー状態です。"
+  },
+  "state_alreadyReady": {
+    "message": "すでに準備完了です。"
+  },
+  "state_alreadyStopped": {
+    "message": "すでに終了しています。"
+  },
+  "state_notCapturing": {
+    "message": "字幕を受信していません。"
+  },
+  "state_notPaused": {
+    "message": "一時停止中ではありません。"
+  },
+  "state_pausedResume": {
+    "message": "一時停止中です。再開を押してください。"
+  },
+  "sttAvailabilityCheckFailed": {
+    "message": "音声認識が使えるかどうかを確認できませんでした: $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttError": {
+    "message": "音声認識エラー: $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttLangUnavailable": {
+    "message": "この端末では $p1$ の端末内音声認識を利用できません。Chrome の設定 → 言語でその言語を追加してから、もう一度お試しください。メモとキャプチャはそのまま使えます。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttNetworkRequired": {
+    "message": "音声認識がネットワークを要求しました。端末内認識ではない可能性があります。"
+  },
+  "sttNoAudioTrack": {
+    "message": "認識に使える音声トラックがありません。"
+  },
+  "sttNoOffscreenSupport": {
+    "message": "このコンテキストでは Chrome 内蔵の音声認識を使えません (offscreen 非対応)。"
+  },
+  "sttNoOnDevice": {
+    "message": "この Chrome は端末内音声認識 (processLocally) に対応していません。音声を外部に送らないため、字幕を開始しませんでした。Chrome を 139 以降に更新してください。メモとキャプチャはそのまま使えます。"
+  },
+  "sttPackDownloading": {
+    "message": "$p1$ の音声認識パックをダウンロード中です (初回のみ、数百 MB)。完了すると字幕が自動で始まります。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttPackIncomplete": {
+    "message": "$p1$ の音声認識パックのダウンロードが完了していません。完了してからもう一度開始してください。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttPackNotStarted": {
+    "message": "$p1$ の音声認識パックのダウンロードが始まりませんでした。[字幕を開始] をもう一度押してください。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttPackReady": {
+    "message": "$p1$ の音声認識パックが準備できました。字幕を開始します。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttPackUnavailable": {
+    "message": "$p1$ の音声認識パックを利用できません。Chrome の設定 → 言語でその言語を追加してから、もう一度お試しください。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttRecognizerCreateFailed": {
+    "message": "音声認識エンジンを作成できませんでした: $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttRestartFailed": {
+    "message": "音声認識を再開できませんでした。[字幕を開始] をもう一度押してください。"
+  },
+  "sttStartFailed": {
+    "message": "音声認識を開始できませんでした。"
+  },
+  "sttTooManyRestarts": {
+    "message": "音声認識が繰り返し途切れたため停止しました。[字幕を開始] をもう一度押してください。"
+  },
+  "sttUnavailableKind": {
+    "message": "音声認識を利用できません ($p1$)。メモとキャプチャはそのまま使えます。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiAddMemoOnly": {
+    "message": "+ メモのみ追加"
+  },
+  "uiAutoScroll": {
+    "message": "自動スクロール"
+  },
+  "uiBackToCurrentTab": {
+    "message": "このタブのノートへ ›"
+  },
+  "uiCannotSwitchWhileCapturing": {
+    "message": "字幕の受信中はノートを切り替えられません。先に終了を押してください。"
+  },
+  "uiCaptionLanguage": {
+    "message": "字幕の言語"
+  },
+  "uiCaptionLanguageSame": {
+    "message": "話している言語と同じにすると、訳さずに話したままを表示します。"
+  },
+  "uiCaptionSettings": {
+    "message": "字幕設定"
+  },
+  "uiCaptionSettingsHint": {
+    "message": "設定は次の [字幕を開始] から適用されます。"
+  },
+  "uiCaptionSettingsLead": {
+    "message": "話している内容を選んだ言語に訳して表示します。"
+  },
+  "uiCaptionSettingsTitle": {
+    "message": "字幕の言語を選びます。"
+  },
+  "uiCaptionsShort": {
+    "message": "字幕"
+  },
+  "uiCapture": {
+    "message": "キャプチャ"
+  },
+  "uiCaptureAlt": {
+    "message": "講義キャプチャ"
+  },
+  "uiCaptureDeleteFailed": {
+    "message": "キャプチャを削除できませんでした。"
+  },
+  "uiCaptureFailed": {
+    "message": "キャプチャに失敗しました。"
+  },
+  "uiCaptureImageNotFound": {
+    "message": "キャプチャ画像が見つかりません。"
+  },
+  "uiCaptureMemoSaveFailed": {
+    "message": "キャプチャのメモを保存できませんでした。"
+  },
+  "uiCapturesMemos": {
+    "message": "キャプチャ/メモ"
+  },
+  "uiCheckingTab": {
+    "message": "現在のタブを確認中"
+  },
+  "uiClearCurrentCaptions": {
+    "message": "字幕を消す"
+  },
+  "uiClearCurrentCaptionsTitle": {
+    "message": "この動画の字幕だけを消します。メモとキャプチャは残ります。"
+  },
+  "uiClipboardFailed": {
+    "message": "クリップボードへのコピーに失敗しました。"
+  },
+  "uiCommandFailed": {
+    "message": "コマンドを実行できませんでした。"
+  },
+  "uiCopiedCaptureAndMemo": {
+    "message": "キャプチャとメモを一緒にコピーしました。"
+  },
+  "uiCopiedCaptureMemo": {
+    "message": "キャプチャのメモをコピーしました。"
+  },
+  "uiCopiedMemo": {
+    "message": "メモをコピーしました。"
+  },
+  "uiCopiedTranscript": {
+    "message": "字幕をコピーしました。"
+  },
+  "uiCopiedTranscriptLines": {
+    "message": "字幕 $p1$行をコピーしました。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiCopy": {
+    "message": "コピー"
+  },
+  "uiCopyAll": {
+    "message": "すべてコピー"
+  },
+  "uiCroppedFallback": {
+    "message": "再生中の映像領域が見つからなかったため、画面全体を保存しました。"
+  },
+  "uiDelete": {
+    "message": "削除"
+  },
+  "uiEmptyCaptions": {
+    "message": "字幕を開始を押すと、いま見ている動画の音声がここに積み上がります。"
+  },
+  "uiFollowBrowser": {
+    "message": "ブラウザの言語"
+  },
+  "uiHistory": {
+    "message": "履歴"
+  },
+  "uiHistoryHint": {
+    "message": "動画が変わると字幕は自動で新しく始まり、元の動画に戻るとその字幕を続けて使います。履歴はこのブラウザ内 (IndexedDB) にのみ保存されます。"
+  },
+  "uiImageLoadFailed": {
+    "message": "画像を読み込めませんでした。"
+  },
+  "uiInterfaceLanguage": {
+    "message": "表示言語"
+  },
+  "uiLanguageChangeWhileLive": {
+    "message": "言語は字幕を終了してから変更できます。"
+  },
+  "uiLectureMemo": {
+    "message": "講義メモ"
+  },
+  "uiMemoForMoment": {
+    "message": "この時点についてのメモ"
+  },
+  "uiMemoForScene": {
+    "message": "この場面についてのメモ"
+  },
+  "uiMemoPlaceholder": {
+    "message": "この講義全体についての考え、疑問、あとで学ぶことを書いてみましょう..."
+  },
+  "uiMemoSaveFailed": {
+    "message": "保存に失敗"
+  },
+  "uiMemoSaved": {
+    "message": "保存しました"
+  },
+  "uiMemoSaving": {
+    "message": "保存中..."
+  },
+  "uiNavCurrentCaptions": {
+    "message": "字幕"
+  },
+  "uiNavNotes": {
+    "message": "ノート"
+  },
+  "uiNeedsInvoke": {
+    "message": "このタブの音声を取り込むには、ツールバーの拡張機能アイコンを一度クリックしてください。(Chrome の仕様上、ページを移動すると権限がリセットされます)"
+  },
+  "uiNewCaptionSession": {
+    "message": "+ 新しいノートを開始"
+  },
+  "uiNewCaptionSessionTitle": {
+    "message": "この動画の字幕・メモ・キャプチャを新しく始めます。これまでの分は履歴に残ります。"
+  },
+  "uiNewNoteStarted": {
+    "message": "新しいノートを始めました。前のノートは履歴に残っています。"
+  },
+  "uiNoHistory": {
+    "message": "保存された履歴がありません。"
+  },
+  "uiNoTranscriptToCopy": {
+    "message": "コピーできる字幕がまだありません。"
+  },
+  "uiNoUrl": {
+    "message": "アドレスなし"
+  },
+  "uiNoteDeleted": {
+    "message": "ノートを削除しました。"
+  },
+  "uiNothingToClear": {
+    "message": "消す字幕がありません。"
+  },
+  "uiOffTabWarn": {
+    "message": "いま見ているタブとは別の講義のノートを開いています。字幕とキャプチャは一時的にロックされています。"
+  },
+  "uiOverlay": {
+    "message": "動画の上に字幕"
+  },
+  "uiOverlayHint": {
+    "message": "字幕は動画の上に重ねて表示されます。この一覧はいま見ている動画の字幕で、別の動画に移ると自動的に新しい字幕が始まります。前の動画の字幕は履歴に残ります。"
+  },
+  "uiPause": {
+    "message": "一時停止"
+  },
+  "uiPinnedNote": {
+    "message": "履歴から開いたノートを見ています。タブを移動してもこのノートのままです。"
+  },
+  "uiPngNeedsImage": {
+    "message": "画像のないメモは PNG で保存できません。コピーを使うか、すべて保存に含めてください。"
+  },
+  "uiReadingTab": {
+    "message": "タブ情報を読み込み中"
+  },
+  "uiResume": {
+    "message": "再開"
+  },
+  "uiRetry": {
+    "message": "もう一度試す"
+  },
+  "uiSave": {
+    "message": "保存"
+  },
+  "uiSaveAll": {
+    "message": "すべて保存"
+  },
+  "uiSaveBundleFailed": {
+    "message": "すべて保存に失敗しました: $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiSaveCaptureFailed": {
+    "message": "キャプチャを保存できませんでした: $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiSavedBundle": {
+    "message": "キャプチャ $p1$件 · メモ $p2$件 · 字幕 $p3$行を HTML 1 ファイルに保存しました。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "uiSavedPng": {
+    "message": "キャプチャとメモを PNG で保存しました。"
+  },
+  "uiSessionListReadFailed": {
+    "message": "保存されたノート一覧を読み込めませんでした。"
+  },
+  "uiShowOlder": {
+    "message": "前の字幕 $p1$行をもっと見る",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiSpeechLanguage": {
+    "message": "話す言語"
+  },
+  "uiStartCaption": {
+    "message": "字幕を開始"
+  },
+  "uiStop": {
+    "message": "終了"
+  },
+  "uiTagline": {
+    "message": "講義を見ながら字幕を読み、ノートを一か所に。"
+  },
+  "uiTimeline": {
+    "message": "タイムライン"
+  },
+  "uiTimelineCounts": {
+    "message": "キャプチャ $p1$ · メモ $p2$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "uiTimelineHint": {
+    "message": "キャプチャを押すといまの画面が、メモのみ追加を押すといまの再生位置がここに時系列で積み上がります。"
+  },
+  "uiTranscriptCleared": {
+    "message": "字幕 $p1$行を消しました。メモとキャプチャはそのままです。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiTranslateUnsupported": {
+    "message": "この Chrome には内蔵翻訳機能がないため、字幕は話したままの言語で表示されます。"
+  },
+  "uiTypeMemo": {
+    "message": "メモ"
+  },
+  "uiTypeVideoRegion": {
+    "message": "映像領域"
+  },
+  "uiTypeViewport": {
+    "message": "画面全体"
+  },
+  "uiVideoAt": {
+    "message": "動画 $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiViewing": {
+    "message": "表示中"
+  },
+  "untitled": {
+    "message": "タイトルなし"
+  }
+}

@@ -11,10 +11,11 @@ Chrome에서 재생 중인 강의 탭의 소리를 **Chrome 내장 기기 내(on
   자막·메모·캡처는 [기록] 에 남습니다.
 - STT가 실패해도 메모와 캡처는 계속 동작하고, 캡처가 실패해도 자막과 메모는 계속 동작합니다.
 - Chrome 139 이상이 필요합니다(`SpeechRecognition.available()` / `install()` / `processLocally`가 그 버전부터입니다).
-- 화면 글자는 브라우저 언어를 따라가고(영어·한국어 포함, `_locales/` 에 폴더를 더하면 언어 추가), 자막 언어는
-  패널에서 22개 중 골라 씁니다.
-- **번역도 기기 안에서 합니다.** [자막 설정] 에서 보여 줄 방식을 원문 / 번역 / 원문+번역 중에 고르면
-  Chrome 내장 번역기(Translator API)가 확정된 자막 줄마다 번역을 붙입니다. 여기도 API 키·과금·서버가 없습니다.
+- 화면 글자 언어는 오른쪽 위에서 직접 고릅니다(영어·한국어·일본어·중국어 간체, 기본값은 브라우저 언어).
+  말소리 언어는 [자막 설정] 에서 22개 중 골라 씁니다.
+- **번역도 기기 안에서 합니다.** [자막 설정] 에서 자막 언어를 고르면 Chrome 내장 번역기(Translator API)가
+  확정된 자막 줄마다 그 언어로 옮겨 보여 줍니다. 말소리 언어와 같은 언어를 고르면 옮기지 않고 말한 그대로
+  보여 줍니다. 여기도 API 키·과금·서버가 없습니다.
 
 ---
 
@@ -30,16 +31,19 @@ in the right-hand Side Panel.
   video's captions, notes, and captures stay in [History].
 - If speech recognition fails, notes and captures keep working; if capture fails, captions and notes keep working.
 - Requires Chrome 139+ (`SpeechRecognition.available()` / `install()` / `processLocally` landed in that version).
-- **Translation runs on-device too.** Under [Caption settings] you choose how captions are shown — original,
-  translated, or both — and Chrome's built-in Translator API translates every finished caption line.
-  Again with no API key, no billing, no server.
+- **Translation runs on-device too.** Under [Caption settings] you pick the caption language and Chrome's
+  built-in Translator API translates every finished caption line into it. Pick the language that is being
+  spoken and captions stay exactly as spoken. Again with no API key, no billing, no server.
 
 ### Languages
 
-The **interface language** follows your Chrome UI language. English and Korean ship in the package
+The **interface language** is chosen in the top right of the panel: English, Korean, Japanese, Simplified
+Chinese, or "Browser language", which follows Chrome's own UI language. All four ship in the package
 (`apps/extension/public/_locales/`); adding another language means dropping in one more
-`_locales/<lang>/messages.json` — no code change is needed, because every visible string goes through
-`t()` in `apps/extension/src/shared/i18n.ts`.
+`_locales/<lang>/messages.json` and one line in `UI_LANGUAGES` — every visible string goes through `t()` in
+`apps/extension/src/shared/i18n.ts`. Chrome cannot repoint `chrome.i18n` at runtime, so a manual choice makes
+`t()` fetch that folder's `messages.json` and read from it instead; the choice is stored in `uiLang` and applied
+before the panel renders, and the service worker and offscreen document apply it too so their messages match.
 
 The **caption language** is separate and chosen in the panel, so a Korean-language browser can caption an
 English lecture. The list lives in `apps/extension/src/shared/languages.ts` (22 locales: English, Korean,
@@ -48,16 +52,16 @@ Vietnamese, Thai, Turkish, Dutch, Polish, Swedish). Chrome downloads the on-devi
 chosen language on first use; Chrome does not expose an API to enumerate which packs a given machine
 supports, so the extension checks availability at runtime and reports what it finds.
 
-The **caption mode** (original / translated / original + translation) and the **translation language** are two
-more choices, kept separate from the spoken language and handled by Chrome's built-in Translator API
-(Chrome 138+, on-device, no key and no per-call cost). `apps/extension/src/transcription/translator.ts`
+The **caption language** is a second choice next to the spoken language, handled by Chrome's built-in
+Translator API (Chrome 138+, on-device, no key and no per-call cost). `apps/extension/src/transcription/translator.ts`
 wraps it: it maps each caption locale to a translator code (`cmn-Hans-CN` → `zh`), creates one translator
 per session, and returns an empty string on every failure path — so an unsupported device or language pair
 loses the translation only, never the captions. Chrome downloads the language-pair model on first use, which
 is why the panel warms the translator up inside your click, the same way it warms the speech pack. Only
 **finished** lines are translated: interim recognition results keep being rewritten while someone speaks, so
-translating them would make the screen flicker for nothing. The original streams live in original mode, and the
-overlay clears itself after a few seconds of silence instead of leaving the last line on the video.
+translating them would make the screen flicker for nothing. When the caption language equals the spoken
+language no translator is created at all and the interim line streams live, and the overlay clears itself after
+a few seconds of silence instead of leaving the last line on the video.
 
 ### Build it yourself
 

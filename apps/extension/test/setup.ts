@@ -22,6 +22,8 @@ const listeners = new Set<(message: unknown) => void>();
 (globalThis as any).chrome = {
   i18n: { getMessage, getUILanguage: () => 'en-US' },
   runtime: {
+    // 화면 언어를 직접 고르면 해당 messages.json 을 fetch 로 읽는다. 테스트에서는 파일 경로를 그대로 돌려준다.
+    getURL: (path: string) => resolve(process.cwd(), 'public', path),
     sendMessage: vi.fn(async () => ({ ok: true })),
     onMessage: {
       addListener: (fn: (message: unknown) => void) => listeners.add(fn),

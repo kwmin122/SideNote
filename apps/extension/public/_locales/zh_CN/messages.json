@@ -1,0 +1,603 @@
+{
+  "appDesc": {
+    "message": "在本机把当前 Chrome 标签页的课程音频实时转成字幕，并把笔记和截图一起保存。"
+  },
+  "bgCurrentTabNotFound": {
+    "message": "找不到当前标签页。"
+  },
+  "bgOffscreenJustification": {
+    "message": "处理课程标签页的音频，以生成实时字幕。"
+  },
+  "bgScreenshotFailed": {
+    "message": "屏幕截图失败：$p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "bgTabCaptureFailed": {
+    "message": "标签页音频采集失败：$p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "bgTabCapturePermission": {
+    "message": "没有采集该标签页音频的权限。请在课程标签页点击一次工具栏中的扩展图标，然后重试。（页面跳转后权限会被重置）"
+  },
+  "bgTabClosed": {
+    "message": "课程标签页已关闭，字幕已停止。"
+  },
+  "bgTabNavigated": {
+    "message": "标签页跳转到其他页面，字幕已停止。"
+  },
+  "bgTabNotFound": {
+    "message": "找不到该标签页。"
+  },
+  "bgUnknownCommand": {
+    "message": "未知命令"
+  },
+  "defaultLectureTitle": {
+    "message": "课程"
+  },
+  "err_IMAGE_CROP_FAILED": {
+    "message": "裁剪视频区域失败，已保存整个屏幕。"
+  },
+  "err_NETWORK_OFFLINE": {
+    "message": "网络已断开。"
+  },
+  "err_SCREENSHOT_FAILED": {
+    "message": "屏幕截图失败。"
+  },
+  "err_STORAGE_READ_FAILED": {
+    "message": "无法读取已保存的数据。"
+  },
+  "err_STORAGE_WRITE_FAILED": {
+    "message": "保存失败，请稍后再试。"
+  },
+  "err_STT_AUTH_FAILED": {
+    "message": "语音识别认证失败。"
+  },
+  "err_STT_CONNECTION_FAILED": {
+    "message": "无法连接到语音识别。"
+  },
+  "err_STT_PROVIDER_FAILED": {
+    "message": "语音识别失败。"
+  },
+  "err_STT_RATE_LIMITED": {
+    "message": "语音识别请求过多，会稍有延迟。"
+  },
+  "err_TAB_CAPTURE_FAILED": {
+    "message": "无法开始采集该标签页的音频。"
+  },
+  "err_TAB_CAPTURE_PERMISSION_DENIED": {
+    "message": "没有采集该标签页音频的权限。请在课程标签页点击一次工具栏中的扩展图标，然后重试。"
+  },
+  "err_TAB_NOT_FOUND": {
+    "message": "找不到当前标签页。"
+  },
+  "err_UNKNOWN": {
+    "message": "发生了未知错误。"
+  },
+  "err_VIDEO_ELEMENT_NOT_FOUND": {
+    "message": "没有找到正在播放的视频，已保存整个屏幕。"
+  },
+  "exportCaptureN": {
+    "message": "截图 $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "exportCaptures": {
+    "message": "截图与笔记"
+  },
+  "exportDocTitle": {
+    "message": "$p1$ · 学习记录",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "exportExportedAt": {
+    "message": "导出时间 $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "exportMemoN": {
+    "message": "笔记 $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "exportMyNotes": {
+    "message": "我的笔记"
+  },
+  "exportNoCaptures": {
+    "message": "没有截图和笔记。"
+  },
+  "exportNoNotes": {
+    "message": "还没有写过笔记。"
+  },
+  "exportNoTranscript": {
+    "message": "没有保存的字幕。"
+  },
+  "exportSummary": {
+    "message": "截图 $p1$ 张 · 笔记 $p2$ 条 · 字幕 $p3$ 行",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "exportTranscript": {
+    "message": "字幕"
+  },
+  "imageReadFailed": {
+    "message": "无法读取图片。"
+  },
+  "noMemo": {
+    "message": "（无笔记）"
+  },
+  "playbackPos": {
+    "message": "播放位置 $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "state_alreadyCapturing": {
+    "message": "字幕已在接收中。"
+  },
+  "state_alreadyError": {
+    "message": "已处于错误状态。"
+  },
+  "state_alreadyReady": {
+    "message": "已处于就绪状态。"
+  },
+  "state_alreadyStopped": {
+    "message": "字幕已停止。"
+  },
+  "state_notCapturing": {
+    "message": "当前没有在接收字幕。"
+  },
+  "state_notPaused": {
+    "message": "当前不是暂停状态。"
+  },
+  "state_pausedResume": {
+    "message": "当前已暂停，请点击继续。"
+  },
+  "sttAvailabilityCheckFailed": {
+    "message": "无法确认语音识别是否可用：$p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttError": {
+    "message": "语音识别错误：$p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttLangUnavailable": {
+    "message": "此设备无法使用 $p1$ 的本机语音识别。请在 Chrome 设置 → 语言中添加该语言后重试。笔记和截图仍可正常使用。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttNetworkRequired": {
+    "message": "语音识别请求了网络，可能不是本机识别。"
+  },
+  "sttNoAudioTrack": {
+    "message": "没有可用于识别的音频轨道。"
+  },
+  "sttNoOffscreenSupport": {
+    "message": "当前环境无法使用 Chrome 内置语音识别（不支持 offscreen）。"
+  },
+  "sttNoOnDevice": {
+    "message": "此 Chrome 不支持本机语音识别（processLocally）。为了不把音频发送到外部，未开始字幕。请将 Chrome 更新到 139 或更高版本。笔记和截图仍可正常使用。"
+  },
+  "sttPackDownloading": {
+    "message": "正在下载 $p1$ 语音识别包（仅首次，数百 MB）。下载完成后字幕会自动开始。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttPackIncomplete": {
+    "message": "$p1$ 语音识别包尚未下载完成。完成后请重新开始。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttPackNotStarted": {
+    "message": "$p1$ 语音识别包没有开始下载。请再点击一次 [开始字幕]。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttPackReady": {
+    "message": "$p1$ 语音识别包已准备好，开始生成字幕。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttPackUnavailable": {
+    "message": "无法使用 $p1$ 语音识别包。请在 Chrome 设置 → 语言中添加该语言后重试。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttRecognizerCreateFailed": {
+    "message": "无法创建语音识别器：$p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sttRestartFailed": {
+    "message": "无法重新启动语音识别。请再次点击 [开始字幕]。"
+  },
+  "sttStartFailed": {
+    "message": "无法开始语音识别。"
+  },
+  "sttTooManyRestarts": {
+    "message": "语音识别反复中断，已停止。请再次点击 [开始字幕]。"
+  },
+  "sttUnavailableKind": {
+    "message": "无法使用语音识别（$p1$）。笔记和截图仍可正常使用。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiAddMemoOnly": {
+    "message": "+ 仅添加笔记"
+  },
+  "uiAutoScroll": {
+    "message": "自动滚动"
+  },
+  "uiBackToCurrentTab": {
+    "message": "前往当前标签页的笔记 ›"
+  },
+  "uiCannotSwitchWhileCapturing": {
+    "message": "接收字幕时无法切换笔记，请先点击停止。"
+  },
+  "uiCaptionLanguage": {
+    "message": "字幕语言"
+  },
+  "uiCaptionLanguageSame": {
+    "message": "选择与说话语言相同时，不翻译，按原话显示。"
+  },
+  "uiCaptionSettings": {
+    "message": "字幕设置"
+  },
+  "uiCaptionSettingsHint": {
+    "message": "设置将在下次点击 [开始字幕] 时生效。"
+  },
+  "uiCaptionSettingsLead": {
+    "message": "把说话内容翻译成所选语言来显示。"
+  },
+  "uiCaptionSettingsTitle": {
+    "message": "选择字幕语言。"
+  },
+  "uiCaptionsShort": {
+    "message": "字幕"
+  },
+  "uiCapture": {
+    "message": "截图"
+  },
+  "uiCaptureAlt": {
+    "message": "课程截图"
+  },
+  "uiCaptureDeleteFailed": {
+    "message": "删除截图失败。"
+  },
+  "uiCaptureFailed": {
+    "message": "截图失败。"
+  },
+  "uiCaptureImageNotFound": {
+    "message": "找不到截图图片。"
+  },
+  "uiCaptureMemoSaveFailed": {
+    "message": "保存截图笔记失败。"
+  },
+  "uiCapturesMemos": {
+    "message": "截图/笔记"
+  },
+  "uiCheckingTab": {
+    "message": "正在确认当前标签页"
+  },
+  "uiClearCurrentCaptions": {
+    "message": "清除字幕"
+  },
+  "uiClearCurrentCaptionsTitle": {
+    "message": "只清除此视频的字幕，笔记和截图会保留。"
+  },
+  "uiClipboardFailed": {
+    "message": "复制到剪贴板失败。"
+  },
+  "uiCommandFailed": {
+    "message": "无法执行该命令。"
+  },
+  "uiCopiedCaptureAndMemo": {
+    "message": "已复制截图和笔记。"
+  },
+  "uiCopiedCaptureMemo": {
+    "message": "已复制截图笔记。"
+  },
+  "uiCopiedMemo": {
+    "message": "已复制笔记。"
+  },
+  "uiCopiedTranscript": {
+    "message": "已复制字幕。"
+  },
+  "uiCopiedTranscriptLines": {
+    "message": "已复制 $p1$ 行字幕。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiCopy": {
+    "message": "复制"
+  },
+  "uiCopyAll": {
+    "message": "全部复制"
+  },
+  "uiCroppedFallback": {
+    "message": "没有找到正在播放的视频区域，已保存整个屏幕。"
+  },
+  "uiDelete": {
+    "message": "删除"
+  },
+  "uiEmptyCaptions": {
+    "message": "点击开始字幕后，正在观看的视频的语音会积累在这里。"
+  },
+  "uiFollowBrowser": {
+    "message": "浏览器语言"
+  },
+  "uiHistory": {
+    "message": "历史"
+  },
+  "uiHistoryHint": {
+    "message": "视频变化时字幕会自动重新开始；回到原来的视频会继续使用该视频的字幕。历史仅保存在此浏览器内（IndexedDB）。"
+  },
+  "uiImageLoadFailed": {
+    "message": "无法加载图片。"
+  },
+  "uiInterfaceLanguage": {
+    "message": "界面语言"
+  },
+  "uiLanguageChangeWhileLive": {
+    "message": "请先停止字幕，然后再更改语言。"
+  },
+  "uiLectureMemo": {
+    "message": "课程笔记"
+  },
+  "uiMemoForMoment": {
+    "message": "关于此时刻的笔记"
+  },
+  "uiMemoForScene": {
+    "message": "关于此画面的笔记"
+  },
+  "uiMemoPlaceholder": {
+    "message": "写下对整门课程的想法、疑问、接下来要学的内容..."
+  },
+  "uiMemoSaveFailed": {
+    "message": "保存失败"
+  },
+  "uiMemoSaved": {
+    "message": "已保存"
+  },
+  "uiMemoSaving": {
+    "message": "正在保存..."
+  },
+  "uiNavCurrentCaptions": {
+    "message": "字幕"
+  },
+  "uiNavNotes": {
+    "message": "笔记"
+  },
+  "uiNeedsInvoke": {
+    "message": "要采集此标签页的音频，请点击一次工具栏中的扩展图标。（按 Chrome 的规则，页面跳转后权限会被重置）"
+  },
+  "uiNewCaptionSession": {
+    "message": "+ 开始新笔记"
+  },
+  "uiNewCaptionSessionTitle": {
+    "message": "为此视频重新开始字幕、笔记和截图。之前的内容会留在历史中。"
+  },
+  "uiNewNoteStarted": {
+    "message": "已开始新笔记，之前的笔记保留在历史中。"
+  },
+  "uiNoHistory": {
+    "message": "还没有保存的历史。"
+  },
+  "uiNoTranscriptToCopy": {
+    "message": "还没有可复制的字幕。"
+  },
+  "uiNoUrl": {
+    "message": "无地址"
+  },
+  "uiNoteDeleted": {
+    "message": "已删除笔记。"
+  },
+  "uiNothingToClear": {
+    "message": "没有可清除的字幕。"
+  },
+  "uiOffTabWarn": {
+    "message": "你打开的是与当前标签页不同课程的笔记，字幕和截图暂时被锁定。"
+  },
+  "uiOverlay": {
+    "message": "视频上的字幕"
+  },
+  "uiOverlayHint": {
+    "message": "字幕会叠加显示在视频上。此列表是当前观看视频的字幕，切换到其他视频会自动开始新的字幕，之前视频的字幕会留在历史中。"
+  },
+  "uiPause": {
+    "message": "暂停"
+  },
+  "uiPinnedNote": {
+    "message": "你正在查看从历史中打开的笔记，切换标签页也会保持不变。"
+  },
+  "uiPngNeedsImage": {
+    "message": "没有图片的笔记无法保存为 PNG。请使用复制，或包含在全部保存中。"
+  },
+  "uiReadingTab": {
+    "message": "正在读取标签页信息"
+  },
+  "uiResume": {
+    "message": "继续"
+  },
+  "uiRetry": {
+    "message": "重试"
+  },
+  "uiSave": {
+    "message": "保存"
+  },
+  "uiSaveAll": {
+    "message": "全部保存"
+  },
+  "uiSaveBundleFailed": {
+    "message": "全部保存失败：$p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiSaveCaptureFailed": {
+    "message": "保存截图失败：$p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiSavedBundle": {
+    "message": "已把截图 $p1$ 张 · 笔记 $p2$ 条 · 字幕 $p3$ 行保存为一个 HTML 文件。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "uiSavedPng": {
+    "message": "已将截图和笔记保存为 PNG。"
+  },
+  "uiSessionListReadFailed": {
+    "message": "无法读取已保存的笔记列表。"
+  },
+  "uiShowOlder": {
+    "message": "再显示 $p1$ 行较早的字幕",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiSpeechLanguage": {
+    "message": "说话语言"
+  },
+  "uiStartCaption": {
+    "message": "开始字幕"
+  },
+  "uiStop": {
+    "message": "停止"
+  },
+  "uiTagline": {
+    "message": "一边看课程一边看字幕，笔记集中在一处。"
+  },
+  "uiTimeline": {
+    "message": "时间轴"
+  },
+  "uiTimelineCounts": {
+    "message": "截图 $p1$ · 笔记 $p2$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "uiTimelineHint": {
+    "message": "点击截图会保存当前画面，点击仅添加笔记会记录当前播放位置，两者按时间顺序积累在这里。"
+  },
+  "uiTranscriptCleared": {
+    "message": "已清除 $p1$ 行字幕，笔记和截图保持不变。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiTranslateUnsupported": {
+    "message": "此 Chrome 没有内置翻译功能，字幕将按原语言显示。"
+  },
+  "uiTypeMemo": {
+    "message": "笔记"
+  },
+  "uiTypeVideoRegion": {
+    "message": "视频区域"
+  },
+  "uiTypeViewport": {
+    "message": "整个屏幕"
+  },
+  "uiVideoAt": {
+    "message": "视频 $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiViewing": {
+    "message": "查看中"
+  },
+  "untitled": {
+    "message": "无标题"
+  }
+}

@@ -26,6 +26,12 @@ body { margin: 0; }
 }
 h1 { font-size: 15px; margin: 0; letter-spacing: -0.2px; }
 .brand p { margin: 2px 0 0; font-size: 11px; color: var(--ink-3); }
+/* 화면 글자 언어 고르개. 제목 오른쪽 위에 작게 붙는다. */
+.ui-lang { flex: 0 0 auto; }
+.ui-lang select { font-size: 11px; font-weight: 600; color: var(--ink-2); background: var(--card);
+  border: 1px solid var(--line); border-radius: 8px; padding: 4px 6px; cursor: pointer; max-width: 116px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 /* lecture card */
 .lecture {
   display: grid; grid-template-columns: 84px 1fr; gap: 10px; align-items: center;
@@ -98,27 +104,16 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .listbar .ghost:last-child { margin-left: auto; }
 /* 컨트롤 바로 아래 붙는 보조 줄(영상 위 자막 토글 / 전체 저장) */
 .toolbar { margin-top: -4px; }
-/* 지금 무엇으로 보고 있는지(음성 언어 → 번역 언어)를 적은 버튼. 누르면 자막 설정이 펼쳐진다. */
-.toolbar .lang-summary { margin-left: auto; max-width: 52%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* 누르면 자막 설정이 펼쳐지는 버튼. 오른쪽 끝에 붙여 둔다. */
+.toolbar .lang-summary { margin-left: auto; white-space: nowrap; }
 
 /* 자막 설정. 사이드패널이 좁아서 평소에는 접어 두고, 펼치면 한 줄에 하나씩 세로로 쌓는다. */
-.settings .modes { border: 0; margin: 0 0 10px; padding: 0; display: grid; gap: 6px; }
-.settings legend { font-size: 11px; font-weight: 700; color: var(--ink-3); padding: 0 0 6px; }
-.settings .mode { display: flex; align-items: flex-start; gap: 8px; padding: 7px 9px; cursor: pointer;
-  border: 1px solid var(--line); border-radius: 9px; background: var(--card); }
-.settings .mode.on { border-color: var(--accent); background: var(--accent-soft); }
-.settings .mode input { margin: 2px 0 0; accent-color: var(--accent); }
-.settings .mode strong { display: block; font-size: 12px; }
-.settings .mode small { display: block; margin-top: 2px; font-size: 11px; color: var(--ink-3); line-height: 1.35; }
-.settings .mode input:disabled { cursor: not-allowed; }
-.settings .mode:has(input:disabled) { opacity: 0.55; cursor: not-allowed; }
+.settings .hint-line.lead { margin: 0 0 10px; }
 .settings .field { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .settings .field > span { font-size: 11px; font-weight: 700; color: var(--ink-3); }
 .settings .lang { margin-left: auto; max-width: 62%; font-size: 11px; font-weight: 600; color: var(--ink-2);
   background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 5px 6px; cursor: pointer; }
 .settings .lang:disabled { opacity: 0.5; cursor: not-allowed; }
-/* 번역문은 원문 바로 아래 줄에. 색으로 원문과 구분한다. */
-.line .translated { display: block; margin-top: 3px; color: var(--accent); }
 /* 아직 확정되지 않은 줄. 곧 바뀔 글자라는 것이 보이게 흐리게 둔다. */
 .line.live p { color: var(--ink-3); font-style: italic; }
 .line.live time { opacity: 0.6; letter-spacing: 1px; }

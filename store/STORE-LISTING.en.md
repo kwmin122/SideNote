@@ -48,16 +48,17 @@ Speech recognition runs through Chrome's built-in on-device recognizer, on your 
 are never uploaded. No account, no sign-in, no payment, no ads.
 
 ■ Translate the lecture as you watch
-Watching an English lecture but want Korean captions? Open [Caption settings] and choose how captions are shown —
-original, translated, or both at once — then pick the language to translate into. Every finished caption line gets its
-translation, in the panel and on the video overlay. Translation uses Chrome's built-in translator,
-which runs on this computer. No API key, no per-use cost, no server. Chrome downloads the translation model for your
-language pair the first time you use it, and support varies by device and language pair.
+Watching an English lecture but want Korean captions? Open [Caption settings] and set the caption language to Korean.
+What is being said is shown in that language, in the panel and on the video overlay. Pick the language that is being
+spoken and captions stay exactly as spoken. Translation uses Chrome's built-in translator, which runs on this computer.
+No API key, no per-use cost, no server. Chrome downloads the translation model for your language pair the first time
+you use it, and support varies by device and language pair.
 
-■ Choose your caption language
-Captions are not limited to one language. Pick from English, Korean, Japanese, Chinese, Spanish, French, German, Italian, Portuguese,
-Russian, Hindi, Arabic, Indonesian, Vietnamese, Thai, Turkish, Dutch, Polish, and Swedish. The interface itself follows your Chrome
-language. Chrome downloads the on-device speech pack for your chosen language the first time you use it.
+■ Choose your languages
+The spoken language can be English, Korean, Japanese, Chinese, Spanish, French, German, Italian, Portuguese,
+Russian, Hindi, Arabic, Indonesian, Vietnamese, Thai, Turkish, Dutch, Polish, or Swedish. The interface language is
+yours to pick in the top right of the panel — English, Korean, Japanese, Simplified Chinese, or whatever your browser
+uses. Chrome downloads the on-device speech pack for your chosen language the first time you use it.
 
 ■ Who it is for
 · Anyone taking notes while watching lecture recordings or MOOCs
@@ -125,7 +126,7 @@ Used to show captions, notes, and screen captures next to the lecture video with
 
 **storage**
 ```
-Used to keep settings such as the chosen caption language, the chosen translation language, and the current session identifier on this computer. Nothing is synced or transmitted.
+Used to keep settings such as the spoken language, the caption language, the interface language, and the current session identifier on this computer. Nothing is synced or transmitted.
 ```
 
 **activeTab**

@@ -296,8 +296,11 @@
   "uiCannotSwitchWhileCapturing": {
     "message": "You can't switch notes while captions are running. Press Stop first."
   },
-  "uiCaptionMode": {
-    "message": "Caption mode"
+  "uiCaptionLanguage": {
+    "message": "Caption language"
+  },
+  "uiCaptionLanguageSame": {
+    "message": "Pick the same language as the speech and captions stay exactly as spoken."
   },
   "uiCaptionSettings": {
     "message": "Caption settings"
@@ -305,8 +308,11 @@
   "uiCaptionSettingsHint": {
     "message": "Changes apply the next time you press [Start captions]."
   },
+  "uiCaptionSettingsLead": {
+    "message": "Captions are translated into the language you pick."
+  },
   "uiCaptionSettingsTitle": {
-    "message": "Choose the caption mode and languages."
+    "message": "Choose the caption language."
   },
   "uiCaptionsShort": {
     "message": "captions"
@@ -382,6 +388,9 @@
   "uiEmptyCaptions": {
     "message": "Press Start captions and the audio of the video you're watching will stack up here."
   },
+  "uiFollowBrowser": {
+    "message": "Browser language"
+  },
   "uiHistory": {
     "message": "History"
   },
@@ -391,8 +400,11 @@
   "uiImageLoadFailed": {
     "message": "Couldn't load the image."
   },
+  "uiInterfaceLanguage": {
+    "message": "Interface language"
+  },
   "uiLanguageChangeWhileLive": {
-    "message": "Stop captions first to change the language or mode."
+    "message": "Stop captions first to change the language."
   },
   "uiLectureMemo": {
     "message": "Lecture notes"
@@ -414,29 +426,6 @@
   },
   "uiMemoSaving": {
     "message": "Saving..."
-  },
-  "uiModeBoth": {
-    "message": "Original + translation"
-  },
-  "uiModeBothHint": {
-    "message": "Show the translation under the original."
-  },
-  "uiModeOriginal": {
-    "message": "Original"
-  },
-  "uiModeOriginalHint": {
-    "message": "Show the speech exactly as it is spoken."
-  },
-  "uiModeTranslated": {
-    "message": "Translated"
-  },
-  "uiModeTranslatedHint": {
-    "message": "Show it translated into $p1$.",
-    "placeholders": {
-      "p1": {
-        "content": "$1"
-      }
-    }
   },
   "uiNavCurrentCaptions": {
     "message": "Captions"
@@ -587,9 +576,6 @@
   },
   "uiTranslateUnsupported": {
     "message": "This Chrome has no built-in translator, so captions stay in the original language."
-  },
-  "uiTranslationLanguage": {
-    "message": "Translate into"
   },
   "uiTypeMemo": {
     "message": "Note"

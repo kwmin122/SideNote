@@ -296,8 +296,11 @@
   "uiCannotSwitchWhileCapturing": {
     "message": "자막을 받는 중에는 노트를 바꿀 수 없습니다. 먼저 종료를 눌러주세요."
   },
-  "uiCaptionMode": {
-    "message": "자막 모드"
+  "uiCaptionLanguage": {
+    "message": "자막 언어"
+  },
+  "uiCaptionLanguageSame": {
+    "message": "말하는 언어와 같은 언어를 고르면 옮기지 않고 말한 그대로 보여 줍니다."
   },
   "uiCaptionSettings": {
     "message": "자막 설정"
@@ -305,8 +308,11 @@
   "uiCaptionSettingsHint": {
     "message": "설정은 다음 [자막 시작] 부터 적용됩니다."
   },
+  "uiCaptionSettingsLead": {
+    "message": "말하는 내용을 선택한 언어로 번역해 표시합니다."
+  },
   "uiCaptionSettingsTitle": {
-    "message": "자막 모드와 언어를 고릅니다."
+    "message": "자막 언어를 고릅니다."
   },
   "uiCaptionsShort": {
     "message": "자막"
@@ -382,6 +388,9 @@
   "uiEmptyCaptions": {
     "message": "자막 시작을 누르면 지금 보고 있는 영상의 음성이 여기에 쌓입니다."
   },
+  "uiFollowBrowser": {
+    "message": "브라우저 언어"
+  },
   "uiHistory": {
     "message": "기록"
   },
@@ -391,8 +400,11 @@
   "uiImageLoadFailed": {
     "message": "이미지를 불러올 수 없습니다."
   },
+  "uiInterfaceLanguage": {
+    "message": "화면 언어"
+  },
   "uiLanguageChangeWhileLive": {
-    "message": "언어와 모드는 자막을 종료한 뒤에 바꿀 수 있습니다."
+    "message": "언어는 자막을 종료한 뒤에 바꿀 수 있습니다."
   },
   "uiLectureMemo": {
     "message": "강의 메모"
@@ -414,29 +426,6 @@
   },
   "uiMemoSaving": {
     "message": "저장 중..."
-  },
-  "uiModeBoth": {
-    "message": "원문 + 번역"
-  },
-  "uiModeBothHint": {
-    "message": "원문 아래에 번역을 함께 보여 줍니다."
-  },
-  "uiModeOriginal": {
-    "message": "원문"
-  },
-  "uiModeOriginalHint": {
-    "message": "말하는 그대로 자막으로 보여 줍니다."
-  },
-  "uiModeTranslated": {
-    "message": "번역"
-  },
-  "uiModeTranslatedHint": {
-    "message": "$p1$ 로 옮겨서 보여 줍니다.",
-    "placeholders": {
-      "p1": {
-        "content": "$1"
-      }
-    }
   },
   "uiNavCurrentCaptions": {
     "message": "현재 자막"
@@ -587,9 +576,6 @@
   },
   "uiTranslateUnsupported": {
     "message": "이 Chrome 에는 내장 번역기가 없어 원문 자막만 보여 줍니다."
-  },
-  "uiTranslationLanguage": {
-    "message": "번역 언어"
   },
   "uiTypeMemo": {
     "message": "메모"

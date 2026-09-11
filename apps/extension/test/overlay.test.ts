@@ -65,43 +65,35 @@ describe('번역이 켜져 있을 때 오버레이', () => {
   });
 });
 
-describe('자막 모드별로 무엇을 그리는가', () => {
-  const input = { finalText: 'How does a transformer work?', translation: '트랜스포머는 어떻게 작동하나요?', partial: 'It reads the', translating: true };
+describe('자막으로 무엇을 그리는가', () => {
+  const input = {
+    finalText: 'How does a transformer work?',
+    translation: '트랜스포머는 어떻게 작동하나요?',
+    partial: 'It reads the',
+    translating: true
+  };
 
-  it('원문 모드는 확정 줄과 진행 중인 줄을 원문으로 보여 준다', () => {
-    const view = buildCaptionView('original', input);
-    expect(view.text).toContain('How does a transformer work?');
-    expect(view.text).toContain('It reads the');
-    expect(view.text).not.toContain('트랜스포머');
-    expect(view.partial).toBe('It reads the');
-  });
-
-  it('번역 모드는 번역문만 보여 주고 진행 중인 줄은 내보내지 않는다', () => {
-    const view = buildCaptionView('translated', input);
+  it('옮길 때는 번역문만 보여 주고 진행 중인 줄은 내보내지 않는다', () => {
+    const view = buildCaptionView(input);
     expect(view.text).toBe('트랜스포머는 어떻게 작동하나요?');
     expect(view.text).not.toContain('How does');
     expect(view.partial).toBe('');
   });
 
-  it('번역이 아직 안 왔으면 번역 모드라도 원문을 보여 준다', () => {
-    const view = buildCaptionView('translated', { ...input, translation: '' });
+  it('번역이 아직 안 왔으면 원문을 그대로 보여 준다', () => {
+    const view = buildCaptionView({ ...input, translation: '' });
     expect(view.text).toBe('How does a transformer work?');
   });
 
-  it('원문 + 번역 모드는 두 줄로 나눠 보여 준다', () => {
-    const view = buildCaptionView('both', input);
-    expect(view.text.split('\n')).toEqual(['How does a transformer work?', '트랜스포머는 어떻게 작동하나요?']);
-    expect(view.partial).toBe('');
-  });
-
-  it('번역기가 없으면 무엇을 골랐든 원문으로 본다', () => {
-    const view = buildCaptionView('both', { ...input, translating: false });
+  it('말하는 언어와 자막 언어가 같으면 확정 줄과 진행 중인 줄을 그대로 보여 준다', () => {
+    const view = buildCaptionView({ ...input, translating: false });
+    expect(view.text).toContain('How does a transformer work?');
     expect(view.text).toContain('It reads the');
     expect(view.partial).toBe('It reads the');
   });
 
   it('아무것도 없으면 빈 화면이다', () => {
-    const view = buildCaptionView('translated', { finalText: '', translation: '', partial: '', translating: true });
+    const view = buildCaptionView({ finalText: '', translation: '', partial: '', translating: true });
     expect(view.text).toBe('');
     expect(view.partial).toBe('');
   });

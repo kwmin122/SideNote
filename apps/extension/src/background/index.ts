@@ -3,7 +3,10 @@ import type { CaptureResponse, ErrorCode, SessionStatus, STTConnectionStatus, St
 import { pickVideoFromFrames } from '../shared/capture';
 import { COMMAND_BY_MESSAGE, transition, type CaptureCommand } from '../shared/state';
 import { hideOverlay, showOverlay } from './overlay';
-import { t } from '../shared/i18n';
+import { applyStoredUiLanguage, t } from '../shared/i18n';
+
+// 오류 문구도 사용자가 고른 화면 언어로 나가야 한다. 서비스 워커는 자주 죽으므로 깰 때마다 한 번씩 얹는다.
+void applyStoredUiLanguage();
 
 const STATE_KEY = 'captureState';
 
@@ -188,7 +191,6 @@ async function runCommand(command: CaptureCommand, message: any) {
         contextPrompt: message.contextPrompt ?? '',
         language: message.language,
         translateTo: message.translateTo ?? '',
-        mode: message.mode ?? 'original',
         engine
       });
       const next = await writeState({
