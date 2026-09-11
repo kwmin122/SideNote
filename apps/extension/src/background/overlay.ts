@@ -10,12 +10,21 @@
 export const OVERLAY_ELEMENT_ID = 'study-sidepanel-caption-overlay';
 
 /** 주입 함수: 오버레이를 만들거나(이미 있으면) 문구만 바꾼다. 영상이 없는 프레임에서는 아무것도 하지 않는다. */
-function installCaptionOverlay(elementId: string, text: string): void {
+export function installCaptionOverlay(elementId: string, text: string): void {
   type Overlay = HTMLElement & { __studyUpdate?: (next: string) => void; __studyDispose?: () => void };
 
-  const existing = document.getElementById(elementId) as Overlay | null;
-  if (existing?.__studyUpdate) {
-    existing.__studyUpdate(text);
+  // 확장을 새로고침하면 이전 코드가 붙여 둔 오버레이가 갱신 함수를 잃은 채 페이지에 남는다.
+  // 그 요소를 놔두고 새로 만들면 갱신 시점이 다른 자막이 여러 장 겹쳐 보인다(id 중복이라 getElementById 로는 하나만 보인다).
+  // 그래서 그릴 때마다 같은 id 를 전부 훑어, 살아 있는 것 하나만 남기고 나머지는 걷어낸다.
+  const found = Array.from(document.querySelectorAll(`[id="${elementId}"]`)) as Overlay[];
+  const alive = found.find((el) => typeof el.__studyUpdate === 'function');
+  for (const el of found) {
+    if (el === alive) continue;
+    if (el.__studyDispose) el.__studyDispose();
+    else el.remove();
+  }
+  if (alive?.__studyUpdate) {
+    alive.__studyUpdate(text);
     return;
   }
 
@@ -144,12 +153,15 @@ function installCaptionOverlay(elementId: string, text: string): void {
   box.__studyUpdate(current);
 }
 
-/** 주입 함수: 오버레이를 걷어낸다. 없으면 아무 일도 하지 않는다. */
-function removeCaptionOverlay(elementId: string): void {
-  const el = document.getElementById(elementId) as (HTMLElement & { __studyDispose?: () => void }) | null;
-  if (!el) return;
-  if (el.__studyDispose) el.__studyDispose();
-  else el.remove();
+/** 주입 함수: 오버레이를 걷어낸다. 겹쳐 남은 것까지 전부 지운다. 없으면 아무 일도 하지 않는다. */
+export function removeCaptionOverlay(elementId: string): void {
+  const found = Array.from(document.querySelectorAll(`[id="${elementId}"]`)) as Array<
+    HTMLElement & { __studyDispose?: () => void }
+  >;
+  for (const el of found) {
+    if (el.__studyDispose) el.__studyDispose();
+    else el.remove();
+  }
 }
 
 /** 자막 한 줄을 영상 위에 그린다. 주입 실패(권한/특수 페이지)는 자막 자체를 막지 않으므로 삼킨다. */
