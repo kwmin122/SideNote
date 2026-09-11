@@ -12,6 +12,12 @@ export type CaptureType = 'VIDEO_REGION' | 'VIEWPORT' | 'MEMO';
  */
 export type SttEngine = 'chrome';
 
+/**
+ * 자막을 어떻게 보여줄지. 자막 기능은 하나이고 보여 주는 방식만 고른다.
+ * original = 말한 그대로, translated = 옮긴 말만, both = 원문 아래에 번역.
+ */
+export type CaptionMode = 'original' | 'translated' | 'both';
+
 export type ErrorCode =
   | 'TAB_NOT_FOUND'
   | 'TAB_CAPTURE_PERMISSION_DENIED'
@@ -146,13 +152,31 @@ export interface StatusPayload {
 }
 
 export type ExtensionMessage =
-  | { type: 'CAPTION_START'; tabId: number; sessionId: string; contextPrompt?: string; engine?: SttEngine }
+  | {
+      type: 'CAPTION_START';
+      tabId: number;
+      sessionId: string;
+      contextPrompt?: string;
+      engine?: SttEngine;
+      language?: string;
+      translateTo?: string;
+      mode?: CaptionMode;
+    }
   | { type: 'CAPTION_PAUSE' }
   | { type: 'CAPTION_RESUME' }
   | { type: 'CAPTION_STOP' }
   | { type: 'CAPTURE_REQUEST'; tabId: number }
   | { type: 'STATUS_GET' }
-  | { type: 'OFFSCREEN_START'; streamId: string; sessionId: string; contextPrompt: string; engine?: SttEngine }
+  | {
+      type: 'OFFSCREEN_START';
+      streamId: string;
+      sessionId: string;
+      contextPrompt: string;
+      engine?: SttEngine;
+      language?: string;
+      translateTo?: string;
+      mode?: CaptionMode;
+    }
   | { type: 'OFFSCREEN_PAUSE' }
   | { type: 'OFFSCREEN_RESUME' }
   | { type: 'OFFSCREEN_STOP' }

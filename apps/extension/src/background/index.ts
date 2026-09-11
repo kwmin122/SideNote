@@ -188,6 +188,7 @@ async function runCommand(command: CaptureCommand, message: any) {
         contextPrompt: message.contextPrompt ?? '',
         language: message.language,
         translateTo: message.translateTo ?? '',
+        mode: message.mode ?? 'original',
         engine
       });
       const next = await writeState({

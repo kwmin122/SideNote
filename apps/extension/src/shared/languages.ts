@@ -6,6 +6,11 @@
  * 실제로 쓸 수 있는지는 시작할 때 SpeechRecognition.available() 로 확인한다(없으면 언어팩을 받는다).
  * 이름은 그 언어 화자가 읽는 이름 그대로 둔다. UI 언어가 무엇이든 자기 언어를 찾을 수 있어야 하기 때문이다.
  */
+import type { CaptionMode } from './contracts';
+
+/** 화면에 보여 줄 순서. 사이드패널의 라디오 버튼이 이 순서를 그대로 쓴다. */
+export const CAPTION_MODES: readonly CaptionMode[] = ['original', 'translated', 'both'];
+
 export interface CaptionLanguage {
   /** BCP-47 태그. SpeechRecognition.lang 에 그대로 넣는다. */
   code: string;
@@ -106,4 +111,24 @@ export function translationSourceOf(captionCode: string): string {
 export function normalizeTranslationTarget(value: unknown): string {
   if (typeof value === 'string' && TRANSLATION_TARGETS.some((l) => l.code === value)) return value;
   return '';
+}
+
+/** 저장된 자막 모드가 목록에 없으면(예전 값) 원문으로 되돌린다. */
+export function normalizeCaptionMode(value: unknown): CaptionMode {
+  return CAPTION_MODES.includes(value as CaptionMode) ? (value as CaptionMode) : 'original';
+}
+
+/**
+ * 번역을 처음 켰을 때 고를 언어.
+ * 대개 자기가 읽는 언어로 옮겨 보므로 브라우저 UI 언어를 따르고,
+ * 그게 말하는 언어와 같으면(한국어 강의를 한국어로 옮길 일은 없다) 영어로, 영어면 한국어로 간다.
+ */
+export function defaultTranslationTarget(uiLang: string, source: string): string {
+  const want = (uiLang || '').toLowerCase();
+  const base = want.split('-')[0];
+  const exact = TRANSLATION_TARGETS.find((l) => l.code.toLowerCase() === want);
+  const sameLanguage = TRANSLATION_TARGETS.find((l) => l.code.toLowerCase().split('-')[0] === base);
+  const guess = exact?.code ?? sameLanguage?.code ?? 'en';
+  if (guess !== source) return guess;
+  return source === 'en' ? 'ko' : 'en';
 }

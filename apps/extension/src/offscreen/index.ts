@@ -1,11 +1,11 @@
 import { AUDIO_FRAME_SAMPLES, AUDIO_SAMPLE_RATE, config } from '../config';
-import type { ErrorCode, STTConnectionStatus, SttEngine, TranscriptSegment } from '../shared/contracts';
-import { buildOverlayText, isMeaningfulTranscript } from '../shared/transcripts';
+import type { CaptionMode, ErrorCode, STTConnectionStatus, SttEngine, TranscriptSegment } from '../shared/contracts';
+import { buildCaptionView, isMeaningfulTranscript } from '../shared/transcripts';
 import { db, lastTranscriptSequence } from '../storage/db';
 import { createSttProvider, type SttProvider } from '../transcription/provider';
 import { CaptionTranslator } from '../transcription/translator';
 import { CaptionDwell } from './dwell';
-import { translationSourceOf } from '../shared/languages';
+import { normalizeCaptionMode, translationSourceOf } from '../shared/languages';
 
 interface RunState {
   sessionId: string;
@@ -28,6 +28,10 @@ interface RunState {
   lastFinalTranslation: string;
   /** 말이 끊겼을 때 영상 위 자막을 걷어내는 타이머. */
   dwell?: CaptionDwell;
+  /** 자막을 어떻게 보여 줄지. 번역기가 없으면 무엇을 골랐든 원문으로 본다. */
+  mode: CaptionMode;
+  /** 마지막으로 내보낸 화면 내용. 같은 내용을 다시 보내지 않기 위한 것이다. */
+  lastSent?: string;
 }
 
 /** 새 자막이 오지 않을 때 영상 위 자막을 지우기까지 기다리는 시간. */
@@ -48,7 +52,8 @@ chrome.runtime.onMessage.addListener((message) => {
         message.contextPrompt ?? '',
         message.engine === 'chrome' ? 'chrome' : config.defaultSttEngine,
         typeof message.language === 'string' ? message.language : 'auto',
-        typeof message.translateTo === 'string' ? message.translateTo : ''
+        typeof message.translateTo === 'string' ? message.translateTo : '',
+        normalizeCaptionMode(message.mode)
       ).catch((err) => {
         report('TAB_CAPTURE_FAILED', String(err?.message ?? err));
       });
@@ -82,23 +87,29 @@ function broadcastSttStatus(stt: STTConnectionStatus, errorCode?: ErrorCode) {
 }
 
 /**
- * 영상 위 오버레이에 그릴 문구를 보낸다. 저장하지 않는 휘발성 메시지다.
+ * 영상 위 오버레이와 사이드패널의 진행 중인 줄을 보낸다. 저장하지 않는 휘발성 메시지다.
  *
- * 진행 중인 줄은 언제나 원문 그대로 흘려보낸다. 인식 결과는 말이 이어지는 동안 계속 고쳐 쓰이므로
- * (Today → Today we → Today we're) 그때마다 번역을 돌리면 화면이 출렁이고 연산만 버린다.
- * 번역은 줄이 확정된 다음에 붙고, 도착하면 윗줄이 번역문으로 바뀐다.
+ * 번역은 줄이 확정된 다음에만 돌린다. 인식 결과는 말이 이어지는 동안 계속 고쳐 쓰이므로
+ * (Today → Today we → Today we're) 그때마다 번역기를 돌리면 화면이 출렁이고 연산만 버린다.
+ * 무엇을 그릴지는 자막 모드가 정한다(shared/transcripts.ts buildCaptionView).
  */
 function broadcastCaptionLive(state: RunState, partialText: string) {
-  const translating = Boolean(state.translator);
-  // 번역을 기다리는 동안에도 화면이 비지 않도록, 번역이 아직이면 원문 확정 줄을 그대로 쓴다.
-  const finalLine = translating ? state.lastFinalTranslation || state.lastFinalText : state.lastFinalText;
-  const text = buildOverlayText(finalLine, partialText, translating);
-  // text 는 오버레이용으로 두 줄까지 잘라 놓은 것이다. 사이드패널은 진행 중인 줄을 통째로 쓴다.
-  void chrome.runtime
-    .sendMessage({ type: 'CAPTION_LIVE', sessionId: state.sessionId, text, partial: partialText })
-    .catch(() => {});
-  // 말이 끊기면 이 자막도 몇 초 뒤에 걷힌다. 다음 자막이 오면 다시 처음부터 센다.
-  state.dwell?.touch(text);
+  const view = buildCaptionView(state.mode, {
+    finalText: state.lastFinalText,
+    translation: state.lastFinalTranslation,
+    partial: partialText,
+    translating: Boolean(state.translator)
+  });
+  // 같은 내용을 다시 보내지 않는다. 확정 전의 줄은 초당 몇 번씩 들어온다.
+  const sent = `${view.text}\u0000${view.partial}`;
+  if (sent !== state.lastSent) {
+    state.lastSent = sent;
+    void chrome.runtime
+      .sendMessage({ type: 'CAPTION_LIVE', sessionId: state.sessionId, text: view.text, partial: view.partial })
+      .catch(() => {});
+  }
+  // 말이 끊기면 이 자막도 몇 초 뒤에 걷힌다. 말이 이어지는 동안에는 계속 다시 센다.
+  state.dwell?.touch(view.text);
 }
 
 async function start(
@@ -107,7 +118,8 @@ async function start(
   contextPrompt: string,
   engine: SttEngine,
   language: string,
-  translateTo: string
+  translateTo: string,
+  mode: CaptionMode
 ) {
   stop();
   paused = false;
@@ -160,7 +172,8 @@ async function start(
     // 같은 언어로 옮길 일은 없다. 번역기가 없는 Chrome 에서도 생성 자체는 안전하다(번역만 비어 나온다).
     translator: translateTo && translateTo !== translationSourceOf(language)
       ? new CaptionTranslator(translationSourceOf(language), translateTo)
-      : undefined
+      : undefined,
+    mode
   };
   run = state;
   state.dwell = new CaptionDwell(() => {
@@ -168,9 +181,7 @@ async function start(
     // 이전 줄을 기억해 두면 다음 자막에 다시 딸려 나온다. 화면과 함께 비운다.
     state.lastFinalText = '';
     state.lastFinalTranslation = '';
-    void chrome.runtime
-      .sendMessage({ type: 'CAPTION_LIVE', sessionId: state.sessionId, text: '', partial: '' })
-      .catch(() => {});
+    broadcastCaptionLive(state, '');
   }, CAPTION_HOLD_MS);
 
   if (processor) {

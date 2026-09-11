@@ -48,8 +48,9 @@ Speech recognition runs through Chrome's built-in on-device recognizer, on your 
 are never uploaded. No account, no sign-in, no payment, no ads.
 
 ■ Translate the lecture as you watch
-Watching an English lecture but want Korean captions? Pick a language to translate into and every finished caption line
-gets a translation right underneath it — and on the video overlay too. Translation uses Chrome's built-in translator,
+Watching an English lecture but want Korean captions? Open [Caption settings] and choose how captions are shown —
+original, translated, or both at once — then pick the language to translate into. Every finished caption line gets its
+translation, in the panel and on the video overlay. Translation uses Chrome's built-in translator,
 which runs on this computer. No API key, no per-use cost, no server. Chrome downloads the translation model for your
 language pair the first time you use it, and support varies by device and language pair.
 

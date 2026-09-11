@@ -296,11 +296,17 @@
   "uiCannotSwitchWhileCapturing": {
     "message": "You can't switch notes while captions are running. Press Stop first."
   },
-  "uiCaptionLanguage": {
-    "message": "Caption language"
+  "uiCaptionMode": {
+    "message": "Caption mode"
   },
-  "uiCaptionLanguageTitle": {
-    "message": "The language spoken in the lecture. Chrome downloads a speech pack for it on first use."
+  "uiCaptionSettings": {
+    "message": "Caption settings"
+  },
+  "uiCaptionSettingsHint": {
+    "message": "Changes apply the next time you press [Start captions]."
+  },
+  "uiCaptionSettingsTitle": {
+    "message": "Choose the caption mode and languages."
   },
   "uiCaptionsShort": {
     "message": "captions"
@@ -386,7 +392,7 @@
     "message": "Couldn't load the image."
   },
   "uiLanguageChangeWhileLive": {
-    "message": "Stop captions first to change the caption language."
+    "message": "Stop captions first to change the language or mode."
   },
   "uiLectureMemo": {
     "message": "Lecture notes"
@@ -408,6 +414,29 @@
   },
   "uiMemoSaving": {
     "message": "Saving..."
+  },
+  "uiModeBoth": {
+    "message": "Original + translation"
+  },
+  "uiModeBothHint": {
+    "message": "Show the translation under the original."
+  },
+  "uiModeOriginal": {
+    "message": "Original"
+  },
+  "uiModeOriginalHint": {
+    "message": "Show the speech exactly as it is spoken."
+  },
+  "uiModeTranslated": {
+    "message": "Translated"
+  },
+  "uiModeTranslatedHint": {
+    "message": "Show it translated into $p1$.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
   },
   "uiNavCurrentCaptions": {
     "message": "Captions"
@@ -519,6 +548,9 @@
       }
     }
   },
+  "uiSpeechLanguage": {
+    "message": "Spoken language"
+  },
   "uiStartCaption": {
     "message": "Start captions"
   },
@@ -553,22 +585,11 @@
       }
     }
   },
-  "uiTranslateInto": {
-    "message": "→ $p1$",
-    "placeholders": {
-      "p1": {
-        "content": "$1"
-      }
-    }
+  "uiTranslateUnsupported": {
+    "message": "This Chrome has no built-in translator, so captions stay in the original language."
   },
-  "uiTranslateOff": {
-    "message": "No translation"
-  },
-  "uiTranslateTo": {
-    "message": "Translate captions into"
-  },
-  "uiTranslateToTitle": {
-    "message": "Translate each finished caption line with Chrome’s built-in translator. It runs on this computer. Applies from the next [Start captions]."
+  "uiTranslationLanguage": {
+    "message": "Translate into"
   },
   "uiTypeMemo": {
     "message": "Note"

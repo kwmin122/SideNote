@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { config } from '../config';
 import type {
+  CaptionMode,
   CaptureRecord,
   CaptureResponse,
   ErrorCode,
@@ -27,9 +28,12 @@ import { requestLanguagePack } from '../transcription/chrome-speech';
 import { t, uiLanguage } from '../shared/i18n';
 import {
   CAPTION_LANGUAGES,
+  CAPTION_MODES,
   TRANSLATION_TARGETS,
   defaultCaptionLanguage,
+  defaultTranslationTarget,
   normalizeCaptionLanguage,
+  normalizeCaptionMode,
   normalizeTranslationTarget,
   translationSourceOf
 } from '../shared/languages';
@@ -165,9 +169,14 @@ function App() {
   /** 인식할 말소리의 언어. 화면 글자 언어(브라우저 설정)와 별개다. */
   const [lang, setLang] = useState(() => defaultCaptionLanguage(uiLanguage()));
   const langRef = useRef(lang);
-  /** 자막을 옮겨 볼 언어. '' 이면 번역하지 않는다. */
+  /** 자막을 옮겨 볼 언어. 번역 모드일 때만 쓴다. */
   const [translateTo, setTranslateTo] = useState('');
   const translateRef = useRef('');
+  /** 자막을 보여 주는 방식. 원문 / 번역 / 원문+번역. */
+  const [mode, setMode] = useState<CaptionMode>('original');
+  const modeRef = useRef<CaptionMode>('original');
+  /** 자막 설정(모드·언어)을 펼쳐 놓았는가. 패널이 좁아서 평소에는 접어 둔다. */
+  const [showSettings, setShowSettings] = useState(false);
   /** 이 Chrome 에 내장 번역기가 있는가. 없으면 번역 선택 자체를 감춘다. */
   const [canTranslate] = useState(() => translatorSupported());
 
@@ -469,15 +478,21 @@ function App() {
     // 예전 버전에서 고른 엔진 값이 남아 있을 수 있다. 이제 인식기는 Chrome 내장 하나뿐이라 읽지 않고 지운다.
     void chrome.storage.local.remove('sttEngine').catch(() => {});
     try {
-      const saved = await chrome.storage.local.get(['captionLang', 'translateTo']);
+      const saved = await chrome.storage.local.get(['captionLang', 'translateTo', 'captionMode']);
       const next = normalizeCaptionLanguage(saved?.captionLang, uiLanguage());
       langRef.current = next;
       setLang(next);
-      // 자막 언어와 같은 언어로 옮길 일은 없다. 예전에 고른 값이 겹치면 번역을 끈다.
+      // 자막 언어와 같은 언어로 옮길 일은 없다. 예전에 고른 값이 겹치면 다른 언어로 바꿔 준다.
       const target = normalizeTranslationTarget(saved?.translateTo);
-      const usable = target === translationSourceOf(next) ? '' : target;
+      const usable = target && target !== translationSourceOf(next)
+        ? target
+        : defaultTranslationTarget(uiLanguage(), translationSourceOf(next));
       translateRef.current = usable;
       setTranslateTo(usable);
+      // 번역기가 없는 Chrome 에서는 무엇이 저장돼 있든 원문으로 본다.
+      const savedMode = translatorSupported() ? normalizeCaptionMode(saved?.captionMode) : 'original';
+      modeRef.current = savedMode;
+      setMode(savedMode);
     } catch {
       /* 저장소를 못 읽으면 브라우저 언어에서 고른 기본값을 그대로 쓴다. */
     }
@@ -509,7 +524,7 @@ function App() {
     // 동기적으로 시작만 시켜 둔다. 이미 깔려 있으면 아무 일도 일어나지 않는다.
     if (type === 'CAPTION_START') {
       void requestLanguagePack(langRef.current);
-      if (translateRef.current) {
+      if (modeRef.current !== 'original' && translateRef.current) {
         void prepareTranslator(translationSourceOf(langRef.current), translateRef.current);
       }
     }
@@ -521,7 +536,9 @@ function App() {
         sessionId: current.id,
         contextPrompt: current.pageTitle,
         language: langRef.current,
-        translateTo: translateRef.current,
+        // 원문만 볼 때는 번역기를 아예 만들지 않는다.
+        translateTo: modeRef.current === 'original' ? '' : translateRef.current,
+        mode: modeRef.current,
         engine: config.defaultSttEngine
       });
       if (!res?.ok) {
@@ -662,8 +679,10 @@ function App() {
     setLang(next);
     void chrome.storage.local.set({ captionLang: next }).catch(() => {});
     void requestLanguagePack(next);
-    // 새 자막 언어와 번역 대상이 같아지면 번역할 것이 없다. 선택도 목록에서 사라지므로 함께 끈다.
-    if (translateRef.current && translateRef.current === translationSourceOf(next)) changeTranslateTo('');
+    // 새 자막 언어와 번역 대상이 같아지면 옮길 것이 없다. 목록에서도 사라지므로 다른 언어로 바꿔 둔다.
+    if (translateRef.current === translationSourceOf(next)) {
+      changeTranslateTo(defaultTranslationTarget(uiLanguage(), translationSourceOf(next)));
+    }
   }
 
   /** 자막을 옮겨 볼 언어 변경. 다음 [자막 시작] 부터 적용된다. */
@@ -672,7 +691,26 @@ function App() {
     setTranslateTo(next);
     void chrome.storage.local.set({ translateTo: next }).catch(() => {});
     // 이 change 도 사용자 제스처다. 여기서 번역 모델 내려받기를 미리 시작해 둔다.
-    if (next) void prepareTranslator(translationSourceOf(langRef.current), next);
+    if (next && modeRef.current !== 'original') {
+      void prepareTranslator(translationSourceOf(langRef.current), next);
+    }
+  }
+
+  /**
+   * 자막 모드 변경. 라디오 클릭도 사용자 제스처라, 여기서 번역 모델을 미리 데울 수 있다.
+   * 이미 자막이 돌고 있으면 다음 [자막 시작] 부터 적용된다(그래서 진행 중에는 잠가 둔다).
+   */
+  function changeMode(next: CaptionMode) {
+    modeRef.current = next;
+    setMode(next);
+    void chrome.storage.local.set({ captionMode: next }).catch(() => {});
+    if (next === 'original') return;
+    const source = translationSourceOf(langRef.current);
+    if (!translateRef.current || translateRef.current === source) {
+      changeTranslateTo(defaultTranslationTarget(uiLanguage(), source));
+      return;
+    }
+    void prepareTranslator(source, translateRef.current);
   }
 
   /** 영상 위 자막 오버레이 on/off. 끄면 배경이 즉시 걷어낸다. */
@@ -842,6 +880,25 @@ function App() {
   const clock = videoTime?.cur != null ? `${fmtClock(videoTime.cur)}${videoTime.dur ? ` / ${fmtClock(videoTime.dur)}` : ''}` : '';
   // 아이콘 클릭으로 이 탭을 "호출"하지 않으면 tabCapture 가 거부된다. 누르기 전에 미리 알려준다.
   const needsInvoke = !live && status !== 'PAUSED' && activeTabId != null && invokedTabId !== activeTabId;
+  // 자막이 도는 중에 언어를 바꾸면 인식기를 다시 띄워야 한다. 멈춘 뒤에 바꾸게 한다.
+  const settingsLocked = live || status === 'PAUSED';
+  const langLabel = CAPTION_LANGUAGES.find((item) => item.code === lang)?.label ?? lang;
+  const targetLabel = TRANSLATION_TARGETS.find((item) => item.code === translateTo)?.label ?? translateTo;
+  // 설정을 접어 둔 동안에도 지금 무엇으로 보고 있는지는 버튼에 적어 둔다.
+  const settingsSummary = mode === 'original' ? langLabel : `${langLabel} → ${targetLabel}`;
+  const modeHint: Record<CaptionMode, string> = {
+    original: t('uiModeOriginalHint'),
+    translated: t('uiModeTranslatedHint', targetLabel),
+    both: t('uiModeBothHint')
+  };
+  const modeLabel: Record<CaptionMode, string> = {
+    original: t('uiModeOriginal'),
+    translated: t('uiModeTranslated'),
+    both: t('uiModeBoth')
+  };
+  // 원문을 보여 주지 않는 모드에서는 확정 전의 줄도 보여 주지 않는다(번역은 확정된 뒤에 나온다).
+  const showOriginal = mode !== 'translated';
+  const showTranslation = mode !== 'original';
 
   return (
     <div className="app">
@@ -902,38 +959,85 @@ function App() {
         <button className="ghost" disabled={busy} onClick={() => void saveAll()}>
           {t('uiSaveAll')}
         </button>
-        <select
-          className="lang"
-          value={lang}
-          disabled={live || status === 'PAUSED'}
-          title={live || status === 'PAUSED' ? t('uiLanguageChangeWhileLive') : t('uiCaptionLanguageTitle')}
-          aria-label={t('uiCaptionLanguage')}
-          onChange={(e) => changeLanguage(e.target.value)}
+        <button
+          className={`ghost lang-summary ${showSettings ? 'accent' : ''}`}
+          onClick={() => setShowSettings((prev) => !prev)}
+          aria-expanded={showSettings}
+          title={t('uiCaptionSettingsTitle')}
         >
-          {CAPTION_LANGUAGES.map((item) => (
-            <option key={item.code} value={item.code}>
-              {item.label}
-            </option>
-          ))}
-        </select>
-        {canTranslate && (
-          <select
-            className="lang translate"
-            value={translateTo}
-            disabled={live || status === 'PAUSED'}
-            title={live || status === 'PAUSED' ? t('uiLanguageChangeWhileLive') : t('uiTranslateToTitle')}
-            aria-label={t('uiTranslateTo')}
-            onChange={(e) => changeTranslateTo(e.target.value)}
-          >
-            <option value="">{t('uiTranslateOff')}</option>
-            {TRANSLATION_TARGETS.filter((item) => item.code !== translationSourceOf(lang)).map((item) => (
-              <option key={item.code} value={item.code}>
-                {t('uiTranslateInto', item.label)}
-              </option>
-            ))}
-          </select>
-        )}
+          {settingsSummary} {showSettings ? '▴' : '▾'}
+        </button>
       </div>
+
+      {showSettings && (
+        <section className="block settings">
+          <div className="block-head">
+            <h2>{t('uiCaptionSettings')}</h2>
+          </div>
+          {canTranslate && (
+            <fieldset className="modes">
+              <legend>{t('uiCaptionMode')}</legend>
+              {CAPTION_MODES.map((item) => (
+                <label key={item} className={`mode ${mode === item ? 'on' : ''}`}>
+                  <input
+                    type="radio"
+                    name="caption-mode"
+                    value={item}
+                    checked={mode === item}
+                    disabled={settingsLocked}
+                    onChange={() => changeMode(item)}
+                  />
+                  <span>
+                    <strong>{modeLabel[item]}</strong>
+                    <small>{modeHint[item]}</small>
+                  </span>
+                </label>
+              ))}
+            </fieldset>
+          )}
+          <label className="field">
+            <span>{t('uiSpeechLanguage')}</span>
+            <select
+              className="lang"
+              value={lang}
+              disabled={settingsLocked}
+              aria-label={t('uiSpeechLanguage')}
+              onChange={(e) => changeLanguage(e.target.value)}
+            >
+              {CAPTION_LANGUAGES.map((item) => (
+                <option key={item.code} value={item.code}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          {canTranslate && mode !== 'original' && (
+            <label className="field">
+              <span>{t('uiTranslationLanguage')}</span>
+              <select
+                className="lang translate"
+                value={translateTo}
+                disabled={settingsLocked}
+                aria-label={t('uiTranslationLanguage')}
+                onChange={(e) => changeTranslateTo(e.target.value)}
+              >
+                {TRANSLATION_TARGETS.filter((item) => item.code !== translationSourceOf(lang)).map((item) => (
+                  <option key={item.code} value={item.code}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          <p className="hint-line">
+            {!canTranslate
+              ? t('uiTranslateUnsupported')
+              : settingsLocked
+                ? t('uiLanguageChangeWhileLive')
+                : t('uiCaptionSettingsHint')}
+          </p>
+        </section>
+      )}
 
       {showSessions && (
         <section className="block sessions">
@@ -1105,20 +1209,22 @@ function App() {
             </button>
           </div>
           <div className="transcript compact" ref={listRef} onScroll={onListScroll}>
-            {!items.length && !liveLine && (
+            {!items.length && !(liveLine && showOriginal) && (
               <p className="empty">{t('uiEmptyCaptions')}</p>
             )}
             {visible.map((item) => (
               <div key={item.id} className={item.status === 'FINAL' ? 'line final' : 'line partial'}>
                 <time>{fmtMs(item.startedAtMs)}</time>
                 <p>
-                  {item.text}
-                  {item.translation && <span className="translated">{item.translation}</span>}
+                  {showOriginal ? item.text : item.translation || item.text}
+                  {showOriginal && showTranslation && item.translation && (
+                    <span className="translated">{item.translation}</span>
+                  )}
                 </p>
                 <button onClick={() => void copy(lineToText(item), t('uiCopiedTranscript'))}>{t('uiCopy')}</button>
               </div>
             ))}
-            {liveLine && (
+            {liveLine && showOriginal && (
               <div className="line live">
                 <time>···</time>
                 <p>{liveLine}</p>

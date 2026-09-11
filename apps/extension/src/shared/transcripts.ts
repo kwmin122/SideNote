@@ -1,4 +1,4 @@
-import type { TranscriptSegment } from './contracts';
+import type { CaptionMode, TranscriptSegment } from './contracts';
 
 /** 같은 sequence 는 덮어쓰고, 항상 sequence 오름차순으로 정렬한다. */
 export function mergeSegment(list: TranscriptSegment[], incoming: TranscriptSegment): TranscriptSegment[] {
@@ -89,4 +89,27 @@ export function buildOverlayText(finalLine: string, partialLine: string, separat
   const combined = [final, partial].filter(Boolean).join(' ');
   if (!combined) return '';
   return wrapWords(combined, OVERLAY_LINE_CHARS).slice(-OVERLAY_MAX_LINES).join('\n');
+}
+
+/**
+ * 자막 모드에 맞춰 화면에 무엇을 그릴지 고른다.
+ *
+ * text 는 영상 위 오버레이(두 줄까지), partial 은 사이드패널에 흘려보낼 '아직 확정 전의 줄'이다.
+ * 확정 전의 줄은 원문을 보여 주는 모드에서만 내보낸다. 번역해서 보는 중에 원문 중간 결과까지
+ * 그리면 한 화면에 두 언어가 번갈아 깜빡인다.
+ */
+export function buildCaptionView(
+  mode: CaptionMode,
+  input: { finalText: string; translation: string; partial: string; translating: boolean }
+): { text: string; partial: string } {
+  const { finalText, translation, partial, translating } = input;
+  // 번역기가 없으면(지원하지 않는 Chrome, 내려받는 중) 무엇을 골랐든 원문으로 본다.
+  if (!translating || mode === 'original') {
+    return { text: buildOverlayText(finalText, partial), partial };
+  }
+  if (mode === 'translated') {
+    // 번역이 도착하기 전에는 원문이라도 보여 준다. 모델을 받는 동안 화면이 비지 않게.
+    return { text: buildOverlayText(translation || finalText, ''), partial: '' };
+  }
+  return { text: buildOverlayText(finalText, translation, true), partial: '' };
 }

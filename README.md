@@ -13,8 +13,8 @@ Chrome에서 재생 중인 강의 탭의 소리를 **Chrome 내장 기기 내(on
 - Chrome 139 이상이 필요합니다(`SpeechRecognition.available()` / `install()` / `processLocally`가 그 버전부터입니다).
 - 화면 글자는 브라우저 언어를 따라가고(영어·한국어 포함, `_locales/` 에 폴더를 더하면 언어 추가), 자막 언어는
   패널에서 22개 중 골라 씁니다.
-- **번역도 기기 안에서 합니다.** 자막 언어 옆에서 옮겨 볼 언어를 고르면 Chrome 내장 번역기(Translator API)가
-  확정된 자막 줄마다 번역을 붙입니다. 여기도 API 키·과금·서버가 없습니다.
+- **번역도 기기 안에서 합니다.** [자막 설정] 에서 보여 줄 방식을 원문 / 번역 / 원문+번역 중에 고르면
+  Chrome 내장 번역기(Translator API)가 확정된 자막 줄마다 번역을 붙입니다. 여기도 API 키·과금·서버가 없습니다.
 
 ---
 
@@ -30,8 +30,9 @@ in the right-hand Side Panel.
   video's captions, notes, and captures stay in [History].
 - If speech recognition fails, notes and captures keep working; if capture fails, captions and notes keep working.
 - Requires Chrome 139+ (`SpeechRecognition.available()` / `install()` / `processLocally` landed in that version).
-- **Translation runs on-device too.** Pick a language to translate into and Chrome's built-in Translator API
-  adds a translation under every finished caption line — again with no API key, no billing, no server.
+- **Translation runs on-device too.** Under [Caption settings] you choose how captions are shown — original,
+  translated, or both — and Chrome's built-in Translator API translates every finished caption line.
+  Again with no API key, no billing, no server.
 
 ### Languages
 
@@ -47,12 +48,16 @@ Vietnamese, Thai, Turkish, Dutch, Polish, Swedish). Chrome downloads the on-devi
 chosen language on first use; Chrome does not expose an API to enumerate which packs a given machine
 supports, so the extension checks availability at runtime and reports what it finds.
 
-The **translation language** is a third, optional choice, handled by Chrome's built-in Translator API
+The **caption mode** (original / translated / original + translation) and the **translation language** are two
+more choices, kept separate from the spoken language and handled by Chrome's built-in Translator API
 (Chrome 138+, on-device, no key and no per-call cost). `apps/extension/src/transcription/translator.ts`
 wraps it: it maps each caption locale to a translator code (`cmn-Hans-CN` → `zh`), creates one translator
 per session, and returns an empty string on every failure path — so an unsupported device or language pair
 loses the translation only, never the captions. Chrome downloads the language-pair model on first use, which
-is why the panel warms the translator up inside your click, the same way it warms the speech pack.
+is why the panel warms the translator up inside your click, the same way it warms the speech pack. Only
+**finished** lines are translated: interim recognition results keep being rewritten while someone speaks, so
+translating them would make the screen flicker for nothing. The original streams live in original mode, and the
+overlay clears itself after a few seconds of silence instead of leaving the last line on the video.
 
 ### Build it yourself
 
