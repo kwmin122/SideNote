@@ -18,15 +18,18 @@
 npm run release:chrome
 ```
 
-→ `release/sidenote-0.3.0.zip` 이 만들어지고, 업로드 전 검사 15가지가 자동으로 돌아갑니다.
+→ `release/sidenote-0.3.0.zip` 이 만들어지고, 업로드 전 검사 16가지가 자동으로 돌아갑니다.
 하나라도 FAIL 이면 스크립트가 실패로 끝나며, 그 상태로는 올리지 말라고 알려 줍니다.
 
-검사에 포함된 것 중 중요한 세 가지:
+검사에 포함된 것 중 중요한 것들:
 
 - **`manifest.json` 이 ZIP 최상단에 있는지** — 웹스토어는 `dist/manifest.json` 형태를 거절합니다.
 - **선언한 권한이 설명해 둔 7개(`sidePanel`, `activeTab`, `tabCapture`, `storage`, `offscreen`, `tabs`, `scripting`)뿐인지** —
   `store/STORE-LISTING.md` 에 사유를 적어 둔 목록과 대조합니다. 여기 없는 권한이 하나라도 들어오면 FAIL 입니다.
   `nativeMessaging` 은 따로 한 번 더 검사합니다(외부 엔진이 없으므로 절대 들어가면 안 됩니다).
+- **넓은 호스트 권한(`host_permissions`)이 없는지** — `http://*/*` 같은 패턴이 하나라도 있으면 설치 화면에
+  "방문하는 모든 웹사이트의 데이터 읽기/변경" 경고가 뜨고, 대시보드가 *"광범위한 호스트 권한 — 자세한 검토가
+  필요할 수 있습니다"* 라며 심사를 늦춥니다. SideNote 는 아이콘을 누른 탭에만 접근하므로 `activeTab` 하나로 충분합니다.
 - **`minimum_chrome_version` 이 139 이상인지** — 자막을 만드는 유일한 경로인 Chrome 기기 내 음성인식
   (`SpeechRecognition.available()` / `install()` / `processLocally`)이 Chrome 139부터입니다. 이 줄이 없으면
   구버전 사용자는 설치는 되는데 자막이 한 줄도 안 나오고, 심사자가 구버전으로 열면 죽은 확장으로 보입니다.

@@ -131,7 +131,7 @@ Used to keep settings such as the spoken language, the caption language, the int
 
 **activeTab**
 ```
-Used to identify the tab in which the user opened the side panel by clicking the extension icon, so captions and captures target that tab.
+This is the only way the extension reaches a page. Access is granted for the single tab where the user clicked the toolbar icon, and only from that click until the page navigates away. It is used to (1) identify the tab that captions and captures target, (2) read the position and playback time of the video playing in that tab, and (3) capture the screen at the moment the user asks for it. No broad host permissions (http://*/*, https://*/* or <all_urls>) are declared, and tabs the user has not clicked the icon on are never accessed.
 ```
 
 **tabs**
@@ -141,13 +141,12 @@ When the tab being captioned closes or navigates elsewhere, recording and the of
 
 **scripting**
 ```
-Used to read the on-screen position and playback time of the <video> element in the current tab, in order to (1) crop the screen capture to the video area, (2) record the playback position with the capture, and (3) draw the caption overlay on top of the video when the user turns it on. Page content is never collected or transmitted.
+Used only in the tab the user granted activeTab to by clicking the icon, to read the on-screen position and playback time of the <video> element, in order to (1) crop the screen capture to the video area, (2) record the playback position with the capture, and (3) draw the caption overlay on top of the video when the user turns it on. There are no automatically injected content scripts; injection happens only at the moment the user presses a button. Page content is never collected or transmitted.
 ```
 
-**host_permissions (http://*/*, https://*/*)**
-```
-Lectures are not limited to specific sites, so broad host access is needed to (1) locate the playing video on whichever lecture page the user is on and (2) capture the screen at the moment the user asks. Both actions happen only when the user presses a button. Page content is never read, stored, or transmitted, and there are no automatically injected content scripts.
-```
+> **No host_permissions are declared.** There is no field to paste them into, and the install screen shows no
+> "read and change all your data on the websites you visit" warning. Page access relies solely on activeTab,
+> granted for the tab where the user clicked the icon.
 
 ### Remote code
 ```

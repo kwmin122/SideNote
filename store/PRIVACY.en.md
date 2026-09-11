@@ -57,7 +57,11 @@ The extension does not talk to any external program or server. It makes no outbo
 - `storage` — to keep your settings (caption language, translation language) and session list on this computer.
 - `activeTab`, `tabs` — to identify the tab being captioned and captured, and to clean up recording when that tab closes or navigates away.
 - `scripting` — to read the on-screen position and playback time of the playing `<video>`, so captures can be cropped to the video area and captions can be overlaid on the video when you turn that on.
-- `host_permissions` (`http://*/*`, `https://*/*`) — because lectures can be on any site, and both of the above must work wherever you are watching. Page content is never read, stored, or transmitted.
+
+Broad host permissions such as `http://*/*` and `https://*/*` are **not declared.** The only way this extension
+reaches a page is `activeTab`, granted for the tab where you clicked the toolbar icon and revoked by Chrome when
+that page navigates. There are no automatically injected content scripts, and page content is never read, stored,
+or transmitted.
 
 ## Deleting your data
 

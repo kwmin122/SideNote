@@ -16,6 +16,9 @@
       }
     }
   },
+  "bgScreenshotPermission": {
+    "message": "To capture the screen, click the SideNote icon in the toolbar on the lecture tab once, then try again."
+  },
   "bgTabCaptureFailed": {
     "message": "Tab audio capture failed: $p1$",
     "placeholders": {
@@ -434,7 +437,7 @@
     "message": "Notes"
   },
   "uiNeedsInvoke": {
-    "message": "To capture this tab's audio, click the extension icon in the toolbar once. (Chrome resets this permission whenever the page navigates.)"
+    "message": "To use captions and captures on this tab, click the SideNote icon in the toolbar once. SideNote only works on the tab where you clicked the icon. (Chrome resets this permission whenever the page navigates.)"
   },
   "uiNewCaptionSession": {
     "message": "+ Start a new note"

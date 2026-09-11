@@ -7,6 +7,8 @@ Chrome에서 재생 중인 강의 탭의 소리를 **Chrome 내장 기기 내(on
 
 - 음성 인식은 전부 이 컴퓨터 안에서 돕니다. 외부 API도, API 키도, 과금도, 켜 둘 서버도 없습니다.
 - 설치는 확장 하나뿐입니다. 동반 프로그램(.pkg)도, `nativeMessaging` 권한도 쓰지 않습니다.
+- **모든 사이트 권한을 요구하지 않습니다.** 넓은 `host_permissions` 대신 `activeTab` 만 써서, 툴바 아이콘을 누른
+  그 탭에서만 동작합니다. 설치 화면에 "방문하는 모든 웹사이트의 데이터 읽기/변경" 경고가 뜨지 않습니다.
 - **영상마다 노트가 따로 생깁니다.** 다른 영상으로 넘어가면 자막이 자동으로 새로 시작되고, 이전 영상의
   자막·메모·캡처는 [기록] 에 남습니다.
 - STT가 실패해도 메모와 캡처는 계속 동작하고, 캡처가 실패해도 자막과 메모는 계속 동작합니다.
@@ -27,6 +29,9 @@ in the right-hand Side Panel.
 
 - Recognition runs entirely on your computer. No external API, no API key, no billing, no server to keep running.
 - One extension is the whole install. No companion program (`.pkg`), no `nativeMessaging` permission.
+- **It does not ask for access to every site.** Instead of broad `host_permissions` it uses `activeTab` alone, so it
+  works only on the tab where you clicked the toolbar icon — no "read and change all your data on the websites you
+  visit" warning at install time.
 - **Each video gets its own notebook.** Move to another video and captions restart automatically; the previous
   video's captions, notes, and captures stay in [History].
 - If speech recognition fails, notes and captures keep working; if capture fails, captions and notes keep working.
@@ -134,7 +139,8 @@ open apps/extension/dist
 
 1. 강의/인강 영상을 **재생**합니다.
 2. **그 강의 탭에서** 툴바의 **SideNote** 아이콘을 클릭합니다. 오른쪽에 Side Panel이 열립니다.
-   - 이 클릭이 Chrome이 요구하는 "사용자 호출"입니다. 이걸 해야 그 탭의 오디오를 캡처할 수 있습니다.
+   - 이 클릭이 Chrome이 요구하는 "사용자 호출"(`activeTab`)입니다. 이걸 해야 그 탭의 오디오 캡처·화면 캡처·영상 위 자막이 동작합니다.
+     SideNote 는 넓은 호스트 권한을 선언하지 않아, **아이콘을 누른 탭 말고는 어떤 페이지에도 접근하지 않습니다.**
    - **주소가 바뀌면(다른 강의로 이동, 새로고침) 권한이 회수됩니다.** 패널 위쪽에 노란 안내가 뜨면 아이콘을 한 번 더 누르세요.
 3. **자막 시작**을 누릅니다. Chrome이 탭 소리 공유를 물어보면 허용합니다.
    - 처음 한 번은 Chrome이 음성 인식 언어팩(ko-KR)을 내려받는 동안 잠시 기다릴 수 있습니다.
@@ -238,9 +244,9 @@ npm run release:chrome   # 웹스토어 ZIP → release/ (+ 업로드 전 검사
 npm run release:chrome
 ```
 
-`release/sidenote-<버전>.zip` 이 만들어지고 업로드 전 검사 13가지가 자동으로 돌아갑니다.
+`release/sidenote-<버전>.zip` 이 만들어지고 업로드 전 검사 16가지가 자동으로 돌아갑니다.
 이 ZIP 은 `manifest.json` 이 최상단에 있고, 설치 프로그램(.pkg)·macOS 부산물·소스맵은 들어가지 않으며,
-설명해 둔 권한 7개 외의 권한(특히 `nativeMessaging`)이 들어오면 FAIL 로 막습니다.
+설명해 둔 권한 7개 외의 권한(특히 `nativeMessaging`)이나 넓은 호스트 권한(`host_permissions`)이 들어오면 FAIL 로 막습니다.
 개발용 `apps/extension/dist/` 는 건드리지 않습니다(스토어 빌드는 `dist-store/` 에 따로 만듭니다).
 
 - 대시보드에 붙여 넣을 원고: `store/STORE-LISTING.md`

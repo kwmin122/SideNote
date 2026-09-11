@@ -16,6 +16,9 @@
       }
     }
   },
+  "bgScreenshotPermission": {
+    "message": "要截取画面，请先在课程标签页点击一次工具栏中的 SideNote 图标，然后重试。"
+  },
   "bgTabCaptureFailed": {
     "message": "标签页音频采集失败：$p1$",
     "placeholders": {
@@ -434,7 +437,7 @@
     "message": "笔记"
   },
   "uiNeedsInvoke": {
-    "message": "要采集此标签页的音频，请点击一次工具栏中的扩展图标。（按 Chrome 的规则，页面跳转后权限会被重置）"
+    "message": "要在此标签页使用字幕和截图，请点击一次工具栏中的 SideNote 图标。SideNote 仅在你点击过图标的标签页中工作。（按 Chrome 的规则，页面跳转后权限会被重置）"
   },
   "uiNewCaptionSession": {
     "message": "+ 开始新笔记"

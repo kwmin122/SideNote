@@ -269,13 +269,17 @@ async function ensureOffscreen() {
  * 모든 프레임에서 영상을 찾는다.
  * - 자르기 좌표(rect)는 최상위 프레임 것만 쓴다. iframe 좌표는 프레임 기준이라 그대로 자르면 엉뚱한 곳이 잘린다.
  * - 재생 위치(currentTime)는 프레임 좌표와 무관하므로 iframe 플레이어 것도 그대로 쓴다.
+ *
+ * 이 확장은 넓은 host_permissions 를 선언하지 않는다. 주입 권한은 아이콘 클릭으로 받은 activeTab 뿐이라
+ * 아이콘을 누르기 전이거나, 그 탭의 출처와 다른 iframe(다른 사이트에 embed 된 플레이어) 안은 주입이 막힌다.
+ * 그때는 예외를 그대로 삼키고 뷰포트 전체 캡처로 물러난다.
  */
 async function probeVideos(tabId: number): Promise<{ topRect: VideoRect | null; anyVideo: VideoRect | null }> {
   try {
     const frames = await chrome.scripting.executeScript({ target: { tabId, allFrames: true }, func: findPlayingVideoRect });
     return pickVideoFromFrames(frames.map((frame) => ({ frameId: frame.frameId, result: frame.result as VideoRect | null })));
   } catch {
-    // chrome:// 페이지 등 스크립트 주입 불가 → 뷰포트 전체로 폴백한다.
+    // chrome:// 페이지, 아이콘을 누르기 전, 다른 출처 iframe 등 스크립트 주입 불가 → 뷰포트 전체로 폴백한다.
     return { topRect: null, anyVideo: null };
   }
 }
@@ -301,7 +305,15 @@ async function captureScreen(tabId: number): Promise<CaptureResponse> {
     const dataUrl = await chrome.tabs.captureVisibleTab({ format: 'png' });
     return { ok: true, dataUrl, videoRect: topRect, videoTimeSec: anyVideo?.videoTimeSec, pageUrl };
   } catch (err) {
-    return { ok: false, error: t('bgScreenshotFailed', String((err as Error)?.message ?? err)), errorCode: 'SCREENSHOT_FAILED' };
+    const message = String((err as Error)?.message ?? err);
+    // captureVisibleTab 은 activeTab 이 있어야 한다. 아이콘을 누르기 전이거나 주소가 바뀐 뒤면 권한 오류가 난다.
+    // "캡처 실패" 로만 알리면 무엇을 눌러야 하는지 알 수 없으므로, 그 경우만 따로 안내한다.
+    const denied = /permission|activeTab|not allowed/i.test(message);
+    return {
+      ok: false,
+      error: denied ? t('bgScreenshotPermission') : t('bgScreenshotFailed', message),
+      errorCode: 'SCREENSHOT_FAILED'
+    };
   }
 }
 

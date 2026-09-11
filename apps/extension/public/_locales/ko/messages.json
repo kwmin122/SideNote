@@ -16,6 +16,9 @@
       }
     }
   },
+  "bgScreenshotPermission": {
+    "message": "화면을 캡처하려면 강의 탭에서 툴바의 SideNote 아이콘을 한 번 누른 뒤 다시 시도하세요."
+  },
   "bgTabCaptureFailed": {
     "message": "탭 오디오 캡처 실패: $p1$",
     "placeholders": {
@@ -434,7 +437,7 @@
     "message": "노트"
   },
   "uiNeedsInvoke": {
-    "message": "이 탭의 오디오를 캡처하려면 툴바의 확장 아이콘을 한 번 눌러주세요. (Chrome 정책상 페이지를 이동하면 권한이 초기화됩니다)"
+    "message": "이 탭에서 자막·캡처를 쓰려면 툴바의 SideNote 아이콘을 한 번 눌러주세요. SideNote 는 아이콘을 누른 탭에서만 동작합니다. (Chrome 정책상 페이지를 이동하면 권한이 초기화됩니다)"
   },
   "uiNewCaptionSession": {
     "message": "+ 새 자막 시작"

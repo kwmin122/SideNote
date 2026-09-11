@@ -16,6 +16,9 @@
       }
     }
   },
+  "bgScreenshotPermission": {
+    "message": "画面をキャプチャするには、講義タブでツールバーの SideNote アイコンを一度クリックしてから、もう一度お試しください。"
+  },
   "bgTabCaptureFailed": {
     "message": "タブ音声のキャプチャに失敗しました: $p1$",
     "placeholders": {
@@ -434,7 +437,7 @@
     "message": "ノート"
   },
   "uiNeedsInvoke": {
-    "message": "このタブの音声を取り込むには、ツールバーの拡張機能アイコンを一度クリックしてください。(Chrome の仕様上、ページを移動すると権限がリセットされます)"
+    "message": "このタブで字幕・キャプチャを使うには、ツールバーの SideNote アイコンを一度クリックしてください。SideNote はアイコンをクリックしたタブでのみ動作します。(Chrome の仕様上、ページを移動すると権限がリセットされます)"
   },
   "uiNewCaptionSession": {
     "message": "+ 新しいノートを開始"

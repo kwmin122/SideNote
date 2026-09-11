@@ -113,6 +113,15 @@ function main() {
   const extraPermissions = permissions.filter((name) => !ALLOWED_PERMISSIONS.has(name));
   check('설명해 둔 권한만 들어 있다 (nativeMessaging 등 추가 권한 없음)', extraPermissions.length === 0, extraPermissions.join(', '));
   check('nativeMessaging 권한이 없다 (외부 엔진 없음)', !permissions.includes('nativeMessaging'));
+  // 넓은 host_permissions 는 설치 화면에 "방문하는 모든 웹사이트의 데이터 읽기/변경" 을 띄우고,
+  // 웹스토어에서는 "광범위한 호스트 권한" 경고와 함께 심사가 길어진다.
+  // SideNote 는 사용자가 아이콘을 누른 탭에서만 동작하므로 activeTab 하나로 충분하다.
+  const hostPatterns = [...(manifest.host_permissions ?? []), ...(manifest.optional_host_permissions ?? [])];
+  check(
+    '광범위한 호스트 권한이 없다 (activeTab 만 사용)',
+    hostPatterns.length === 0,
+    hostPatterns.join(', ')
+  );
   check(
     'macOS 부산물(._, .DS_Store)이 없다',
     !listing.some((name) => name.includes('.DS_Store') || path.basename(name).startsWith('._')),
