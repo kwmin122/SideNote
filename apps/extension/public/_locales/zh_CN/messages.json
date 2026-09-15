@@ -1,6 +1,168 @@
 {
+  "aiChecking": {
+    "message": "正在检查此 Chrome 能否运行 AI…"
+  },
+  "aiContextButton": {
+    "message": "AI 读取的资料"
+  },
+  "aiContextCaptions": {
+    "message": "实时字幕"
+  },
+  "aiContextCaptureMemos": {
+    "message": "截图笔记"
+  },
+  "aiContextElided": {
+    "message": "…（省略 $p1$ 行）…",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "aiContextLead": {
+    "message": "只有勾选的内容会交给 AI。无论如何都不会离开这台电脑。"
+  },
+  "aiContextLecture": {
+    "message": "课程"
+  },
+  "aiContextMemo": {
+    "message": "我的笔记"
+  },
+  "aiContextScript": {
+    "message": "视频字幕"
+  },
+  "aiContextSize": {
+    "message": "大约会传入 $p1$ 个字符。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "aiDownloading": {
+    "message": "正在下载 AI 模型… $p1$%",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "aiEmpty": {
+    "message": "关于这门课随便问。AI 会读取：$p1$。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "aiEmptyAnswer": {
+    "message": "（没有回答）"
+  },
+  "aiExplainCapturePrompt": {
+    "message": "用几句话说明课程中这个画面展示了什么。"
+  },
+  "aiImageUnsupported": {
+    "message": "此 Chrome 的 AI 无法读取图片。"
+  },
+  "aiInputPlaceholder": {
+    "message": "就这门课提问。换行请按 Shift+Enter。"
+  },
+  "aiLocalHint": {
+    "message": "AI 在这台电脑的 Chrome 内运行。无需账号、无需 API 密钥，不会上传任何内容。"
+  },
+  "aiMakeStudyFile": {
+    "message": "生成学习文件"
+  },
+  "aiNeedsDownload": {
+    "message": "首次提问时会下载一次 AI 模型。下载期间请保持 Chrome 打开。"
+  },
+  "aiNewChat": {
+    "message": "新对话"
+  },
+  "aiNewChatStarted": {
+    "message": "已开始新对话。"
+  },
+  "aiNoCapture": {
+    "message": "还没有可提问的截图。"
+  },
+  "aiPickCaptureMemos": {
+    "message": "截图笔记"
+  },
+  "aiPickMemo": {
+    "message": "课程笔记"
+  },
+  "aiPickNothing": {
+    "message": "无"
+  },
+  "aiPickScript": {
+    "message": "视频字幕"
+  },
+  "aiPickTranscript": {
+    "message": "实时字幕"
+  },
+  "aiQuickCaptureLabel": {
+    "message": "解释这张截图"
+  },
+  "aiQuickSummary": {
+    "message": "用五个要点总结这门课。"
+  },
+  "aiQuickSummaryLabel": {
+    "message": "摘要"
+  },
+  "aiQuickTerms": {
+    "message": "列出这门课的关键术语，每个配一行说明。"
+  },
+  "aiQuickTermsLabel": {
+    "message": "关键术语"
+  },
+  "aiSend": {
+    "message": "提问"
+  },
+  "aiStop": {
+    "message": "停止"
+  },
+  "aiStopped": {
+    "message": "（已停止）"
+  },
+  "aiStudyFailed": {
+    "message": "AI 未能生成学习文件。请减少勾选的资料后重试。"
+  },
+  "aiStudyPrompt": {
+    "message": "把上面的课程资料整理成学习提纲：标题、简短摘要、分节要点、关键术语，以及几道复习题和答案。"
+  },
+  "aiStudySaved": {
+    "message": "已保存包含 $p1$ 个小节的学习文件。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "aiStudySource": {
+    "message": "来自 $p1$ 行视频字幕和 $p2$ 行实时字幕",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "aiSystemPrompt": {
+    "message": "你是学习助手。只根据给出的课程资料作答，并使用与提问相同的语言。资料中没有的内容请直说没有。回答要简短具体。"
+  },
+  "aiUnavailable": {
+    "message": "此 Chrome 无法运行内置 AI。"
+  },
+  "aiUnavailableHow": {
+    "message": "需要桌面版 Chrome 138 或更高版本以及足够的可用空间。其他功能不受影响。"
+  },
   "appDesc": {
     "message": "在本机把当前 Chrome 标签页的课程音频实时转成字幕，并把笔记和截图一起保存。"
+  },
+  "bgBadgeRunning": {
+    "message": "正在生成字幕"
   },
   "bgCurrentTabNotFound": {
     "message": "找不到当前标签页。"
@@ -18,6 +180,20 @@
   },
   "bgScreenshotPermission": {
     "message": "要截取画面，请先在课程标签页点击一次工具栏中的 SideNote 图标，然后重试。"
+  },
+  "bgScriptFailed": {
+    "message": "无法读取视频字幕：$p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "bgScriptNotFound": {
+    "message": "此视频没有可导入的字幕。"
+  },
+  "bgScriptPermission": {
+    "message": "请先在此标签页点击 SideNote 图标，然后重试。"
   },
   "bgTabCaptureFailed": {
     "message": "标签页音频采集失败：$p1$",
@@ -45,6 +221,12 @@
   "defaultLectureTitle": {
     "message": "课程"
   },
+  "err_AI_FAILED": {
+    "message": "AI 未能作答。"
+  },
+  "err_AI_UNAVAILABLE": {
+    "message": "此设备无法使用 AI。"
+  },
   "err_IMAGE_CROP_FAILED": {
     "message": "裁剪视频区域失败，已保存整个屏幕。"
   },
@@ -53,6 +235,12 @@
   },
   "err_SCREENSHOT_FAILED": {
     "message": "屏幕截图失败。"
+  },
+  "err_SCRIPT_FETCH_FAILED": {
+    "message": "无法读取字幕。"
+  },
+  "err_SCRIPT_NOT_FOUND": {
+    "message": "没有可导入的字幕。"
   },
   "err_STORAGE_READ_FAILED": {
     "message": "无法读取已保存的数据。"
@@ -287,6 +475,26 @@
       }
     }
   },
+  "studyFooter": {
+    "message": "由 SideNote 根据本课程资料生成，全部在这台电脑上完成。"
+  },
+  "studyGeneratedAt": {
+    "message": "生成于 $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "studyQuiz": {
+    "message": "复习题"
+  },
+  "studySummary": {
+    "message": "摘要"
+  },
+  "studyTerms": {
+    "message": "关键术语"
+  },
   "uiAddMemoOnly": {
     "message": "+ 仅添加笔记"
   },
@@ -406,6 +614,12 @@
   "uiInterfaceLanguage": {
     "message": "界面语言"
   },
+  "uiKeepAlive": {
+    "message": "关闭后继续"
+  },
+  "uiKeepAliveTitle": {
+    "message": "关闭侧边栏后仍继续生成字幕。关闭此开关后，侧边栏一关字幕就会停止。"
+  },
   "uiLanguageChangeWhileLive": {
     "message": "请先停止字幕，然后再更改语言。"
   },
@@ -430,11 +644,17 @@
   "uiMemoSaving": {
     "message": "正在保存..."
   },
+  "uiNavAi": {
+    "message": "AI"
+  },
   "uiNavCurrentCaptions": {
     "message": "字幕"
   },
   "uiNavNotes": {
     "message": "笔记"
+  },
+  "uiNavScript": {
+    "message": "脚本"
   },
   "uiNeedsInvoke": {
     "message": "要在此标签页使用字幕和截图，请点击一次工具栏中的 SideNote 图标。SideNote 仅在你点击过图标的标签页中工作。（按 Chrome 的规则，页面跳转后权限会被重置）"
@@ -528,6 +748,63 @@
   },
   "uiSavedPng": {
     "message": "已将截图和笔记保存为 PNG。"
+  },
+  "uiScriptAuto": {
+    "message": "自动生成"
+  },
+  "uiScriptCopied": {
+    "message": "已复制 $p1$ 行字幕。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiScriptDeleted": {
+    "message": "已删除导入的字幕。"
+  },
+  "uiScriptEmpty": {
+    "message": "点击[导入字幕]即可整段取回视频自带的字幕，无需播放或收听。"
+  },
+  "uiScriptHint": {
+    "message": "直接读取视频自带的字幕轨道，因此准确又快速。仅在你点击过 SideNote 图标的标签页、且该视频有字幕时可用。"
+  },
+  "uiScriptImport": {
+    "message": "导入字幕"
+  },
+  "uiScriptImportFailed": {
+    "message": "无法导入字幕。"
+  },
+  "uiScriptImported": {
+    "message": "已导入 $p1$ 行字幕（$p2$ 个字符）。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "uiScriptMeta": {
+    "message": "$p1$ · $p2$ 行 · $p3$ 个字符",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "uiScriptReimport": {
+    "message": "重新导入"
+  },
+  "uiScriptTrack": {
+    "message": "语言"
   },
   "uiSessionListReadFailed": {
     "message": "无法读取已保存的笔记列表。"

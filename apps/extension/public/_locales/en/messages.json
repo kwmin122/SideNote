@@ -1,6 +1,168 @@
 {
+  "aiChecking": {
+    "message": "Checking whether the AI can run on this Chrome…"
+  },
+  "aiContextButton": {
+    "message": "What the AI reads"
+  },
+  "aiContextCaptions": {
+    "message": "Live captions"
+  },
+  "aiContextCaptureMemos": {
+    "message": "Capture notes"
+  },
+  "aiContextElided": {
+    "message": "… ($p1$ lines omitted) …",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "aiContextLead": {
+    "message": "Only what you tick here is handed to the AI. Nothing leaves this computer either way."
+  },
+  "aiContextLecture": {
+    "message": "Lecture"
+  },
+  "aiContextMemo": {
+    "message": "My note"
+  },
+  "aiContextScript": {
+    "message": "Video subtitles"
+  },
+  "aiContextSize": {
+    "message": "About $p1$ characters will be handed over.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "aiDownloading": {
+    "message": "Downloading the AI model… $p1$%",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "aiEmpty": {
+    "message": "Ask anything about this lecture. The AI will read: $p1$.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "aiEmptyAnswer": {
+    "message": "(no answer)"
+  },
+  "aiExplainCapturePrompt": {
+    "message": "Explain what this screen from the lecture shows, in a few sentences."
+  },
+  "aiImageUnsupported": {
+    "message": "The AI on this Chrome cannot read images."
+  },
+  "aiInputPlaceholder": {
+    "message": "Ask about this lecture. Shift+Enter for a new line."
+  },
+  "aiLocalHint": {
+    "message": "The AI runs inside Chrome on this computer. No account, no API key, nothing uploaded."
+  },
+  "aiMakeStudyFile": {
+    "message": "Make study file"
+  },
+  "aiNeedsDownload": {
+    "message": "The AI model downloads once, the first time you ask. Keep Chrome open while it does."
+  },
+  "aiNewChat": {
+    "message": "New chat"
+  },
+  "aiNewChatStarted": {
+    "message": "Started a new chat."
+  },
+  "aiNoCapture": {
+    "message": "There is no capture to ask about yet."
+  },
+  "aiPickCaptureMemos": {
+    "message": "Capture notes"
+  },
+  "aiPickMemo": {
+    "message": "Lecture note"
+  },
+  "aiPickNothing": {
+    "message": "nothing"
+  },
+  "aiPickScript": {
+    "message": "Video subtitles"
+  },
+  "aiPickTranscript": {
+    "message": "Live captions"
+  },
+  "aiQuickCaptureLabel": {
+    "message": "Explain this capture"
+  },
+  "aiQuickSummary": {
+    "message": "Summarize this lecture in five bullet points."
+  },
+  "aiQuickSummaryLabel": {
+    "message": "Summary"
+  },
+  "aiQuickTerms": {
+    "message": "List the key terms in this lecture, each with a one-line explanation."
+  },
+  "aiQuickTermsLabel": {
+    "message": "Key terms"
+  },
+  "aiSend": {
+    "message": "Ask"
+  },
+  "aiStop": {
+    "message": "Stop"
+  },
+  "aiStopped": {
+    "message": "(stopped)"
+  },
+  "aiStudyFailed": {
+    "message": "The AI could not build a study file. Untick some materials and try again."
+  },
+  "aiStudyPrompt": {
+    "message": "Turn the lecture material above into a study sheet: a title, a short summary, sections with bullet points, key terms, and a few review questions with their answers."
+  },
+  "aiStudySaved": {
+    "message": "Saved a study file with $p1$ sections.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "aiStudySource": {
+    "message": "From $p1$ subtitle lines and $p2$ caption lines",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "aiSystemPrompt": {
+    "message": "You are a study assistant. Answer only from the lecture material given to you, in the same language as the question. If the material does not contain the answer, say so plainly. Keep answers short and concrete."
+  },
+  "aiUnavailable": {
+    "message": "This Chrome cannot run the built-in AI."
+  },
+  "aiUnavailableHow": {
+    "message": "It needs Chrome 138 or newer on a desktop with enough free disk space. Everything else in SideNote works without it."
+  },
   "appDesc": {
     "message": "Turns the audio of the lecture tab into live captions on your device, and keeps your notes and screenshots beside them."
+  },
+  "bgBadgeRunning": {
+    "message": "Captions are running"
   },
   "bgCurrentTabNotFound": {
     "message": "Can't find the current tab."
@@ -18,6 +180,20 @@
   },
   "bgScreenshotPermission": {
     "message": "To capture the screen, click the SideNote icon in the toolbar on the lecture tab once, then try again."
+  },
+  "bgScriptFailed": {
+    "message": "Could not read the video's subtitles: $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "bgScriptNotFound": {
+    "message": "This video has no subtitles to import."
+  },
+  "bgScriptPermission": {
+    "message": "Click the SideNote icon on this tab first, then try again."
   },
   "bgTabCaptureFailed": {
     "message": "Tab audio capture failed: $p1$",
@@ -45,6 +221,12 @@
   "defaultLectureTitle": {
     "message": "Lecture"
   },
+  "err_AI_FAILED": {
+    "message": "The AI could not answer."
+  },
+  "err_AI_UNAVAILABLE": {
+    "message": "The on-device AI is not available."
+  },
   "err_IMAGE_CROP_FAILED": {
     "message": "Cropping to the video area failed, so the whole screen was saved."
   },
@@ -53,6 +235,12 @@
   },
   "err_SCREENSHOT_FAILED": {
     "message": "Screen capture failed."
+  },
+  "err_SCRIPT_FETCH_FAILED": {
+    "message": "Could not read the subtitles."
+  },
+  "err_SCRIPT_NOT_FOUND": {
+    "message": "There are no subtitles to import."
   },
   "err_STORAGE_READ_FAILED": {
     "message": "Couldn't load the saved data."
@@ -287,6 +475,26 @@
       }
     }
   },
+  "studyFooter": {
+    "message": "Made by SideNote from this lecture's materials. Everything was generated on this computer."
+  },
+  "studyGeneratedAt": {
+    "message": "Made on $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "studyQuiz": {
+    "message": "Review questions"
+  },
+  "studySummary": {
+    "message": "Summary"
+  },
+  "studyTerms": {
+    "message": "Key terms"
+  },
   "uiAddMemoOnly": {
     "message": "+ Note only"
   },
@@ -406,6 +614,12 @@
   "uiInterfaceLanguage": {
     "message": "Interface language"
   },
+  "uiKeepAlive": {
+    "message": "Keep running"
+  },
+  "uiKeepAliveTitle": {
+    "message": "Keep making captions after you close this side panel. Turn it off and captions stop the moment the panel closes."
+  },
   "uiLanguageChangeWhileLive": {
     "message": "Stop captions first to change the language."
   },
@@ -430,11 +644,17 @@
   "uiMemoSaving": {
     "message": "Saving..."
   },
+  "uiNavAi": {
+    "message": "AI"
+  },
   "uiNavCurrentCaptions": {
     "message": "Captions"
   },
   "uiNavNotes": {
     "message": "Notes"
+  },
+  "uiNavScript": {
+    "message": "Script"
   },
   "uiNeedsInvoke": {
     "message": "To use captions and captures on this tab, click the SideNote icon in the toolbar once. SideNote only works on the tab where you clicked the icon. (Chrome resets this permission whenever the page navigates.)"
@@ -528,6 +748,63 @@
   },
   "uiSavedPng": {
     "message": "Saved the capture and its note as a PNG."
+  },
+  "uiScriptAuto": {
+    "message": "auto"
+  },
+  "uiScriptCopied": {
+    "message": "Copied $p1$ subtitle lines.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiScriptDeleted": {
+    "message": "Removed the imported subtitles."
+  },
+  "uiScriptEmpty": {
+    "message": "Press [Import subtitles] to bring in the subtitles this video already carries. Nothing has to be played or listened to."
+  },
+  "uiScriptHint": {
+    "message": "This reads the subtitle track the video itself carries, so it is exact and instant. It works on the tab where you clicked the SideNote icon, and only if that video has subtitles."
+  },
+  "uiScriptImport": {
+    "message": "Import subtitles"
+  },
+  "uiScriptImportFailed": {
+    "message": "Could not import the subtitles."
+  },
+  "uiScriptImported": {
+    "message": "Imported $p1$ subtitle lines ($p2$ characters).",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "uiScriptMeta": {
+    "message": "$p1$ · $p2$ lines · $p3$ characters",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "uiScriptReimport": {
+    "message": "Import again"
+  },
+  "uiScriptTrack": {
+    "message": "Language"
   },
   "uiSessionListReadFailed": {
     "message": "Couldn't read the saved note list."

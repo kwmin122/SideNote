@@ -19,6 +19,10 @@ export type ErrorCode =
   | 'VIDEO_ELEMENT_NOT_FOUND'
   | 'SCREENSHOT_FAILED'
   | 'IMAGE_CROP_FAILED'
+  | 'SCRIPT_NOT_FOUND'
+  | 'SCRIPT_FETCH_FAILED'
+  | 'AI_UNAVAILABLE'
+  | 'AI_FAILED'
   | 'STORAGE_WRITE_FAILED'
   | 'STORAGE_READ_FAILED'
   | 'STT_CONNECTION_FAILED'
@@ -84,6 +88,50 @@ export interface TranscriptSegment {
   translatedTo?: string;
 }
 
+/** 영상에 원래 들어 있던 자막 한 줄. 시각은 영상 재생 위치(초)다. */
+export interface ScriptLine {
+  startSec: number;
+  endSec?: number;
+  text: string;
+}
+
+/** 스크립트를 어디서 가져왔는가. player = 플레이어가 들고 있는 자막 트랙, texttrack = <video> 의 track 요소. */
+export type ScriptSource = 'player' | 'texttrack';
+
+/** 가져온 전체 스크립트 한 벌. 실시간 자막(transcripts)과 섞지 않고 따로 보관한다. */
+export interface ScriptRecord {
+  id: string;
+  sessionId: string;
+  source: ScriptSource;
+  /** 트랙 언어 코드(ko, en ...). 모르면 빈 값. */
+  lang: string;
+  /** 트랙 이름("한국어 (자동 생성)" 등). */
+  label: string;
+  pageUrl: string;
+  createdAt: number;
+  lines: ScriptLine[];
+}
+
+/** 페이지에서 고를 수 있는 자막 트랙 하나. */
+export interface CaptionTrackInfo {
+  lang: string;
+  label: string;
+  /** 자동 생성 자막이면 'asr'. 사람이 올린 자막을 먼저 고르는 데 쓴다. */
+  kind?: string;
+}
+
+export interface ScriptFetchResponse {
+  ok: boolean;
+  source?: ScriptSource;
+  lang?: string;
+  label?: string;
+  /** 그 페이지에 있던 트랙 목록. 다른 언어로 다시 가져오게 화면에 보여 준다. */
+  tracks?: CaptionTrackInfo[];
+  lines?: ScriptLine[];
+  error?: string;
+  errorCode?: ErrorCode;
+}
+
 export interface CaptureRecord {
   id: string;
   sessionId: string;
@@ -141,6 +189,8 @@ export interface StatusPayload {
   invokedTabId?: number;
   /** 영상 위 자막 오버레이 사용 여부. */
   overlay?: boolean;
+  /** 사이드패널을 닫아도 자막·번역을 계속 돌릴지. */
+  keepAlive?: boolean;
   error?: string;
   errorCode?: ErrorCode;
 }
@@ -159,6 +209,9 @@ export type ExtensionMessage =
   | { type: 'CAPTION_RESUME' }
   | { type: 'CAPTION_STOP' }
   | { type: 'CAPTURE_REQUEST'; tabId: number }
+  | { type: 'VIDEO_TIME_GET'; tabId: number }
+  /** 영상에 원래 들어 있는 자막 트랙을 통째로 가져온다. lang 을 주면 그 언어 트랙을 고른다. */
+  | { type: 'SCRIPT_FETCH'; tabId: number; lang?: string }
   | { type: 'STATUS_GET' }
   | {
       type: 'OFFSCREEN_START';
@@ -178,5 +231,6 @@ export type ExtensionMessage =
   /** 확정 전 진행 중인 자막. 저장하지 않고 영상 위 오버레이에만 쓴다. */
   | { type: 'CAPTION_LIVE'; sessionId: string; text: string; partial: string }
   | { type: 'OVERLAY_SET'; enabled: boolean }
+  | { type: 'KEEP_ALIVE_SET'; enabled: boolean }
   | { type: 'STT_STATUS'; stt: STTConnectionStatus; errorCode?: ErrorCode }
   | { type: 'STATUS'; payload: StatusPayload };

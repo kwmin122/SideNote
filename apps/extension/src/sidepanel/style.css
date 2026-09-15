@@ -84,10 +84,10 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .install-actions .ghost { background: var(--card); }
 
 /* tabs */
-.tabs { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--line); }
+.tabs { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--line); }
 .tabs button {
   border: 0; background: transparent; border-radius: 0; border-bottom: 2px solid transparent;
-  color: var(--ink-3); padding: 9px 0; font-size: 13px;
+  color: var(--ink-3); padding: 9px 0; font-size: 12px; white-space: nowrap;
 }
 .tabs button.on { color: var(--accent); border-bottom-color: var(--accent); }
 .tabs em {
@@ -102,8 +102,8 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .ghost.accent { color: var(--accent); border-color: transparent; }
 .ghost.wide { width: 100%; }
 .listbar .ghost:last-child { margin-left: auto; }
-/* 컨트롤 바로 아래 붙는 보조 줄(영상 위 자막 토글 / 전체 저장) */
-.toolbar { margin-top: -4px; }
+/* 컨트롤 바로 아래 붙는 보조 줄(영상 위 자막 토글 / 패널 닫아도 계속 / 전체 저장) */
+.toolbar { margin-top: -4px; flex-wrap: wrap; row-gap: 6px; }
 /* 누르면 자막 설정이 펼쳐지는 버튼. 오른쪽 끝에 붙여 둔다. */
 .toolbar .lang-summary { margin-left: auto; white-space: nowrap; }
 
@@ -230,3 +230,39 @@ textarea:focus { border-color: var(--accent); background: #fff; }
 }
 .capture.memo-only { background: #fbfcfe; border-radius: 9px; padding: 9px; }
 .capture.memo-only + .capture { border-top: 1px solid var(--line); }
+
+/* 영상에 원래 있던 자막(스크립트) */
+/* 설정 밖에서도 쓰는 한 줄 고르개. 자막 설정 안의 것과 모양을 맞춘다. */
+.field { display: flex; align-items: center; gap: 8px; }
+.field > span { font-size: 11px; font-weight: 700; color: var(--ink-3); }
+.field .lang { margin-left: auto; max-width: 62%; font-size: 11px; font-weight: 600; color: var(--ink-2);
+  background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 5px 6px; cursor: pointer; }
+/* 스크립트는 강의 전체라 줄이 아주 많다. 실시간 자막보다 넉넉히 보여 준다. */
+.script-list { max-height: 46vh; }
+.script-list .line:last-child { background: transparent; }
+.script-list .line:last-child:hover { background: #f7f9fc; }
+
+/* AI 대화 */
+.chat {
+  display: grid; gap: 8px; align-content: start; overflow-y: auto; max-height: 40vh;
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px;
+}
+.bubble { border-radius: 10px; padding: 8px 10px; max-width: 92%; }
+.bubble p { margin: 0; font-size: 12.5px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+.bubble.user { justify-self: end; background: var(--accent-soft); color: var(--ink); }
+.bubble.ai { justify-self: start; background: #f5f7fb; color: var(--ink); }
+.chat .empty { margin: 0; }
+.quick { display: flex; gap: 6px; flex-wrap: wrap; }
+.quick .ghost { flex: 1 1 auto; white-space: nowrap; }
+/* 마지막 버튼을 오른쪽 끝으로 미는 .listbar 규칙이 여기서는 방해가 된다. */
+.quick .ghost:last-child { margin-left: 0; }
+.composer { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: end; }
+.composer textarea { min-height: 56px; }
+.composer button { white-space: nowrap; align-self: stretch; }
+/* 대화에 넣을 자료 고르기 */
+.check { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 12px; color: var(--ink-2); }
+.check input { width: 15px; height: 15px; accent-color: var(--accent); }
+.check em {
+  font-style: normal; font-size: 10px; font-weight: 700; background: #eef1f6; color: var(--ink-3);
+  border-radius: 999px; padding: 1px 6px; margin-left: 4px;
+}

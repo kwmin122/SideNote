@@ -1,14 +1,35 @@
 import { config } from '../config';
-import type { CaptureResponse, ErrorCode, SessionStatus, STTConnectionStatus, StatusPayload, VideoRect, VideoTimeResponse } from '../shared/contracts';
+import type {
+  CaptureResponse,
+  ErrorCode,
+  ScriptFetchResponse,
+  ScriptLine,
+  SessionStatus,
+  STTConnectionStatus,
+  StatusPayload,
+  VideoRect,
+  VideoTimeResponse
+} from '../shared/contracts';
 import { pickVideoFromFrames } from '../shared/capture';
-import { COMMAND_BY_MESSAGE, transition, type CaptureCommand } from '../shared/state';
+import { COMMAND_BY_MESSAGE, badgeTextFor, shouldStopOnPanelClose, transition, type CaptureCommand } from '../shared/state';
+import {
+  normalizeScriptLines,
+  parseJson3,
+  pickCaptionTrack,
+  trackInfo,
+  type RawCaptionTrack
+} from '../shared/script';
 import { hideOverlay, showOverlay } from './overlay';
-import { applyStoredUiLanguage, t } from '../shared/i18n';
+import { applyStoredUiLanguage, t, uiLanguage } from '../shared/i18n';
 
 // 오류 문구도 사용자가 고른 화면 언어로 나가야 한다. 서비스 워커는 자주 죽으므로 깰 때마다 한 번씩 얹는다.
 void applyStoredUiLanguage();
 
 const STATE_KEY = 'captureState';
+/** "패널을 닫아도 계속"은 사용자가 고른 설정이다. 브라우저를 껐다 켜도 남아야 해서 local 에 둔다. */
+const KEEP_ALIVE_KEY = 'keepAlive';
+/** 사이드패널이 열려 있는 동안만 살아 있는 포트. 끊기는 순간이 곧 "패널을 닫았다"는 신호다. */
+export const PANEL_PORT = 'sidepanel';
 
 interface BackgroundState {
   status: SessionStatus;
@@ -19,17 +40,24 @@ interface BackgroundState {
   invokedTabId?: number;
   /** 영상 위 자막 오버레이 사용 여부. 기본은 켜짐. */
   overlay?: boolean;
+  /** 사이드패널을 닫아도 자막을 계속 돌릴지. 기본은 켜짐. */
+  keepAlive?: boolean;
   error?: string;
   errorCode?: ErrorCode;
 }
 
-const INITIAL: BackgroundState = { status: 'READY', stt: 'DISCONNECTED', overlay: true };
+const INITIAL: BackgroundState = { status: 'READY', stt: 'DISCONNECTED', overlay: true, keepAlive: true };
 
 /** 서비스 워커는 언제든 종료된다. 상태는 항상 chrome.storage.session 에서 읽고 쓴다. */
 async function readState(): Promise<BackgroundState> {
   try {
-    const stored = await chrome.storage.session.get(STATE_KEY);
-    return { ...INITIAL, ...(stored?.[STATE_KEY] as BackgroundState | undefined) };
+    // 진행 상태는 session(브라우저를 닫으면 사라짐), "패널을 닫아도 계속"은 local(계속 남음)에 있다.
+    const [stored, saved] = await Promise.all([
+      chrome.storage.session.get(STATE_KEY),
+      chrome.storage.local.get(KEEP_ALIVE_KEY)
+    ]);
+    const keepAlive = typeof saved?.[KEEP_ALIVE_KEY] === 'boolean' ? (saved[KEEP_ALIVE_KEY] as boolean) : true;
+    return { ...INITIAL, ...(stored?.[STATE_KEY] as BackgroundState | undefined), keepAlive };
   } catch {
     return { ...INITIAL };
   }
@@ -42,8 +70,25 @@ async function writeState(patch: Partial<BackgroundState>): Promise<BackgroundSt
   } catch {
     /* storage 실패해도 동작은 계속한다 */
   }
+  applyBadge(next);
   await broadcast(next);
   return next;
+}
+
+/**
+ * 아이콘 위 배지. 사이드패널을 닫아도 자막이 계속 돌기 때문에,
+ * 지금 받고 있는지 아닌지를 알 수 있는 곳이 툴바 아이콘밖에 없다.
+ */
+function applyBadge(state: BackgroundState) {
+  const text = badgeTextFor(state.status);
+  void chrome.action.setBadgeText({ text }).catch(() => {});
+  if (text) {
+    void chrome.action
+      .setBadgeBackgroundColor({ color: state.status === 'CAPTURING' ? '#d93025' : '#5f6368' })
+      .catch(() => {});
+  }
+  // 이름은 번역하지 않는다(스토어 등록명과 같아야 한다). 상태 설명만 화면 언어를 따른다.
+  void chrome.action.setTitle({ title: text ? `SideNote — ${t('bgBadgeRunning')}` : 'SideNote' }).catch(() => {});
 }
 
 /** 실패가 아닌 진행 상황. 사이드패널의 알림 줄에 그대로 뜬다. */
@@ -59,6 +104,7 @@ async function broadcast(state: BackgroundState) {
     tabId: state.tabId,
     invokedTabId: state.invokedTabId,
     overlay: state.overlay !== false,
+    keepAlive: state.keepAlive !== false,
     error: state.error,
     errorCode: state.errorCode
   };
@@ -81,7 +127,27 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.runtime.onStartup.addListener(() => {
   installActionBehavior();
   void chrome.storage.session.remove(STATE_KEY).catch(() => {});
+  void chrome.action.setBadgeText({ text: '' }).catch(() => {});
 });
+
+/**
+ * 사이드패널이 열려 있는 동안만 이 포트가 살아 있다.
+ * "패널을 닫아도 계속"이 꺼져 있으면 포트가 끊기는 순간 자막도 끝낸다(탭 소리를 계속 붙잡지 않는다).
+ * 켜져 있으면 아무것도 하지 않는다. 오프스크린 문서가 자막·번역·저장을 그대로 이어 간다.
+ */
+chrome.runtime.onConnect.addListener((port) => {
+  if (port.name !== PANEL_PORT) return;
+  port.onDisconnect.addListener(() => {
+    void onPanelClosed().catch(() => {});
+  });
+});
+
+async function onPanelClosed() {
+  const state = await readState();
+  if (!shouldStopOnPanelClose(state.status, state.keepAlive !== false)) return;
+  await teardown();
+  await writeState({ status: 'STOPPED', stt: 'DISCONNECTED' });
+}
 
 chrome.action.onClicked.addListener((tab) => {
   // open() 은 사용자 제스처 안에서 동기적으로 호출해야 한다. await 를 앞에 두면 제스처가 소멸한다.
@@ -106,7 +172,8 @@ const COMMANDS = new Set([
   'CAPTION_STOP',
   'CAPTURE_REQUEST',
   'STATUS_GET',
-  'VIDEO_TIME_GET'
+  'VIDEO_TIME_GET',
+  'SCRIPT_FETCH'
 ]);
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
@@ -126,6 +193,15 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       if (state.status !== 'CAPTURING' && state.status !== 'PAUSED') return;
       return showOverlay(state.tabId, String(message.text ?? ''));
     });
+    return false;
+  }
+  if (message?.type === 'KEEP_ALIVE_SET') {
+    const enabled = message.enabled !== false;
+    void chrome.storage.local
+      .set({ [KEEP_ALIVE_KEY]: enabled })
+      .catch(() => {})
+      .then(() => readState())
+      .then((state) => broadcast(state));
     return false;
   }
   if (message?.type === 'OVERLAY_SET') {
@@ -156,6 +232,7 @@ async function handleMessage(message: any): Promise<unknown> {
   }
   if (message.type === 'CAPTURE_REQUEST') return captureScreen(message.tabId);
   if (message.type === 'VIDEO_TIME_GET') return probeVideoTime(message.tabId);
+  if (message.type === 'SCRIPT_FETCH') return fetchScript(message.tabId, message.lang);
 
   const command = COMMAND_BY_MESSAGE[message.type];
   if (!command) return { ok: false, error: t('bgUnknownCommand') };
@@ -353,6 +430,153 @@ function findPlayingVideoRect(): VideoRect | null {
     videoTimeSec: Number.isFinite(chosen.currentTime) ? chosen.currentTime : undefined,
     durationSec: Number.isFinite(chosen.duration) ? chosen.duration : undefined
   };
+}
+
+/**
+ * 영상에 원래 들어 있는 자막(스크립트)을 통째로 가져온다.
+ *
+ * 자막 트랙 주소는 페이지와 같은 출처다. 확장에는 그 사이트의 호스트 권한이 없으므로
+ * 확장이 직접 받을 수 없고, 페이지(MAIN 월드)가 자기 이름으로 받아 오게 해야 한다.
+ * 그래서 "트랙 목록 읽기 → (여기서 고르기) → 고른 주소 받아 오기" 두 번에 나눠 주입한다.
+ * 플레이어가 트랙을 들고 있지 않으면 <video> 의 textTracks 로 물러난다.
+ */
+async function fetchScript(tabId: number, prefer?: string): Promise<ScriptFetchResponse> {
+  if (typeof tabId !== 'number') return { ok: false, error: t('bgCurrentTabNotFound'), errorCode: 'TAB_NOT_FOUND' };
+  let tracks: RawCaptionTrack[] = [];
+  try {
+    tracks = (await runInPage<RawCaptionTrack[]>(tabId, readCaptionTracks)) ?? [];
+    const chosen = pickCaptionTrack(tracks, prefer ?? '', uiLanguage());
+    if (chosen) {
+      const body = await runInPage<string>(tabId, fetchTrackText, [chosen.baseUrl]);
+      const lines = parseJson3(String(body ?? ''));
+      if (lines.length) {
+        return { ok: true, source: 'player', lang: chosen.lang, label: chosen.label, tracks: trackInfo(tracks), lines };
+      }
+    }
+    const fallback = await runInPage<{ lang: string; label: string; lines: ScriptLine[] }>(tabId, readTextTrackCues);
+    const lines = normalizeScriptLines(fallback?.lines ?? []);
+    if (lines.length) {
+      return {
+        ok: true,
+        source: 'texttrack',
+        lang: fallback?.lang ?? '',
+        label: fallback?.label ?? '',
+        tracks: trackInfo(tracks),
+        lines
+      };
+    }
+    return { ok: false, error: t('bgScriptNotFound'), errorCode: 'SCRIPT_NOT_FOUND', tracks: trackInfo(tracks) };
+  } catch (err) {
+    const message = String((err as Error)?.message ?? err);
+    // 아이콘을 누르기 전이면 activeTab 이 없어 주입 자체가 막힌다. 그때는 무엇을 눌러야 하는지 알려준다.
+    const denied = /permission|activeTab|not allowed|cannot access/i.test(message);
+    return {
+      ok: false,
+      error: denied ? t('bgScriptPermission') : t('bgScriptFailed', message),
+      errorCode: 'SCRIPT_FETCH_FAILED',
+      tracks: trackInfo(tracks)
+    };
+  }
+}
+
+/** 최상위 프레임에서만 돌린다. 스크립트는 좌표와 무관하고, iframe 까지 뒤지면 광고 프레임까지 건드리게 된다. */
+async function runInPage<T>(tabId: number, func: (...args: any[]) => unknown, args: unknown[] = []): Promise<T | undefined> {
+  const [frame] = await chrome.scripting.executeScript({
+    target: { tabId },
+    world: 'MAIN',
+    func: func as (...args: any[]) => unknown,
+    args: args as any[]
+  });
+  return frame?.result as T | undefined;
+}
+
+/**
+ * 주입 함수. 페이지가 들고 있는 자막 트랙 목록을 읽는다.
+ * 유튜브는 ytInitialPlayerResponse 전역에 담아 두고, 전역이 없을 때도 HTML 안에 같은 배열이 박혀 있다.
+ */
+function readCaptionTracks(): Array<{ lang: string; label: string; baseUrl: string; kind?: string }> {
+  const out: Array<{ lang: string; label: string; baseUrl: string; kind?: string }> = [];
+  const push = (list: unknown) => {
+    if (!Array.isArray(list)) return;
+    for (const item of list) {
+      const track = item as any;
+      const baseUrl = String(track?.baseUrl ?? '');
+      if (!baseUrl) continue;
+      const label = String(track?.name?.simpleText ?? track?.name?.runs?.[0]?.text ?? track?.languageCode ?? '');
+      out.push({
+        lang: String(track?.languageCode ?? ''),
+        label,
+        baseUrl,
+        kind: track?.kind ? String(track.kind) : undefined
+      });
+    }
+  };
+  push((window as any)?.ytInitialPlayerResponse?.captions?.playerCaptionsTracklistRenderer?.captionTracks);
+  if (out.length) return out;
+
+  // 전역이 없는 페이지도 있다. HTML 안에 박힌 배열을 통째로 잘라 읽는다.
+  // 대괄호만 세면 문자열 안의 "]" 에 걸려 잘못 자르므로, 따옴표 안쪽은 건너뛴다.
+  const html = document.documentElement.innerHTML;
+  const at = html.indexOf('"captionTracks"');
+  if (at < 0) return out;
+  const start = html.indexOf('[', at);
+  if (start < 0) return out;
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for (let i = start; i < html.length; i += 1) {
+    const ch = html[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === '\\') escaped = true;
+      else if (ch === '"') inString = false;
+      continue;
+    }
+    if (ch === '"') inString = true;
+    else if (ch === '[') depth += 1;
+    else if (ch === ']') {
+      depth -= 1;
+      if (depth === 0) {
+        try {
+          push(JSON.parse(html.slice(start, i + 1)));
+        } catch {
+          /* 형식이 바뀌었으면 포기하고 textTracks 로 물러난다 */
+        }
+        break;
+      }
+    }
+  }
+  return out;
+}
+
+/** 주입 함수. 고른 트랙을 페이지가 자기 이름으로 받아 온다(json3 = 시각이 붙은 JSON). */
+async function fetchTrackText(url: string): Promise<string> {
+  const target = /[?&]fmt=/.test(url) ? url : `${url}${url.includes('?') ? '&' : '?'}fmt=json3`;
+  const res = await fetch(target, { credentials: 'include' });
+  if (!res.ok) return '';
+  return await res.text();
+}
+
+/** 주입 함수. 플레이어가 트랙을 들고 있지 않을 때, <video> 에 붙은 자막 트랙의 큐를 읽는다. */
+async function readTextTrackCues(): Promise<{ lang: string; label: string; lines: Array<{ startSec: number; endSec?: number; text: string }> }> {
+  const empty = { lang: '', label: '', lines: [] as Array<{ startSec: number; endSec?: number; text: string }> };
+  const video = document.querySelector('video');
+  const tracks = video ? Array.from(video.textTracks) : [];
+  if (!tracks.length) return empty;
+  const chosen = tracks.find((track) => track.mode === 'showing') ?? tracks.find((track) => track.mode === 'hidden') ?? tracks[0];
+  const before = chosen.mode;
+  // 꺼져 있는 트랙은 cues 가 비어 있다. 잠깐 켜서 읽고 원래대로 되돌린다(화면에는 보이지 않는 hidden 이다).
+  if (before === 'disabled') chosen.mode = 'hidden';
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  const cues = chosen.cues ? Array.from(chosen.cues) : [];
+  const lines = cues.map((cue) => ({
+    startSec: Number((cue as any).startTime) || 0,
+    endSec: Number.isFinite(Number((cue as any).endTime)) ? Number((cue as any).endTime) : undefined,
+    // WebVTT 큐에는 <c.color> 같은 꾸밈 태그가 섞여 들어온다.
+    text: String((cue as any).text ?? '').replace(/<[^>]*>/g, ' ')
+  }));
+  if (chosen.mode !== before) chosen.mode = before;
+  return { lang: chosen.language ?? '', label: chosen.label ?? '', lines };
 }
 
 // 캡처 중이던 탭이 닫히거나 다른 페이지로 이동하면 캡처를 정리한다.

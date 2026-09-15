@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isCaptureLive, shouldResyncTab, transition } from '../src/shared/state';
+import { badgeTextFor, isCaptureLive, shouldResyncTab, shouldStopOnPanelClose, transition } from '../src/shared/state';
 
 describe('캡처 상태 전이 (명세 §20.5)', () => {
   it('READY → START 는 캡처를 시작한다', () => {
@@ -72,5 +72,39 @@ describe('자막이 끝난 뒤 현재 탭에 다시 맞추기', () => {
     expect(isCaptureLive('READY')).toBe(false);
     expect(isCaptureLive('STOPPED')).toBe(false);
     expect(isCaptureLive('ERROR')).toBe(false);
+  });
+});
+
+describe('아이콘 배지 (사이드패널을 닫아도 돌고 있는지 보여 준다)', () => {
+  it('자막을 받는 중에는 점을 찍는다', () => {
+    expect(badgeTextFor('CAPTURING')).toBe('●');
+  });
+
+  it('잠시 멈춤은 다른 표시를 쓴다', () => {
+    expect(badgeTextFor('PAUSED')).toBe('❚❚');
+  });
+
+  it('돌지 않을 때는 아무것도 찍지 않는다', () => {
+    expect(badgeTextFor('READY')).toBe('');
+    expect(badgeTextFor('STOPPED')).toBe('');
+    expect(badgeTextFor('ERROR')).toBe('');
+  });
+});
+
+describe('사이드패널을 닫았을 때 자막을 멈출지', () => {
+  it('"닫아도 계속"이 켜져 있으면 받던 자막을 그대로 둔다', () => {
+    expect(shouldStopOnPanelClose('CAPTURING', true)).toBe(false);
+    expect(shouldStopOnPanelClose('PAUSED', true)).toBe(false);
+  });
+
+  it('꺼져 있으면 닫는 순간 멈춘다', () => {
+    expect(shouldStopOnPanelClose('CAPTURING', false)).toBe(true);
+    expect(shouldStopOnPanelClose('PAUSED', false)).toBe(true);
+  });
+
+  it('원래 돌고 있지 않았다면 멈출 것도 없다', () => {
+    expect(shouldStopOnPanelClose('READY', false)).toBe(false);
+    expect(shouldStopOnPanelClose('STOPPED', false)).toBe(false);
+    expect(shouldStopOnPanelClose('ERROR', false)).toBe(false);
   });
 });

@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie';
-import type { CaptureRecord, StoredImageBlob, StudySession, TranscriptSegment } from '../shared/contracts';
+import type { CaptureRecord, ScriptRecord, StoredImageBlob, StudySession, TranscriptSegment } from '../shared/contracts';
 import { t } from '../shared/i18n';
 import { originOf, pageKeyOf } from '../shared/url';
 
@@ -10,6 +10,8 @@ export class StudyDb extends Dexie {
   transcripts!: Table<StoredTranscript, string>;
   captures!: Table<CaptureRecord, string>;
   imageBlobs!: Table<StoredImageBlob, string>;
+  /** 영상에 원래 들어 있던 자막을 통째로 가져온 것. 실시간 자막(transcripts)과 섞지 않는다. */
+  scripts!: Table<ScriptRecord, string>;
 
   constructor(name = 'study-sidepanel') {
     super(name);
@@ -61,6 +63,15 @@ export class StudyDb extends Dexie {
             session.pageKey = pageKeyOf(session.pageUrl);
           });
       });
+    // v4: 영상에 원래 들어 있던 자막을 통째로 가져오는 기능이 생겼다.
+    // 실시간 자막과 성격이 달라(시각 기준이 영상 재생 위치고, 한 번에 통째로 들어온다) 표를 따로 둔다.
+    this.version(4).stores({
+      sessions: 'id, pageKey, tabOrigin, updatedAt',
+      transcripts: 'id, sessionId, sequence, [sessionId+sequence]',
+      captures: 'id, sessionId, createdAt, imageBlobId',
+      imageBlobs: 'id, createdAt',
+      scripts: 'id, sessionId, createdAt'
+    });
   }
 }
 
@@ -163,6 +174,26 @@ export async function loadSessionBundle(sessionId: string) {
   return { transcripts, captures };
 }
 
+/**
+ * 가져온 스크립트를 이 노트에 붙인다. 한 노트에 한 벌만 둔다.
+ * 다시 가져오면(다른 언어 트랙으로 바꾸는 등) 이전 것을 지우고 새로 넣는다.
+ */
+export async function putScript(record: ScriptRecord): Promise<void> {
+  await db.transaction('rw', db.scripts, async () => {
+    await db.scripts.where('sessionId').equals(record.sessionId).delete();
+    await db.scripts.add(record);
+  });
+}
+
+export async function getScript(sessionId: string): Promise<ScriptRecord | undefined> {
+  const rows = await db.scripts.where('sessionId').equals(sessionId).sortBy('createdAt');
+  return rows[rows.length - 1];
+}
+
+export async function deleteScript(sessionId: string): Promise<number> {
+  return db.scripts.where('sessionId').equals(sessionId).delete();
+}
+
 /** 오프스크린 재시작 후에도 sequence 가 이어지도록 마지막 번호를 읽는다. */
 export async function lastTranscriptSequence(sessionId: string): Promise<number> {
   const rows = await db.transcripts.where('sessionId').equals(sessionId).sortBy('sequence');
@@ -195,12 +226,13 @@ export async function clearSessionTranscripts(sessionId: string): Promise<number
 }
 
 export async function deleteSession(sessionId: string): Promise<void> {
-  await db.transaction('rw', db.sessions, db.transcripts, db.captures, db.imageBlobs, async () => {
+  await db.transaction('rw', db.sessions, db.transcripts, db.captures, db.imageBlobs, db.scripts, async () => {
     const captures = await db.captures.where('sessionId').equals(sessionId).toArray();
     const blobIds = captures.map((c) => c.imageBlobId).filter((id): id is string => Boolean(id));
     await db.imageBlobs.bulkDelete(blobIds);
     await db.captures.bulkDelete(captures.map((c) => c.id));
     await db.transcripts.where('sessionId').equals(sessionId).delete();
+    await db.scripts.where('sessionId').equals(sessionId).delete();
     await db.sessions.delete(sessionId);
   });
 }

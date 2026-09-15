@@ -2,10 +2,13 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { config } from '../config';
 import type {
+  CaptionTrackInfo,
   CaptureRecord,
   CaptureResponse,
   ErrorCode,
   SaveStatus,
+  ScriptFetchResponse,
+  ScriptRecord,
   SessionStatus,
   StatusPayload,
   StudySession,
@@ -15,6 +18,7 @@ import { errorMessage } from '../shared/contracts';
 import { captureTypeFor, computeCropRect } from '../shared/capture';
 import { pageKeyOf } from '../shared/url';
 import { shouldResyncTab } from '../shared/state';
+import { formatScriptClock, scriptCharCount, scriptToText } from '../shared/script';
 import { capSegments, lineToText, mergeSegment, transcriptToText } from '../shared/transcripts';
 import {
   buildSessionHtml,
@@ -49,14 +53,18 @@ import {
   createFreshSession,
   db,
   deleteCapture,
+  deleteScript,
   deleteSession,
   getImageBlob,
   getOrCreateSession,
+  getScript,
   listSessions,
   loadSessionBundle,
   putImageBlob,
+  putScript,
   type SessionSummary
 } from '../storage/db';
+import { AiPanel } from './AiPanel';
 import './style.css';
 
 function fmtMs(ms?: number) {
@@ -158,7 +166,11 @@ function App() {
   const [activeTabId, setActiveTabId] = useState<number | undefined>(undefined);
   const [invokedTabId, setInvokedTabId] = useState<number | undefined>(undefined);
   // 자막은 이제 영상 위 오버레이가 주 화면이라 사이드패널 기본 화면은 노트다.
-  const [tab, setTab] = useState<'note' | 'caption'>('note');
+  const [tab, setTab] = useState<'note' | 'caption' | 'script' | 'ai'>('note');
+  /** 이 영상에 원래 들어 있던 자막을 통째로 가져온 것. 실시간 자막과 섞지 않는다. */
+  const [script, setScript] = useState<ScriptRecord | null>(null);
+  /** 그 영상이 가진 자막 트랙 목록. 다른 언어로 다시 가져올 때 고르는 데 쓴다. */
+  const [tracks, setTracks] = useState<CaptionTrackInfo[]>([]);
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [showSessions, setShowSessions] = useState(false);
   /** 현재 활성 탭의 pageKey. 열어둔 노트와 다르면 자막/캡처를 막는다. */
@@ -169,6 +181,8 @@ function App() {
   /** 아직 확정되지 않은 줄. 확정될 때까지 몇십 초 걸리기도 해서 오는 대로 보여준다. */
   const [liveLine, setLiveLine] = useState('');
   const [overlay, setOverlay] = useState(true);
+  /** 사이드패널을 닫아도 자막을 계속 받을지. 실제 값은 배경이 chrome.storage.local 에 들고 있다. */
+  const [keepAlive, setKeepAlive] = useState(true);
   const [videoTime, setVideoTime] = useState<{ cur?: number; dur?: number } | null>(null);
   /** 인식할 말소리의 언어. 화면 글자 언어(브라우저 설정)와 별개다. */
   const [lang, setLang] = useState(() => defaultCaptionLanguage(uiLanguage()));
@@ -206,6 +220,34 @@ function App() {
     };
   }, []);
 
+  // 배경이 "사이드패널이 닫혔다"를 알 수 있는 유일한 신호가 이 연결이 끊기는 것이다.
+  // 연결을 열어 두면 패널이 열려 있는 동안 서비스 워커도 깨어 있다.
+  // [패널 닫아도 계속] 이 꺼져 있을 때만 배경이 이 끊김을 보고 자막을 멈춘다.
+  useEffect(() => {
+    let alive = true;
+    let port: chrome.runtime.Port | undefined;
+    let timer: ReturnType<typeof setTimeout>;
+    const open = () => {
+      if (!alive) return;
+      try {
+        port = chrome.runtime.connect({ name: 'sidepanel' });
+        // 서비스 워커가 갈려 나가 끊긴 것일 수도 있다. 패널이 열려 있는 한 다시 잇는다.
+        port.onDisconnect.addListener(() => {
+          port = undefined;
+          if (alive) timer = setTimeout(open, 1000);
+        });
+      } catch {
+        if (alive) timer = setTimeout(open, 3000);
+      }
+    };
+    open();
+    return () => {
+      alive = false;
+      clearTimeout(timer);
+      port?.disconnect();
+    };
+  }, []);
+
   useEffect(() => {
     const handler = (message: any) => {
       if (message?.type === 'TRANSCRIPT') {
@@ -218,6 +260,7 @@ function App() {
         setStatus(payload.status);
         setInvokedTabId(payload.invokedTabId);
         if (payload.overlay != null) setOverlay(payload.overlay);
+        if (payload.keepAlive != null) setKeepAlive(payload.keepAlive);
         if (payload.error) showError(payload.error, payload.errorCode);
       }
       if (message?.type === 'CAPTION_LIVE') {
@@ -341,6 +384,9 @@ function App() {
     const bundle = await loadSessionBundle(current.id);
     setItems(capSegments(bundle.transcripts, config.maxTranscriptSegmentsInMemory));
     setCaptures([...bundle.captures].reverse());
+    // 스크립트는 노트에 딸린 것이라 노트를 갈아타면 같이 갈아탄다. 트랙 목록은 그 영상에서 다시 읽는다.
+    setTracks([]);
+    setScript((await getScript(current.id)) ?? null);
   }
 
   /**
@@ -503,6 +549,7 @@ function App() {
         setStatus(res.status as SessionStatus);
         setInvokedTabId(res.invokedTabId as number | undefined);
         if (res.overlay != null) setOverlay(Boolean(res.overlay));
+        if (res.keepAlive != null) setKeepAlive(Boolean(res.keepAlive));
       }
     } catch {
       /* 서비스 워커가 아직 안 떴을 수 있다. 사용자가 버튼을 누르면 다시 깨어난다. */
@@ -706,6 +753,75 @@ function App() {
     const next = !overlay;
     setOverlay(next);
     void chrome.runtime.sendMessage({ type: 'OVERLAY_SET', enabled: next }).catch(() => {});
+  }
+
+  /**
+   * 패널을 닫아도 자막을 계속 받을지 바꾼다.
+   * 자막을 만드는 곳은 원래부터 패널이 아니라 오프스크린 문서라, 켜 두면 패널을 닫아도 그대로 쌓인다.
+   * 끄면 패널을 닫는 순간 배경이 자막을 멈춘다(연결이 끊기는 것을 신호로 쓴다).
+   */
+  function toggleKeepAlive() {
+    const next = !keepAlive;
+    setKeepAlive(next);
+    void chrome.runtime.sendMessage({ type: 'KEEP_ALIVE_SET', enabled: next }).catch(() => {});
+  }
+
+  /**
+   * 이 영상에 원래 들어 있던 자막을 통째로 가져온다.
+   * 확장에는 유튜브 호스트 권한이 없어서 자막 주소를 직접 받을 수 없다. 페이지가 대신 받아 준다
+   * (그래서 아이콘을 눌러 activeTab 을 준 탭에서만 된다).
+   */
+  async function importScript(preferLang = '') {
+    const current = sessionRef.current;
+    if (!current || busy) return;
+    setBusy(true);
+    setError('');
+    try {
+      const [active] = await chrome.tabs.query({ active: true, currentWindow: true });
+      const res: ScriptFetchResponse = await chrome.runtime.sendMessage({
+        type: 'SCRIPT_FETCH',
+        tabId: active?.id,
+        lang: preferLang
+      });
+      if (res?.tracks) setTracks(res.tracks);
+      if (!res?.ok || !res.lines?.length) {
+        showError(res?.error ?? t('uiScriptImportFailed'), res?.errorCode ?? 'SCRIPT_NOT_FOUND');
+        return;
+      }
+      const record: ScriptRecord = {
+        id: crypto.randomUUID(),
+        sessionId: current.id,
+        source: res.source ?? 'player',
+        lang: res.lang ?? '',
+        label: res.label ?? '',
+        pageUrl: active?.url ?? current.pageUrl ?? '',
+        createdAt: Date.now(),
+        lines: res.lines
+      };
+      await putScript(record);
+      setScript(record);
+      setTab('script');
+      setNotice(t('uiScriptImported', record.lines.length, scriptCharCount(record.lines)));
+    } catch (err) {
+      showError(String(err), 'SCRIPT_FETCH_FAILED');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function removeScript() {
+    const current = sessionRef.current;
+    if (!current || busy) return;
+    setBusy(true);
+    try {
+      await deleteScript(current.id);
+      setScript(null);
+      setNotice(t('uiScriptDeleted'));
+    } catch (err) {
+      showError(String(err), 'STORAGE_WRITE_FAILED');
+    } finally {
+      setBusy(false);
+    }
   }
 
   function captureMeta(record: CaptureRecord): ExportCaptureMeta {
@@ -942,6 +1058,15 @@ function App() {
           <i />
           {t('uiOverlay')}
         </button>
+        <button
+          className={`switch ${keepAlive ? 'on' : ''}`}
+          onClick={toggleKeepAlive}
+          aria-pressed={keepAlive}
+          title={t('uiKeepAliveTitle')}
+        >
+          <i />
+          {t('uiKeepAlive')}
+        </button>
         <button className={`ghost ${showSessions ? 'accent' : ''}`} onClick={toggleSessions} aria-expanded={showSessions}>
           {t('uiHistory')} {showSessions ? '▴' : '▾'}
         </button>
@@ -1094,9 +1219,16 @@ function App() {
           {t('uiNavCurrentCaptions')}
           {items.length > 0 && <em>{items.length}</em>}
         </button>
+        <button className={tab === 'script' ? 'on' : ''} onClick={() => setTab('script')}>
+          {t('uiNavScript')}
+          {script != null && <em>{script.lines.length}</em>}
+        </button>
+        <button className={tab === 'ai' ? 'on' : ''} onClick={() => setTab('ai')}>
+          {t('uiNavAi')}
+        </button>
       </nav>
 
-      {tab === 'note' ? (
+      {tab === 'note' && (
         <>
           <section className="block">
             <div className="block-head">
@@ -1160,7 +1292,9 @@ function App() {
             ))}
           </section>
         </>
-      ) : (
+      )}
+
+      {tab === 'caption' && (
         <>
           <div className="listbar">
             <button className={`switch ${autoScroll ? 'on' : ''}`} onClick={toggleAutoScroll} aria-pressed={autoScroll}>
@@ -1206,6 +1340,80 @@ function App() {
             {t('uiOverlayHint')}
           </p>
         </>
+      )}
+
+      {tab === 'script' && (
+        <>
+          <div className="listbar">
+            <button className="ghost accent" disabled={busy || offTab} onClick={() => void importScript()}>
+              {script ? t('uiScriptReimport') : t('uiScriptImport')}
+            </button>
+            <button
+              className="ghost"
+              disabled={!script?.lines.length}
+              onClick={() => void copy(scriptToText(script?.lines ?? []), t('uiScriptCopied', script?.lines.length ?? 0))}
+            >
+              {t('uiCopyAll')}
+            </button>
+            {script && (
+              <button className="danger" disabled={busy} onClick={() => void removeScript()}>
+                {t('uiDelete')}
+              </button>
+            )}
+          </div>
+
+          {tracks.length > 1 && (
+            <label className="field">
+              <span>{t('uiScriptTrack')}</span>
+              <select
+                className="lang"
+                value={script?.lang ?? ''}
+                disabled={busy}
+                aria-label={t('uiScriptTrack')}
+                onChange={(e) => void importScript(e.target.value)}
+              >
+                {tracks.map((track) => (
+                  <option key={`${track.lang}-${track.kind ?? ''}`} value={track.lang}>
+                    {track.label || track.lang}
+                    {track.kind === 'asr' ? ` (${t('uiScriptAuto')})` : ''}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+
+          {!script ? (
+            <p className="empty">{t('uiScriptEmpty')}</p>
+          ) : (
+            <>
+              <p className="hint-line">
+                {t('uiScriptMeta', script.label || script.lang || '-', script.lines.length, scriptCharCount(script.lines))}
+              </p>
+              <div className="transcript compact script-list">
+                {script.lines.map((line, index) => (
+                  <div className="line final" key={`${line.startSec}-${index}`}>
+                    <time>{formatScriptClock(line.startSec)}</time>
+                    <p>{line.text}</p>
+                    <button onClick={() => void copy(line.text, t('uiCopiedTranscript'))}>{t('uiCopy')}</button>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+          <p className="hint-line">{t('uiScriptHint')}</p>
+        </>
+      )}
+
+      {tab === 'ai' && (
+        <AiPanel
+          session={session}
+          transcripts={items}
+          captures={captures}
+          script={script}
+          memo={memo}
+          onNotice={setNotice}
+          onError={showError}
+        />
       )}
     </div>
   );

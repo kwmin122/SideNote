@@ -1,6 +1,168 @@
 {
+  "aiChecking": {
+    "message": "이 Chrome 에서 AI 를 쓸 수 있는지 확인하는 중…"
+  },
+  "aiContextButton": {
+    "message": "AI 가 읽을 자료"
+  },
+  "aiContextCaptions": {
+    "message": "실시간 자막"
+  },
+  "aiContextCaptureMemos": {
+    "message": "캡처 메모"
+  },
+  "aiContextElided": {
+    "message": "… ($p1$줄 생략) …",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "aiContextLead": {
+    "message": "여기서 체크한 것만 AI 에게 넘어갑니다. 어느 쪽이든 이 컴퓨터 밖으로는 나가지 않습니다."
+  },
+  "aiContextLecture": {
+    "message": "강의"
+  },
+  "aiContextMemo": {
+    "message": "내 메모"
+  },
+  "aiContextScript": {
+    "message": "영상 자막"
+  },
+  "aiContextSize": {
+    "message": "약 $p1$자가 넘어갑니다.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "aiDownloading": {
+    "message": "AI 모델을 내려받는 중… $p1$%",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "aiEmpty": {
+    "message": "이 강의에 대해 무엇이든 물어보세요. AI 가 읽을 자료: $p1$.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "aiEmptyAnswer": {
+    "message": "(답이 없습니다)"
+  },
+  "aiExplainCapturePrompt": {
+    "message": "강의의 이 화면이 무엇을 보여 주는지 몇 문장으로 설명해 줘."
+  },
+  "aiImageUnsupported": {
+    "message": "이 Chrome 의 AI 는 이미지를 읽지 못합니다."
+  },
+  "aiInputPlaceholder": {
+    "message": "이 강의에 대해 물어보세요. 줄바꿈은 Shift+Enter."
+  },
+  "aiLocalHint": {
+    "message": "AI 는 이 컴퓨터의 Chrome 안에서 돕니다. 계정도, API 키도, 업로드도 없습니다."
+  },
+  "aiMakeStudyFile": {
+    "message": "공부파일 만들기"
+  },
+  "aiNeedsDownload": {
+    "message": "처음 물어볼 때 AI 모델을 한 번 내려받습니다. 받는 동안 Chrome 을 켜 두세요."
+  },
+  "aiNewChat": {
+    "message": "새 대화"
+  },
+  "aiNewChatStarted": {
+    "message": "새 대화를 시작했습니다."
+  },
+  "aiNoCapture": {
+    "message": "물어볼 캡처가 아직 없습니다."
+  },
+  "aiPickCaptureMemos": {
+    "message": "캡처 메모"
+  },
+  "aiPickMemo": {
+    "message": "강의 메모"
+  },
+  "aiPickNothing": {
+    "message": "아무것도 없음"
+  },
+  "aiPickScript": {
+    "message": "영상 자막"
+  },
+  "aiPickTranscript": {
+    "message": "실시간 자막"
+  },
+  "aiQuickCaptureLabel": {
+    "message": "이 캡처 설명"
+  },
+  "aiQuickSummary": {
+    "message": "이 강의를 다섯 줄로 요약해 줘."
+  },
+  "aiQuickSummaryLabel": {
+    "message": "요약"
+  },
+  "aiQuickTerms": {
+    "message": "이 강의의 핵심 용어를 한 줄 설명과 함께 뽑아 줘."
+  },
+  "aiQuickTermsLabel": {
+    "message": "핵심 용어"
+  },
+  "aiSend": {
+    "message": "물어보기"
+  },
+  "aiStop": {
+    "message": "중지"
+  },
+  "aiStopped": {
+    "message": "(중지했습니다)"
+  },
+  "aiStudyFailed": {
+    "message": "AI 가 공부파일을 만들지 못했습니다. 넣을 자료를 줄이고 다시 해 보세요."
+  },
+  "aiStudyPrompt": {
+    "message": "위 강의 자료로 공부용 정리본을 만들어 줘. 제목, 짧은 요약, 소제목별 핵심 정리, 핵심 용어, 복습 문제와 답을 담아 줘."
+  },
+  "aiStudySaved": {
+    "message": "소제목 $p1$개짜리 공부파일을 저장했습니다.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "aiStudySource": {
+    "message": "영상 자막 $p1$줄, 실시간 자막 $p2$줄에서",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "aiSystemPrompt": {
+    "message": "너는 공부를 돕는 조수다. 주어진 강의 자료 안에서만 답하고, 질문과 같은 언어로 답한다. 자료에 없는 내용이면 없다고 분명히 말한다. 짧고 구체적으로 답한다."
+  },
+  "aiUnavailable": {
+    "message": "이 Chrome 에서는 내장 AI 를 쓸 수 없습니다."
+  },
+  "aiUnavailableHow": {
+    "message": "데스크톱용 Chrome 138 이상과 여유 저장 공간이 필요합니다. AI 말고 다른 기능은 그대로 쓸 수 있습니다."
+  },
   "appDesc": {
     "message": "현재 Chrome 탭의 강의 오디오를 기기 안에서 실시간 자막으로 만들고, 메모와 캡처를 함께 저장합니다."
+  },
+  "bgBadgeRunning": {
+    "message": "자막을 받는 중"
   },
   "bgCurrentTabNotFound": {
     "message": "현재 탭을 찾을 수 없습니다."
@@ -18,6 +180,20 @@
   },
   "bgScreenshotPermission": {
     "message": "화면을 캡처하려면 강의 탭에서 툴바의 SideNote 아이콘을 한 번 누른 뒤 다시 시도하세요."
+  },
+  "bgScriptFailed": {
+    "message": "영상 자막을 읽지 못했습니다: $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "bgScriptNotFound": {
+    "message": "이 영상에는 가져올 자막이 없습니다."
+  },
+  "bgScriptPermission": {
+    "message": "이 탭에서 SideNote 아이콘을 한 번 누른 뒤 다시 시도해 주세요."
   },
   "bgTabCaptureFailed": {
     "message": "탭 오디오 캡처 실패: $p1$",
@@ -45,6 +221,12 @@
   "defaultLectureTitle": {
     "message": "강의"
   },
+  "err_AI_FAILED": {
+    "message": "AI 가 답하지 못했습니다."
+  },
+  "err_AI_UNAVAILABLE": {
+    "message": "이 기기에서 AI 를 쓸 수 없습니다."
+  },
   "err_IMAGE_CROP_FAILED": {
     "message": "영상 영역 자르기에 실패해 화면 전체를 저장했습니다."
   },
@@ -53,6 +235,12 @@
   },
   "err_SCREENSHOT_FAILED": {
     "message": "화면 캡처에 실패했습니다."
+  },
+  "err_SCRIPT_FETCH_FAILED": {
+    "message": "자막을 읽지 못했습니다."
+  },
+  "err_SCRIPT_NOT_FOUND": {
+    "message": "가져올 자막이 없습니다."
   },
   "err_STORAGE_READ_FAILED": {
     "message": "저장된 데이터를 불러오지 못했습니다."
@@ -287,6 +475,26 @@
       }
     }
   },
+  "studyFooter": {
+    "message": "SideNote 가 이 강의 자료로 만들었습니다. 전부 이 컴퓨터 안에서 만들어졌습니다."
+  },
+  "studyGeneratedAt": {
+    "message": "$p1$ 에 만듦",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "studyQuiz": {
+    "message": "복습 문제"
+  },
+  "studySummary": {
+    "message": "요약"
+  },
+  "studyTerms": {
+    "message": "핵심 용어"
+  },
   "uiAddMemoOnly": {
     "message": "+ 메모만 추가"
   },
@@ -406,6 +614,12 @@
   "uiInterfaceLanguage": {
     "message": "화면 언어"
   },
+  "uiKeepAlive": {
+    "message": "닫아도 계속"
+  },
+  "uiKeepAliveTitle": {
+    "message": "이 사이드패널을 닫아도 자막을 계속 받습니다. 끄면 패널을 닫는 순간 자막이 멈춥니다."
+  },
   "uiLanguageChangeWhileLive": {
     "message": "언어는 자막을 종료한 뒤에 바꿀 수 있습니다."
   },
@@ -430,11 +644,17 @@
   "uiMemoSaving": {
     "message": "저장 중..."
   },
+  "uiNavAi": {
+    "message": "AI"
+  },
   "uiNavCurrentCaptions": {
     "message": "현재 자막"
   },
   "uiNavNotes": {
     "message": "노트"
+  },
+  "uiNavScript": {
+    "message": "스크립트"
   },
   "uiNeedsInvoke": {
     "message": "이 탭에서 자막·캡처를 쓰려면 툴바의 SideNote 아이콘을 한 번 눌러주세요. SideNote 는 아이콘을 누른 탭에서만 동작합니다. (Chrome 정책상 페이지를 이동하면 권한이 초기화됩니다)"
@@ -528,6 +748,63 @@
   },
   "uiSavedPng": {
     "message": "캡처와 메모를 PNG 로 저장했습니다."
+  },
+  "uiScriptAuto": {
+    "message": "자동 생성"
+  },
+  "uiScriptCopied": {
+    "message": "자막 $p1$줄을 복사했습니다.",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiScriptDeleted": {
+    "message": "가져온 자막을 지웠습니다."
+  },
+  "uiScriptEmpty": {
+    "message": "[자막 가져오기] 를 누르면 이 영상에 원래 들어 있는 자막을 통째로 가져옵니다. 재생하거나 들을 필요가 없습니다."
+  },
+  "uiScriptHint": {
+    "message": "영상이 원래 들고 있는 자막을 그대로 읽어 오기 때문에 정확하고 빠릅니다. SideNote 아이콘을 누른 탭에서, 그 영상에 자막이 있을 때만 됩니다."
+  },
+  "uiScriptImport": {
+    "message": "자막 가져오기"
+  },
+  "uiScriptImportFailed": {
+    "message": "자막을 가져오지 못했습니다."
+  },
+  "uiScriptImported": {
+    "message": "자막 $p1$줄을 가져왔습니다($p2$자).",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "uiScriptMeta": {
+    "message": "$p1$ · $p2$줄 · $p3$자",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "uiScriptReimport": {
+    "message": "다시 가져오기"
+  },
+  "uiScriptTrack": {
+    "message": "언어"
   },
   "uiSessionListReadFailed": {
     "message": "저장된 노트 목록을 읽지 못했습니다."

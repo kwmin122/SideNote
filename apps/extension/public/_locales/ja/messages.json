@@ -1,6 +1,168 @@
 {
+  "aiChecking": {
+    "message": "この Chrome で AI を使えるか確認しています…"
+  },
+  "aiContextButton": {
+    "message": "AI が読む資料"
+  },
+  "aiContextCaptions": {
+    "message": "リアルタイム字幕"
+  },
+  "aiContextCaptureMemos": {
+    "message": "キャプチャのメモ"
+  },
+  "aiContextElided": {
+    "message": "…($p1$ 行省略)…",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "aiContextLead": {
+    "message": "ここでチェックしたものだけが AI に渡されます。いずれにせよこのパソコンの外には出ません。"
+  },
+  "aiContextLecture": {
+    "message": "講義"
+  },
+  "aiContextMemo": {
+    "message": "自分のメモ"
+  },
+  "aiContextScript": {
+    "message": "動画の字幕"
+  },
+  "aiContextSize": {
+    "message": "およそ $p1$ 文字が渡されます。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "aiDownloading": {
+    "message": "AI モデルをダウンロード中… $p1$%",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "aiEmpty": {
+    "message": "この講義について何でも聞いてください。AI が読む資料: $p1$。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "aiEmptyAnswer": {
+    "message": "(回答がありません)"
+  },
+  "aiExplainCapturePrompt": {
+    "message": "講義のこの画面が何を示しているのか、数文で説明してください。"
+  },
+  "aiImageUnsupported": {
+    "message": "この Chrome の AI は画像を読み取れません。"
+  },
+  "aiInputPlaceholder": {
+    "message": "この講義について質問してください。改行は Shift+Enter。"
+  },
+  "aiLocalHint": {
+    "message": "AI はこのパソコンの Chrome の中で動きます。アカウントも API キーもアップロードもありません。"
+  },
+  "aiMakeStudyFile": {
+    "message": "学習ファイルを作る"
+  },
+  "aiNeedsDownload": {
+    "message": "最初に質問したときに AI モデルを一度ダウンロードします。その間は Chrome を開いたままにしてください。"
+  },
+  "aiNewChat": {
+    "message": "新しい会話"
+  },
+  "aiNewChatStarted": {
+    "message": "新しい会話を始めました。"
+  },
+  "aiNoCapture": {
+    "message": "質問できるキャプチャがまだありません。"
+  },
+  "aiPickCaptureMemos": {
+    "message": "キャプチャのメモ"
+  },
+  "aiPickMemo": {
+    "message": "講義メモ"
+  },
+  "aiPickNothing": {
+    "message": "なし"
+  },
+  "aiPickScript": {
+    "message": "動画の字幕"
+  },
+  "aiPickTranscript": {
+    "message": "リアルタイム字幕"
+  },
+  "aiQuickCaptureLabel": {
+    "message": "このキャプチャを説明"
+  },
+  "aiQuickSummary": {
+    "message": "この講義を5つの箇条書きで要約してください。"
+  },
+  "aiQuickSummaryLabel": {
+    "message": "要約"
+  },
+  "aiQuickTerms": {
+    "message": "この講義の重要な用語を、1行の説明を添えて挙げてください。"
+  },
+  "aiQuickTermsLabel": {
+    "message": "重要な用語"
+  },
+  "aiSend": {
+    "message": "質問する"
+  },
+  "aiStop": {
+    "message": "停止"
+  },
+  "aiStopped": {
+    "message": "(停止しました)"
+  },
+  "aiStudyFailed": {
+    "message": "AI が学習ファイルを作れませんでした。渡す資料を減らしてもう一度お試しください。"
+  },
+  "aiStudyPrompt": {
+    "message": "上の講義資料から学習用のまとめを作ってください。タイトル、短い要約、見出しごとの要点、重要な用語、復習問題と答えを含めてください。"
+  },
+  "aiStudySaved": {
+    "message": "見出し $p1$ 件の学習ファイルを保存しました。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "aiStudySource": {
+    "message": "動画の字幕 $p1$ 行、リアルタイム字幕 $p2$ 行から",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "aiSystemPrompt": {
+    "message": "あなたは学習を助けるアシスタントです。与えられた講義資料の中だけで、質問と同じ言語で答えてください。資料にない内容ははっきりとないと伝えてください。短く具体的に答えてください。"
+  },
+  "aiUnavailable": {
+    "message": "この Chrome では内蔵 AI を利用できません。"
+  },
+  "aiUnavailableHow": {
+    "message": "デスクトップ版 Chrome 138 以降と十分な空き容量が必要です。AI 以外の機能はそのまま使えます。"
+  },
   "appDesc": {
     "message": "現在の Chrome タブの講義音声を端末内でリアルタイム字幕にし、メモとキャプチャを一緒に保存します。"
+  },
+  "bgBadgeRunning": {
+    "message": "字幕を取得中"
   },
   "bgCurrentTabNotFound": {
     "message": "現在のタブが見つかりません。"
@@ -18,6 +180,20 @@
   },
   "bgScreenshotPermission": {
     "message": "画面をキャプチャするには、講義タブでツールバーの SideNote アイコンを一度クリックしてから、もう一度お試しください。"
+  },
+  "bgScriptFailed": {
+    "message": "動画の字幕を読み取れませんでした: $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "bgScriptNotFound": {
+    "message": "この動画には取り込める字幕がありません。"
+  },
+  "bgScriptPermission": {
+    "message": "このタブで SideNote のアイコンを一度クリックしてから、もう一度お試しください。"
   },
   "bgTabCaptureFailed": {
     "message": "タブ音声のキャプチャに失敗しました: $p1$",
@@ -45,6 +221,12 @@
   "defaultLectureTitle": {
     "message": "講義"
   },
+  "err_AI_FAILED": {
+    "message": "AI が応答できませんでした。"
+  },
+  "err_AI_UNAVAILABLE": {
+    "message": "この端末では AI を利用できません。"
+  },
   "err_IMAGE_CROP_FAILED": {
     "message": "映像領域の切り抜きに失敗したため、画面全体を保存しました。"
   },
@@ -53,6 +235,12 @@
   },
   "err_SCREENSHOT_FAILED": {
     "message": "画面キャプチャに失敗しました。"
+  },
+  "err_SCRIPT_FETCH_FAILED": {
+    "message": "字幕を読み取れませんでした。"
+  },
+  "err_SCRIPT_NOT_FOUND": {
+    "message": "取り込める字幕がありません。"
   },
   "err_STORAGE_READ_FAILED": {
     "message": "保存されたデータを読み込めませんでした。"
@@ -287,6 +475,26 @@
       }
     }
   },
+  "studyFooter": {
+    "message": "SideNote がこの講義の資料から作成しました。すべてこのパソコンの中で生成されています。"
+  },
+  "studyGeneratedAt": {
+    "message": "$p1$ に作成",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "studyQuiz": {
+    "message": "復習問題"
+  },
+  "studySummary": {
+    "message": "要約"
+  },
+  "studyTerms": {
+    "message": "重要な用語"
+  },
   "uiAddMemoOnly": {
     "message": "+ メモのみ追加"
   },
@@ -406,6 +614,12 @@
   "uiInterfaceLanguage": {
     "message": "表示言語"
   },
+  "uiKeepAlive": {
+    "message": "閉じても継続"
+  },
+  "uiKeepAliveTitle": {
+    "message": "このサイドパネルを閉じても字幕を取り続けます。オフにするとパネルを閉じた時点で字幕が止まります。"
+  },
   "uiLanguageChangeWhileLive": {
     "message": "言語は字幕を終了してから変更できます。"
   },
@@ -430,11 +644,17 @@
   "uiMemoSaving": {
     "message": "保存中..."
   },
+  "uiNavAi": {
+    "message": "AI"
+  },
   "uiNavCurrentCaptions": {
     "message": "字幕"
   },
   "uiNavNotes": {
     "message": "ノート"
+  },
+  "uiNavScript": {
+    "message": "スクリプト"
   },
   "uiNeedsInvoke": {
     "message": "このタブで字幕・キャプチャを使うには、ツールバーの SideNote アイコンを一度クリックしてください。SideNote はアイコンをクリックしたタブでのみ動作します。(Chrome の仕様上、ページを移動すると権限がリセットされます)"
@@ -528,6 +748,63 @@
   },
   "uiSavedPng": {
     "message": "キャプチャとメモを PNG で保存しました。"
+  },
+  "uiScriptAuto": {
+    "message": "自動生成"
+  },
+  "uiScriptCopied": {
+    "message": "字幕 $p1$ 行をコピーしました。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "uiScriptDeleted": {
+    "message": "取り込んだ字幕を削除しました。"
+  },
+  "uiScriptEmpty": {
+    "message": "[字幕を取り込む] を押すと、この動画にもともと入っている字幕をまるごと取り込みます。再生も音声も必要ありません。"
+  },
+  "uiScriptHint": {
+    "message": "動画がもともと持っている字幕をそのまま読み取るので、正確で速いです。SideNote のアイコンを押したタブで、その動画に字幕がある場合にのみ使えます。"
+  },
+  "uiScriptImport": {
+    "message": "字幕を取り込む"
+  },
+  "uiScriptImportFailed": {
+    "message": "字幕を取り込めませんでした。"
+  },
+  "uiScriptImported": {
+    "message": "字幕 $p1$ 行を取り込みました($p2$ 文字)。",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "uiScriptMeta": {
+    "message": "$p1$ · $p2$ 行 · $p3$ 文字",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      },
+      "p3": {
+        "content": "$3"
+      }
+    }
+  },
+  "uiScriptReimport": {
+    "message": "取り込み直す"
+  },
+  "uiScriptTrack": {
+    "message": "言語"
   },
   "uiSessionListReadFailed": {
     "message": "保存されたノート一覧を読み込めませんでした。"

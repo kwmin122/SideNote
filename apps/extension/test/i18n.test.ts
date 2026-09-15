@@ -83,3 +83,46 @@ describe('고른 화면 언어로 글자 바꾸기', () => {
     expect(t('uiNoSuchKey')).toBe('uiNoSuchKey');
   });
 });
+
+describe('언어 파일 짝 맞추기', () => {
+  const LOCALES = ['en', 'ko', 'ja', 'zh_CN'];
+  const tables = Object.fromEntries(
+    LOCALES.map((locale) => [
+      locale,
+      JSON.parse(readFileSync(`public/_locales/${locale}/messages.json`, 'utf-8')) as Record<
+        string,
+        { message: string; placeholders?: Record<string, { content?: string }> }
+      >
+    ])
+  );
+
+  it('네 언어가 모두 같은 키를 가진다', () => {
+    const base = Object.keys(tables.en).sort();
+    for (const locale of LOCALES) {
+      expect({ locale, keys: Object.keys(tables[locale]).sort() }).toEqual({ locale, keys: base });
+    }
+  });
+
+  it('빈 문구가 없다', () => {
+    for (const locale of LOCALES) {
+      for (const [key, entry] of Object.entries(tables[locale])) {
+        expect(`${locale}.${key}=${entry.message.trim()}`).not.toMatch(/=$/);
+      }
+    }
+  });
+
+  it('자리표시자 개수가 언어마다 같다 (번역하다 $p2$ 를 빠뜨리면 화면에 빈칸이 남는다)', () => {
+    for (const key of Object.keys(tables.en)) {
+      const want = Object.keys(tables.en[key].placeholders ?? {}).length;
+      for (const locale of LOCALES) {
+        const entry = tables[locale][key];
+        expect(`${locale}.${key}:${Object.keys(entry.placeholders ?? {}).length}`).toBe(`${locale}.${key}:${want}`);
+        for (let i = 1; i <= want; i += 1) {
+          expect(`${locale}.${key} has $p${i}$: ${entry.message.includes(`$p${i}$`)}`).toBe(
+            `${locale}.${key} has $p${i}$: true`
+          );
+        }
+      }
+    }
+  });
+});
